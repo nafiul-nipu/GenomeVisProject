@@ -72,3 +72,4 @@ pip-selfcheck.json
 # *.pdb
 # *.xyz
 # *.bed
+data_processing_python/data/GSE248049/annotation_files/Chlorocebus_sabaeus_genome.gff
