@@ -14,7 +14,7 @@
 
 ### How to run the data processing
 
-1. Go to `graph-data-processing-python` folder
+1. Go to `data_processing_python` folder
 2. Create a virtual environment with `python3 -m venv venv`
 3. Activate the virtual environment with
    for mac `source venv/bin/activate`
