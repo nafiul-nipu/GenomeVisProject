@@ -27,6 +27,8 @@ fonttools==4.40.0
 fqdn==1.5.1
 h5py==3.9.0
 idna==3.4
+importlib_metadata==8.6.1
+importlib_resources==6.5.2
 ipykernel==6.23.2
 ipython==8.14.0
 ipython-genutils==0.2.0
@@ -79,6 +81,7 @@ prompt-toolkit==3.0.38
 psutil==5.9.5
 ptyprocess==0.7.0
 pure-eval==0.2.2
+pyBigWig==0.3.24
 pycparser==2.21
 Pygments==2.15.1
 pyparsing==3.0.9
@@ -116,3 +119,4 @@ webencodings==0.5.1
 websocket-client==1.5.3
 widgetsnbextension==4.0.7
 yellowbrick==1.5
+zipp==3.21.0
