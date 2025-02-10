@@ -1,0 +1,16 @@
+{
+  "MRC5": {
+    "chromosomes": ["chr10", "chr17", "chr19", "chr21"],
+    "before_url": "processed/MRC5/mock/48hr/250000/",
+    "after_url": "processed/MRC5/229E/48hr/250000/",
+    "resolution": 250000,
+    "before-after-names": ["2501_147_48hr_Mock", "2501_149_48hr_229E"]
+  },
+  "green_monkey": {
+    "chromosomes": ["chr01", "chr05", "chr13", "chr26", "chr27"],
+    "before_url": "products/eda-fduh0l8m/section/",
+    "after_url": "products/eda-xwtafb42/section/",
+    "resolution": 100000,
+    "before-after-names": ["before", "after"]
+  }
+}
