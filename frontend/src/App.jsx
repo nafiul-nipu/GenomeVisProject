@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Layout, Menu, Row, theme } from "antd";
 import meta_data from "./meta.json";
 import { message_to_client } from "./worker-handler/messageToClient";
 import { message_to_worker } from "./worker-handler/messagetoWorker";
@@ -85,27 +85,9 @@ const App = () => {
 
   return (
     <Layout>
-      <Header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          color: "black",
-          backgroundColor: "white",
-          height: "5vh",
-        }}
-      >
-        Navigation Panel
-      </Header>
-      <Content>
-        <div
-          style={{
-            width: "100vw",
-            height: "90vh",
-          }}
-        >
-          content
-        </div>
-      </Content>
+      <Row>
+        <Col></Col>
+      </Row>
     </Layout>
   );
 };
