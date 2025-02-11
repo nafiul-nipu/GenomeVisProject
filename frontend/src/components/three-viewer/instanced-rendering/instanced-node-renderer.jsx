@@ -1,5 +1,5 @@
 import { useRef, useLayoutEffect, useEffect, useState } from "react";
-import { Object3D, Color, Raycaster, Vector2 } from "three";
+import { Object3D, Color, Raycaster } from "three";
 import { useThree } from "@react-three/fiber";
 import { chain_colors } from "./chainColors";
 

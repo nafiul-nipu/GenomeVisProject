@@ -1,0 +1,177 @@
+/* .container {
+  min-height: 100vh;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.contentContainer{
+  height: 95vh;
+  width: 50vw;
+} */
+
+.container {
+  min-height: 100vh;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: row; /* Changed from column to row */
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Optional: ensures wrapping if there's not enough space */
+}
+
+.viewContainer {
+  min-height: 100vh;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.contentContainer {
+  height: 62vh;
+  width: 100vw;
+  box-sizing: border-box; /* Ensures padding/border do not affect the width/height */
+  margin-right: 1%;
+}
+
+.canvasViewContainer {
+  height: 62vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.canvas {
+  position: fixed !important;
+  top: 0px;
+  left: 0px;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+.colorLegendAcc {
+  position: absolute;
+  z-index: 100;
+  top: 3.5%;
+  right: 1%;
+}
+
+.before_dataTitle {
+  position: absolute;
+  top: 8%;
+  color: black;
+  z-index: 100;
+  left: 22%;
+}
+
+.after_dataTitle {
+  position: absolute;
+  top: 8%;
+  color: black;
+  z-index: 100;
+  right: 22%;
+}
+
+.bottomView {
+  height: 30vh;
+}
+
+.changeData {
+  height: 4vh;
+  width: 100vw;
+}
+
+.dropdownTitles {
+  margin: 5px;
+  padding-right: 2px;
+}
+
+.chromosomeDropdownContainer {
+  margin-left: 18% !important;
+}
+
+.dropdowns {
+  width: 100vw;
+  font-size: 11px;
+  height: 4vh;
+}
+.sliders {
+  height: 4vh;
+}
+.nodeDetails {
+  position: absolute;
+  top: 5%;
+  background: white;
+  left: 44%;
+  height: 34vh;
+  width: 16vw;
+}
+
+/* .nodeDetails2 {
+    position: absolute;
+    top: 5%;
+    background: white;
+    left: 50%;
+    height: 34vh;
+    width: 16vw;
+  } */
+
+.svgContainer {
+  width: 16vw;
+  height: 20vh;
+  padding-top: 5%;
+}
+
+.geneDetails {
+  position: absolute;
+  bottom: 0%;
+  background: white;
+  left: 0%;
+  height: 20vh;
+  width: 20vw;
+}
+
+.geneDetails2 {
+  position: absolute;
+  bottom: 0%;
+  background: white;
+  left: 50%;
+  height: 20vh;
+  width: 20vw;
+}
+
+.geneSvgContainer {
+  width: 19vw;
+  height: 18vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.fixedAxis {
+  position: absolute; /* Keep it fixed relative to the .geneSvgContainer */
+  bottom: 0; /* Position it at the bottom */
+  left: 0; /* Align it with the left edge */
+  width: 100%; /* Ensure it spans the full width */
+  background: white; /* Optional: to ensure it doesn't overlap with the scrollable content */
+  z-index: 1; /* Ensure it's above the other content */
+}
+
+.ticks line {
+  stroke: black;
+}
+.ticks text {
+  fill: grey;
+  text-anchor: middle;
+  font-size: 0.55em;
+}
+.axisLine {
+  stroke: grey;
+}
+.axis-label {
+  font-size: 1em;
+  fill: grey;
+  font-weight: bold;
+}

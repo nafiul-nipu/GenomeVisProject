@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { extent, scaleLinear } from "d3";
-import styles from "../../styles/Home.module.css";
-import { chain_colors } from "../network/instanced-rendering/chainColors";
+import "../../App.css";
+import { chain_colors } from "../three-viewer/instanced-rendering/chainColors";
 
 const margin = { top: 10, right: 30, bottom: 30, left: 30 };
 
@@ -66,7 +66,7 @@ export const NodeDetails = ({ node, data, nodeStyles }) => {
   };
 
   return (
-    <div className={styles[nodeStyles]}>
+    <div className={nodeStyles}>
       <span style={{ alignItems: "center" }}>
         <b>Node Details</b>
       </span>{" "}
@@ -95,7 +95,7 @@ export const NodeDetails = ({ node, data, nodeStyles }) => {
         {/* <span>To: {sourceArray.join(', ')}</span> <br/>
                 <span>From: {targetArray.join(' , ')}</span> */}
       </span>
-      <div className={styles.svgContainer}>
+      <div className="svgContainer">
         <svg width={width} height={height}>
           <g transform={`translate(20, ${margin.top})`}>
             {nodes.map((item, index) => (

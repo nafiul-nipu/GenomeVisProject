@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 import { useState } from "react";
-import styles from "../../styles/Home.module.css";
-import { Grid } from "@nextui-org/react";
+import "../../App.css";
 import { getInnerMiddleOuterRanges } from "../../utilities/getInnetMiddleOuterRanges";
 import { getInnerMiddelOuterGroups } from "../../utilities/getInnerMiddleOuterGroups";
 import { innerMiddleOuterAdjacencyMatrix } from "../../utilities/innerMiddleOuterAdjacencyMatrix";
@@ -9,8 +8,8 @@ import { ChordLinkDiagram } from "./chord-link-diagram";
 import RectanglesVisualization from "./compare-groups-before-after";
 import { GeneMovementViewer } from "./gene-movement";
 
-import { FullscreenExitOutlined, FullscreenOutlined } from "@ant-design/icons";
-import { Button, Modal } from "antd";
+import { FullscreenOutlined } from "@ant-design/icons";
+import { Button, Col, Modal } from "antd";
 
 export const DistFromCOMCoparison = ({
   data,
@@ -79,7 +78,7 @@ export const DistFromCOMCoparison = ({
 
   return (
     <>
-      <Grid xs={4} className={styles.bottomView}>
+      <Col span={8} className="bottomView">
         <span style={{ position: "absolute", bottom: "28%" }}>
           Inner-Middle-Outer Transition Before to After
           <Button icon={<FullscreenOutlined />} onClick={showModal} />
@@ -92,22 +91,15 @@ export const DistFromCOMCoparison = ({
           chordClicked={chordClicked}
           setChordClicked={setChordClicked}
         />
-      </Grid>
-      <Grid xs={4}>
+      </Col>
+      <Col span={8}>
         <span style={{ position: "absolute" }}>Gene Count Before After</span>
         <RectanglesVisualization
           dataset1={beforeGroupData}
           dataset2={afterGroupData}
           datalength={data.before_data.gene_data.length}
         />
-      </Grid>
-      {/* <Grid xs={4}>
-        <GeneMovementViewer
-          before={beforeGroupData}
-          after={afterGroupData}
-          chordData={chordData}
-        />
-      </Grid> */}
+      </Col>
 
       <Modal
         title="Detailed Gene Movement"

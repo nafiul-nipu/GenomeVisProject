@@ -1,5 +1,5 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import styles from "../../styles/Home.module.css";
+import "../../App.css";
 import React from "react";
 
 import {
@@ -16,20 +16,15 @@ import { useControls } from "leva";
 
 import NodeRenderer from "./instanced-rendering/instanced-node-renderer";
 import InstancedTubeRendererFromPathMaterial from "./instanced-rendering/intanced-tube-from-path-with-material-controls";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import GeneSphereRenderer from "./instanced-rendering/instanced-gene-renderer";
 import { NodeDetails } from "../node-details/nodeDetails";
 import AccSpehereRenderer from "./instanced-rendering/instanced-access-renderer";
 import ColorLegend from "./ColorLegend";
 import GeneSphereRendererWithOpacity from "./instanced-rendering/instanced-gene-renderer-with-opacity";
 import AccSpehereRendererWithOpacity from "./instanced-rendering/instanced-access-renderer-with-opcaity";
-import GeneAccTubeRenderer from "./instanced-rendering/junks/instanced-gene-with-acc-tube-old";
 import { DrawGeneWithAcc } from "./instanced-rendering/gene-with-access-tube";
 import { GeneAccWithTubeRenderer } from "./instanced-rendering/instanced-gene-acc-tube";
-import {
-  CylinderInstanced,
-  GeneWithAccCylinderRenderer,
-} from "./instanced-rendering/instanced-gene-with-acc-cylinder";
 
 const currChromosome = "chr01";
 
@@ -191,8 +186,8 @@ const SimpleNetwork = (props) => {
 
   return (
     <>
-      <div ref={viewContainerRef} className={styles.canvasViewContainer}>
-        <div className={styles.colorLegendAcc}>
+      <div ref={viewContainerRef} className="canvasViewContainer">
+        <div className="colorLegendAcc">
           <ColorLegend
             percentile10={props.data.before_data.accessibility.percentile10}
             percentile90={props.data.before_data.accessibility.percentile90}
@@ -201,7 +196,7 @@ const SimpleNetwork = (props) => {
           />
         </div>
         {Object.keys(props.data).map((item, index) => (
-          <div key={index} className={styles[`${item}Title`]}>
+          <div key={index} className={`${item}Title`}>
             {props.viewTitles[index]}
           </div>
         ))}
@@ -221,7 +216,7 @@ const SimpleNetwork = (props) => {
         ))}
         <Canvas
           eventSource={viewContainerRef}
-          className={styles.canvas}
+          className="canvas"
           frameloop="demand"
           performance={{ min: 0.4 }}
           id={props.canvasID}

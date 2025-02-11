@@ -1,12 +1,6 @@
-import styles from "../../styles/Home.module.css";
-import { InputNumber, Row, Slider, Col } from "antd";
-import { Switch } from "@nextui-org/react";
+import { InputNumber, Row, Slider, Col, Switch, Select } from "antd";
 import React from "react";
 
-// radius slider component that is wrapped in the radius wrapper
-// to fix the useLayoutEffect warning in React
-// when working with antD and nextjs due
-// to ssr issue
 export default function RadiusSliders(props) {
   // console.log(props);
 
@@ -31,12 +25,12 @@ export default function RadiusSliders(props) {
     props.setGeneWithAcc(event.target.checked);
   }
 
-  function handleTubeColorChange(event) {
-    props.setTubeColor(event.target.value);
+  function handleTubeColorChange(value) {
+    props.setTubeColor(value);
   }
 
   return (
-    <Row>
+    <>
       <Col span={1}>Bead: </Col>
       <Col span={2}>
         <Slider
@@ -101,11 +95,15 @@ export default function RadiusSliders(props) {
       </Col>
       <Col span={1}>Color: </Col>
       <Col span={2}>
-        <select value={props.tubeColor} onChange={handleTubeColorChange}>
-          <option value="none">None</option>
-          <option value="centromere">Cent</option>
-          <option value="compartment">Comp</option>
-        </select>
+        <Select
+          value={props.tubeColor}
+          onChange={(value) => handleTubeColorChange(value)}
+          style={{ width: 120 }}
+        >
+          <Select.Option value="none">None</Select.Option>
+          <Select.Option value="centromere">Cent</Select.Option>
+          <Select.Option value="compartment">Comp</Select.Option>
+        </Select>
       </Col>
       <Col span={1}>Acc: </Col>
       <Col span={2}>
@@ -135,6 +133,6 @@ export default function RadiusSliders(props) {
           color="primary"
         />
       </Col>
-    </Row>
+    </>
   );
 }
