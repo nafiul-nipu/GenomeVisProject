@@ -13,6 +13,8 @@ import { ContentContainer } from "./components/containers/ContentContainer";
 import { DistFromCOMCoparison } from "./components/gene-distance-from-com-comparison/distanceFromComComparison";
 const { Header, Content, Footer } = Layout;
 
+import "./App.css";
+
 const App = () => {
   const mount = useRef();
 
@@ -92,7 +94,7 @@ const App = () => {
   // console.log(accRange);
 
   return (
-    <Layout>
+    <Layout className="viewContainer">
       <Row>
         <SpeciesDropdown
           selectedOption={species}

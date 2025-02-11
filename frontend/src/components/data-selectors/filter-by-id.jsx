@@ -1,5 +1,6 @@
-import { InputNumber, Button, Col } from "antd";
+import { InputNumber, Button, Col, Flex } from "antd";
 import { useState } from "react";
+import "../../App.css";
 
 export const FilterById = (props) => {
   const [from, setFrom] = useState(0);
@@ -13,25 +14,27 @@ export const FilterById = (props) => {
     props.setChrRange([minRange, maxRange]);
   };
   return (
-    <Col>
-      <span>ChrID ({props.resolution / 1000}KB)</span>
-      <InputNumber
-        addonBefore="From"
-        // addonAfter="KB"
-        min={0}
-        max={props.maxVal * props.resolution}
-        value={from}
-        onChange={(value) => setFrom(value)}
-      />
-      <InputNumber
-        addonBefore="To"
-        // addonAfter="KB"
-        min={1 * props.resolution}
-        max={props.maxVal * props.resolution}
-        value={to}
-        onChange={(value) => setTo(value)}
-      />
-      <Button onClick={setButtonOnClick}>Filter</Button>
+    <Col span={6} className="dropdowns">
+      <Flex>
+        <span>ChrID ({props.resolution / 1000}KB)</span>
+        <InputNumber
+          addonBefore="From"
+          // addonAfter="KB"
+          min={0}
+          max={props.maxVal * props.resolution}
+          value={from}
+          onChange={(value) => setFrom(value)}
+        />
+        <InputNumber
+          addonBefore="To"
+          // addonAfter="KB"
+          min={1 * props.resolution}
+          max={props.maxVal * props.resolution}
+          value={to}
+          onChange={(value) => setTo(value)}
+        />
+        <Button onClick={setButtonOnClick}>Filter</Button>
+      </Flex>
     </Col>
   );
 };

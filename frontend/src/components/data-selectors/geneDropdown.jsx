@@ -1,4 +1,5 @@
-import { Col, Switch, Button, AutoComplete } from "antd";
+import { Col, Switch, Button, AutoComplete, Flex } from "antd";
+import "../../App.css";
 
 export const GeneDropdown = (props) => {
   function handleToggleChange(checked) {
@@ -27,26 +28,28 @@ export const GeneDropdown = (props) => {
   }
 
   return (
-    <Col>
-      <span>Genes: </span>
-      <AutoComplete
-        style={{ width: 200 }}
-        options={props.data}
-        placeholder="Type Gene Name"
-        filterOption={(inputValue, option) =>
-          option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-        }
-        allowClear={true}
-        onSelect={handleSelect}
-        onClear={handleClear}
-      />
-      <span>See Genes: </span>
-      <Switch
-        onChange={handleToggleChange}
-        checked={props.toggleGene}
-        color="primary"
-      />
-      <Button onClick={resetGeneDropDown}>Reset</Button>
+    <Col span={6} className="dropdowns">
+      <Flex>
+        <span className="dropdownTitles">Genes: </span>
+        <AutoComplete
+          style={{ width: 200 }}
+          options={props.data}
+          placeholder="Type Gene Name"
+          filterOption={(inputValue, option) =>
+            option.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+          }
+          allowClear={true}
+          onSelect={handleSelect}
+          onClear={handleClear}
+        />
+        <span>See Genes: </span>
+        <Switch
+          onChange={handleToggleChange}
+          checked={props.toggleGene}
+          color="primary"
+        />
+        <Button onClick={resetGeneDropDown}>Reset</Button>
+      </Flex>
     </Col>
   );
 };

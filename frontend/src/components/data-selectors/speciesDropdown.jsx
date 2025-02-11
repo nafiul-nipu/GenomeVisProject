@@ -1,4 +1,5 @@
-import { Col, Select } from "antd";
+import { Col, Flex, Select } from "antd";
+import "../../App.css";
 export const SpeciesDropdown = ({
   selectedOption,
   onSelectionChange,
@@ -14,14 +15,16 @@ export const SpeciesDropdown = ({
   }
 
   return (
-    <Col>
-      <span>Cell Type: </span>
-      <Select
-        value={selectedOption}
-        onChange={(value) => handleChange(value)}
-        // style={{ width: 120 }}
-        options={data.map((d) => ({ value: d, label: d }))}
-      />
+    <Col span={2} className="dropdowns">
+      <Flex>
+        <span className="dropdownTitles">Cell Type: </span>
+        <Select
+          value={selectedOption}
+          onChange={(value) => handleChange(value)}
+          // style={{ width: 80 }}
+          options={data.map((d) => ({ value: d, label: d }))}
+        />
+      </Flex>
     </Col>
   );
 };

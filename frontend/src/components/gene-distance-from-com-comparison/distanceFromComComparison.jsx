@@ -79,7 +79,7 @@ export const DistFromCOMCoparison = ({
   return (
     <>
       <Col span={8} className="bottomView">
-        <span style={{ position: "absolute", bottom: "28%" }}>
+        <span style={{ position: "absolute" }}>
           Inner-Middle-Outer Transition Before to After
           <Button icon={<FullscreenOutlined />} onClick={showModal} />
         </span>

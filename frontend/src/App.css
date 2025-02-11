@@ -23,13 +23,14 @@
 }
 
 .viewContainer {
-  min-height: 100vh;
+  /* min-height: 100vh;
   padding: 0 0.5rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: wrap; */
+  overflow: hidden;
 }
 
 .contentContainer {
@@ -55,13 +56,13 @@
 .colorLegendAcc {
   position: absolute;
   z-index: 100;
-  top: 3.5%;
+  top: -9.5%;
   right: 1%;
 }
 
 .before_dataTitle {
   position: absolute;
-  top: 8%;
+  /* top: 8%; */
   color: black;
   z-index: 100;
   left: 22%;
@@ -69,7 +70,7 @@
 
 .after_dataTitle {
   position: absolute;
-  top: 8%;
+  /* top: 8%; */
   color: black;
   z-index: 100;
   right: 22%;
