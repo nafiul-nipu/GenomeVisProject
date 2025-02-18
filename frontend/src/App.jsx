@@ -25,8 +25,9 @@ const App = () => {
 
   const [gene_name, setGeneName] = useState("All");
   const [data, setData] = useState(null);
-  const [species, setSpecies] = useState("MRC5");
-  const [chromosome, setChromosome] = useState("chr10");
+  const [species, setSpecies] = useState("monkey");
+  const [chromosome, setChromosome] = useState("chr1");
+  const [timehr, setTimehr] = useState("12hrs");
 
   const [toggleGene, setToggleGene] = useState(false);
   const [geneWithAcc, setGeneWithAcc] = useState(false);
@@ -69,6 +70,7 @@ const App = () => {
       workerRef["get-data"].current,
       species,
       chromosome,
+      timehr,
       meta_data[species]
     );
 
@@ -85,12 +87,13 @@ const App = () => {
         workerRef["get-data"].current,
         species,
         chromosome,
+        timehr,
         meta_data[species]
       );
     }
   }, [species, chromosome]);
 
-  // console.log(data);
+  console.log(data);
   // console.log(accRange);
 
   return (
@@ -170,7 +173,10 @@ const App = () => {
             accSlider={accSlider}
             accRange={accRange}
             chrRange={chrRange}
-            viewTitles={meta_data[species]["before-after-names"]}
+            viewTitles={[
+              `${chromosome}_${timehr}_${meta_data[species]["before-name"]}`,
+              `${chromosome}_${timehr}_${meta_data[species]["after-name"]}`,
+            ]}
             geneWithAcc={geneWithAcc}
             tubeColor={tubeColor}
           />

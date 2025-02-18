@@ -10,6 +10,7 @@ import { calculateTubesForGeneWithAcc } from "../utilities/calculateTubesForGene
 addEventListener("message", async (event) => {
   let species = event.data.species;
   let chromosome = event.data.chromosome;
+  let hour = event.data.hour;
   let meta_data = event.data.meta_data;
 
   // console.log("Inside worker", species, chromosome, meta_data);
@@ -18,9 +19,10 @@ addEventListener("message", async (event) => {
   before_atom_data.nodes = await fetchBeadData(
     species,
     chromosome,
-    meta_data["before_url"]
+    meta_data["before-name"],
+    hour
   );
-  // console.log(before.nodes);
+  // console.log(before_atom_data.nodes);
 
   before_atom_data.edges = await createEdges(before_atom_data.nodes.length);
   before_atom_data.paths = await findAllPaths(before_atom_data.edges);
@@ -31,7 +33,8 @@ addEventListener("message", async (event) => {
   before.gene_data = await fetchGencodeData(
     species,
     chromosome,
-    meta_data["before_url"]
+    meta_data["before-name"],
+    hour
   );
 
   before.genes = await fetchGeneNames(before.gene_data);
@@ -39,7 +42,8 @@ addEventListener("message", async (event) => {
   let before_acc = await fetchAccessibilityData(
     species,
     chromosome,
-    meta_data["before_url"]
+    meta_data["before-name"],
+    hour
   );
   // console.log(before_acc.min, before_acc.max, before_acc.data);
 
@@ -52,7 +56,8 @@ addEventListener("message", async (event) => {
   after_atom_data.nodes = await fetchBeadData(
     species,
     chromosome,
-    meta_data["after_url"]
+    meta_data["after-name"],
+    hour
   );
 
   after_atom_data.edges = await createEdges(after_atom_data.nodes.length);
@@ -64,7 +69,8 @@ addEventListener("message", async (event) => {
   after.gene_data = await fetchGencodeData(
     species,
     chromosome,
-    meta_data["after_url"]
+    meta_data["after-name"],
+    hour
   );
 
   after.genes = await fetchGeneNames(after.gene_data);
@@ -72,7 +78,8 @@ addEventListener("message", async (event) => {
   let after_acc = await fetchAccessibilityData(
     species,
     chromosome,
-    meta_data["after_url"]
+    meta_data["after-name"],
+    hour
   );
   // console.log(after_acc.min, after_acc.max, after_acc.data);
 

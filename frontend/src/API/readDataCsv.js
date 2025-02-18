@@ -1,22 +1,19 @@
 import axios from "axios";
 import { autoType, csvParse } from "d3";
 
-export const fetchBeadData = async (dataToFetch, chromosome, partURL) => {
+export const fetchBeadData = async (
+  dataToFetch,
+  chromosome,
+  fileIndicator,
+  hour
+) => {
   try {
     // console.log(dataToFetch);
     // console.log(chromosome);
-    // console.log(partURL);
-    let url;
-    if (dataToFetch === "green_monkey") {
-      url = `${
-        import.meta.env.VITE_PUBLIC_DATA_PATH
-      }${dataToFetch}/${partURL}${chromosome}/structure/100kb/structure-with-tracks.csv`;
-      // console.log(url);
-    } else {
-      url = `${
-        import.meta.env.VITE_PUBLIC_DATA_PATH
-      }${dataToFetch}/${partURL}${chromosome}/structure.csv`;
-    }
+    // console.log(fileIndicator);
+    let url = `${
+      import.meta.env.VITE_PUBLIC_DATA_PATH
+    }${dataToFetch}/${chromosome}/structure_${hour}_${fileIndicator}.csv`;
 
     // console.log(url);
 

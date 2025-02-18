@@ -1,20 +1,28 @@
 import axios from "axios";
 import { csvParse } from "d3";
 
-export const fetchGencodeData = async (dataToFetch, chromosome, partURL) => {
+export const fetchGencodeData = async (
+  dataToFetch,
+  chromosome,
+  fileIndicator,
+  hour
+) => {
   try {
     // let url = `${import.meta.env.VITE_PUBLIC_DATA_PATH}${dataToFetch}/gencode-data/${state}/${chromosome}-${state}-gene-info.csv`;
-    let url;
-    if (dataToFetch === "green_monkey") {
-      url = `${
-        import.meta.env.VITE_PUBLIC_DATA_PATH
-      }${dataToFetch}/${partURL}${chromosome}/structure/100kb/gene-info.csv`;
-      // console.log(url);
-    } else {
-      url = `${
-        import.meta.env.VITE_PUBLIC_DATA_PATH
-      }${dataToFetch}/${partURL}${chromosome}/gene-info.csv`;
-    }
+    let url = `${
+      import.meta.env.VITE_PUBLIC_DATA_PATH
+    }${dataToFetch}/${chromosome}/structure_${hour}_${fileIndicator}_gene_info.csv`;
+
+    // if (dataToFetch === "green_monkey") {
+    //   url = `${
+    //     import.meta.env.VITE_PUBLIC_DATA_PATH
+    //   }${dataToFetch}/${partURL}${chromosome}/structure/100kb/gene-info.csv`;
+    //   // console.log(url);
+    // } else {
+    //   url = `${
+    //     import.meta.env.VITE_PUBLIC_DATA_PATH
+    //   }${dataToFetch}/${partURL}${chromosome}/gene-info.csv`;
+    // }
 
     // console.log(url);
     let response = await axios.get(url);

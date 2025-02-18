@@ -4,22 +4,27 @@ import { csvParse } from "d3";
 export const fetchAccessibilityData = async (
   dataToFetch,
   chromosome,
-  partURL
+  fileIndicator,
+  hour
 ) => {
   try {
     // let url = `${import.meta.env.VITE_PUBLIC_DATA_PATH}${dataToFetch}/accessibility-data/${state}/${chromosome}-${state}-accessibility-peaks-only.csv`;
     // console.log(url);
-    let url;
-    if (dataToFetch === "green_monkey") {
-      url = `${
-        import.meta.env.VITE_PUBLIC_DATA_PATH
-      }${dataToFetch}/${partURL}${chromosome}/structure/100kb/accessibility-peaks-only.csv`;
-      // console.log(url);
-    } else {
-      url = `${
-        import.meta.env.VITE_PUBLIC_DATA_PATH
-      }${dataToFetch}/${partURL}${chromosome}/accessibility-peaks-only.csv`;
-    }
+    let url = `${
+      import.meta.env.VITE_PUBLIC_DATA_PATH
+    }${dataToFetch}/${chromosome}/structure_${hour}_${fileIndicator}_accessibility-peaks-only.csv`;
+
+    // if (dataToFetch === "green_monkey") {
+    //   url = `${
+    //     import.meta.env.VITE_PUBLIC_DATA_PATH
+    //   }${dataToFetch}/${partURL}${chromosome}/structure/100kb/accessibility-peaks-only.csv`;
+    //   // console.log(url);
+    // } else {
+    //   url = `${
+    //     import.meta.env.VITE_PUBLIC_DATA_PATH
+    //   }${dataToFetch}/${partURL}${chromosome}/accessibility-peaks-only.csv`;
+    // }
+
     let response = await axios.get(url);
 
     let min = Infinity;
