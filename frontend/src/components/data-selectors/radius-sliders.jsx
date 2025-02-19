@@ -20,9 +20,9 @@ export default function RadiusSliders(props) {
     props.setAccSlider(newVal);
   };
 
-  function handleToggleChange(event) {
+  function handleToggleChange(checked) {
     // console.log(event.target.checked);
-    props.setGeneWithAcc(event.target.checked);
+    props.setGeneWithAcc(checked);
   }
 
   function handleTubeColorChange(value) {
