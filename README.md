@@ -6,7 +6,7 @@
 (if a mac user, recommend using the Node Version Manager (nvm) to assist with proper versioning)
 
 1. Create a .env.local file in the root directory of the project
-2. Add the following line to the file: `PUBLIC_DATA_PATH=/genome-data/`
+2. Add the following line to the file: `VITE_PUBLIC_DATA_PATH=/dataroot/`
 3. Create a `dataroot` folder inside `public` folder and copy the data inside it
 4. Run `npm install` to install all dependencies
 5. Run `npm run dev` to start the frontend
