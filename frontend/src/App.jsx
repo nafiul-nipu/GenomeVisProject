@@ -150,7 +150,7 @@ const App = () => {
           <Card
             className="sliderCard"
             style={{
-              width: width * 0.25,
+              // width: width * 0.25,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",

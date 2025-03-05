@@ -46,7 +46,7 @@ const AccSpehereRenderer = (props) => {
         let radii = parseFloat(node.radius);
         object.scale.set(radii, radii, radii);
       } else {
-        object.scale.set(0.5, 0.5, 0.5);
+        object.scale.set(props.accSlider, props.accSlider, props.accSlider);
       }
 
       object.position.set(

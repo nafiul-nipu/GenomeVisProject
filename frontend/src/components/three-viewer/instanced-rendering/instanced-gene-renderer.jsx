@@ -37,7 +37,7 @@ const GeneSphereRenderer = (props) => {
         let radii = parseFloat(node.radius);
         object.scale.set(radii, radii, radii);
       } else {
-        object.scale.set(1, 1, 1);
+        object.scale.set(props.geneSlider, props.geneSlider, props.geneSlider);
       }
 
       object.position.set(
