@@ -3,6 +3,7 @@ import "..//../App.css";
 import SimpleNetwork from "../three-viewer/SimpleNetwork";
 
 export const ContentContainer = (props) => {
+  // console.log("content container rendering");
   return (
     <div className="contentContainer">
       {props.data && (

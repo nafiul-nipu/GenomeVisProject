@@ -14,6 +14,7 @@ addEventListener("message", async (event) => {
   let meta_data = event.data.meta_data;
 
   // console.log("Inside worker", species, chromosome, meta_data);
+  console.log(hour);
 
   let before_atom_data = {};
   before_atom_data.nodes = await fetchBeadData(
@@ -93,8 +94,6 @@ addEventListener("message", async (event) => {
     after_acc.data
   );
 
-  // console.log(percentile10, percentile90);
-
   before.accessibility = {
     min: before_acc.min,
     max: before_acc.max,
@@ -114,6 +113,8 @@ addEventListener("message", async (event) => {
     percentile90: percentile90,
     data: after_acc.data,
   };
+
+  // console.log(before, after);
 
   postMessage({
     before_data: before,

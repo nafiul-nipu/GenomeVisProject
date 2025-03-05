@@ -14,6 +14,7 @@ import { ContentContainer } from "./components/containers/ContentContainer";
 import { DistFromCOMCoparison } from "./components/gene-distance-from-com-comparison/distanceFromComComparison";
 const { Header, Content, Footer, Sider } = Layout;
 import "./App.css";
+import { TimeChangeSlider } from "./components/data-selectors/timeChangeSlider";
 
 const width = window.innerWidth / 1.71;
 
@@ -97,7 +98,7 @@ const App = () => {
         meta_data[species]
       );
     }
-  }, [species, chromosome]);
+  }, [species, chromosome, timehr]);
 
   // console.log(data);
   // console.log(accRange);
@@ -143,6 +144,7 @@ const App = () => {
               resolution={meta_data[species].resolution}
             />
           )}
+          <TimeChangeSlider timehr={timehr} setTimehr={setTimehr} />
         </Row>
         <Row>
           <Card
@@ -154,7 +156,7 @@ const App = () => {
               alignItems: "center",
               justifyContent: "center",
               position: "absolute",
-              // top: "5px",
+              top: "6%",
               // left: "73%",
               zIndex: 100,
             }}
@@ -186,27 +188,29 @@ const App = () => {
         </Row>
         <Row>
           <Col span={24}>
-            <ContentContainer
-              data={data}
-              toggleGene={toggleGene}
-              canvasID={"canvas1"}
-              chromosome={chromosome}
-              atomSlider={atomSlider}
-              geneSlider={geneSlider}
-              tubeSlider={tubeSlider}
-              gene_name={gene_name}
-              nodeStyles={"nodeDetails"}
-              chordSelection={chordSelection}
-              accSlider={accSlider}
-              accRange={accRange}
-              chrRange={chrRange}
-              viewTitles={[
-                `${chromosome}_${timehr}_${meta_data[species]["before-name"]}`,
-                `${chromosome}_${timehr}_${meta_data[species]["after-name"]}`,
-              ]}
-              geneWithAcc={geneWithAcc}
-              tubeColor={tubeColor}
-            />
+            {data && (
+              <ContentContainer
+                data={data}
+                toggleGene={toggleGene}
+                canvasID={"canvas1"}
+                chromosome={chromosome}
+                atomSlider={atomSlider}
+                geneSlider={geneSlider}
+                tubeSlider={tubeSlider}
+                gene_name={gene_name}
+                nodeStyles={"nodeDetails"}
+                chordSelection={chordSelection}
+                accSlider={accSlider}
+                accRange={accRange}
+                chrRange={chrRange}
+                viewTitles={[
+                  `${chromosome}_${timehr}_${meta_data[species]["before-name"]}`,
+                  `${chromosome}_${timehr}_${meta_data[species]["after-name"]}`,
+                ]}
+                geneWithAcc={geneWithAcc}
+                tubeColor={tubeColor}
+              />
+            )}
           </Col>
         </Row>
         <Row>

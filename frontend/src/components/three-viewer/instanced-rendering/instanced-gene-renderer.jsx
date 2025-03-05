@@ -12,6 +12,7 @@ const GeneSphereRenderer = (props) => {
 
   // on mount
   useLayoutEffect(() => {
+    console.log("gene sphere renderer mounted");
     geneMount.current = true;
 
     meshRef.current.setColorAt(0, new Color());
@@ -24,12 +25,13 @@ const GeneSphereRenderer = (props) => {
   // instancing
   useLayoutEffect(() => {
     if (!geneMount.current) return;
+    console.log("gene sphere rendering started");
 
     const domain = extent(props.gene_data, (item) => item.distance_from_com);
     colorScale.domain([domain[1], domain[0]]);
-    // console.log(extent(props.gene_data, (item) => item.distance_from_com));
 
     props.gene_data.forEach((node, index) => {
+      // console.log(node);
       if (node.radius) {
         // console.log('radius found')
         let radii = parseFloat(node.radius);
@@ -58,7 +60,7 @@ const GeneSphereRenderer = (props) => {
 
   // handle radius change and gene selection
   useEffect(() => {
-    // console.log("gene slider changed");
+    console.log("gene filter changed");
     // console.log(props.geneName);
     props.gene_data.forEach((node, index) => {
       object.scale.set(props.geneSlider, props.geneSlider, props.geneSlider);
