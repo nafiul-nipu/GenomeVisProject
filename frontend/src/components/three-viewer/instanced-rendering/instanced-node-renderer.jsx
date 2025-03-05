@@ -41,7 +41,7 @@ const NodeRenderer = (props) => {
       } else if (props.toggleGene === true) {
         object.scale.set(0, 0, 0);
       } else {
-        object.scale.set(1, 1, 1);
+        object.scale.set(props.atomSlider, props.atomSlider, props.atomSlider);
       }
       object.position.set(node.coord[0], node.coord[1], node.coord[2]);
       object.updateMatrix();

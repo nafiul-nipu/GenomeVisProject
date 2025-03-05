@@ -1,5 +1,6 @@
-import { InputNumber, Row, Slider, Col, Switch, Select } from "antd";
+import { InputNumber, Row, Slider, Col, Switch, Select, Card } from "antd";
 import React from "react";
+import { AccessibilityRangeSlider } from "./accessibility-range-slider";
 
 export default function RadiusSliders(props) {
   // console.log(props);
@@ -30,10 +31,10 @@ export default function RadiusSliders(props) {
   }
 
   return (
-    <Col span={18}>
+    <Card>
       <Row>
-        <Col span={1}>Bead: </Col>
-        <Col span={2}>
+        <Col span={5}>Bead: </Col>
+        <Col span={12}>
           <Slider
             min={0}
             max={2}
@@ -42,7 +43,7 @@ export default function RadiusSliders(props) {
             value={typeof props.atomSlider === "number" ? props.atomSlider : 0}
           />
         </Col>
-        <Col span={1}>
+        <Col span={6}>
           <InputNumber
             min={0}
             max={2}
@@ -52,9 +53,10 @@ export default function RadiusSliders(props) {
             style={{ width: "94%" }}
           />
         </Col>
-
-        <Col span={1}>Gene: </Col>
-        <Col span={2}>
+      </Row>
+      <Row>
+        <Col span={5}>Gene: </Col>
+        <Col span={12}>
           <Slider
             min={0}
             max={2}
@@ -63,7 +65,7 @@ export default function RadiusSliders(props) {
             value={typeof props.geneSlider === "number" ? props.geneSlider : 0}
           />
         </Col>
-        <Col span={1}>
+        <Col span={6}>
           <InputNumber
             min={0}
             max={2}
@@ -73,9 +75,10 @@ export default function RadiusSliders(props) {
             style={{ width: "94%" }}
           />
         </Col>
-
-        <Col span={1}>Tube: </Col>
-        <Col span={2}>
+      </Row>
+      <Row>
+        <Col span={5}>Tube: </Col>
+        <Col span={12}>
           <Slider
             min={0}
             max={0.7}
@@ -84,7 +87,7 @@ export default function RadiusSliders(props) {
             value={typeof props.tubeSlider === "number" ? props.tubeSlider : 0}
           />
         </Col>
-        <Col span={2}>
+        <Col span={6}>
           <InputNumber
             min={0}
             max={0.7}
@@ -94,8 +97,40 @@ export default function RadiusSliders(props) {
             style={{ width: "94%" }}
           />
         </Col>
-        <Col span={1}>Color: </Col>
-        <Col span={2}>
+      </Row>
+      <Row>
+        <Col span={5}>Acc: </Col>
+        <Col span={12}>
+          <Slider
+            min={0}
+            max={2}
+            step={0.1}
+            onChange={onAccSliderChange}
+            value={typeof props.accSlider === "number" ? props.accSlider : 0}
+          />
+        </Col>
+        <Col span={6}>
+          <InputNumber
+            min={0}
+            max={2}
+            step={0.1}
+            value={props.accSlider}
+            onChange={onAccSliderChange}
+            style={{ width: "94%" }}
+          />
+        </Col>
+      </Row>
+      {props.accRange && (
+        <AccessibilityRangeSlider
+          minVal={props.minVal}
+          maxVal={props.maxVal}
+          accRange={props.accRange}
+          setAccRange={props.setAccRange}
+        />
+      )}
+      <Row>
+        <Col span={9}>Color: </Col>
+        <Col span={12}>
           <Select
             value={props.tubeColor}
             onChange={(value) => handleTubeColorChange(value)}
@@ -106,28 +141,10 @@ export default function RadiusSliders(props) {
             <Select.Option value="compartment">Comp</Select.Option>
           </Select>
         </Col>
-        <Col span={1}>Acc: </Col>
-        <Col span={2}>
-          <Slider
-            min={0}
-            max={2}
-            step={0.1}
-            onChange={onAccSliderChange}
-            value={typeof props.accSlider === "number" ? props.accSlider : 0}
-          />
-        </Col>
-        <Col span={2}>
-          <InputNumber
-            min={0}
-            max={2}
-            step={0.1}
-            value={props.accSlider}
-            onChange={onAccSliderChange}
-            style={{ width: "94%" }}
-          />
-        </Col>
-        <Col span={2}> Gene W Acc:</Col>
-        <Col span={1}>
+      </Row>
+      <Row>
+        <Col span={16}> Gene W Acc:</Col>
+        <Col span={4}>
           <Switch
             onChange={handleToggleChange}
             checked={props.geneWithAcc}
@@ -135,6 +152,6 @@ export default function RadiusSliders(props) {
           />
         </Col>
       </Row>
-    </Col>
+    </Card>
   );
 }

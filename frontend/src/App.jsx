@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Col, Layout, Menu, Row } from "antd";
-import {
-  DesktopOutlined,
-  FileOutlined,
-  PieChartOutlined,
-  TeamOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { Card, Col, Layout, Row } from "antd";
+import { DownOutlined, ControlOutlined } from "@ant-design/icons";
 import meta_data from "./meta.json";
 import { message_to_client } from "./worker-handler/messageToClient";
 import { message_to_worker } from "./worker-handler/messagetoWorker";
@@ -21,28 +15,7 @@ import { DistFromCOMCoparison } from "./components/gene-distance-from-com-compar
 const { Header, Content, Footer, Sider } = Layout;
 import "./App.css";
 
-function getItem(label, key, icon, children) {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  };
-}
-const items = [
-  getItem("Option 1", "1", <PieChartOutlined />),
-  getItem("Option 2", "2", <DesktopOutlined />),
-  getItem("User", "sub1", <UserOutlined />, [
-    getItem("Tom", "3"),
-    getItem("Bill", "4"),
-    getItem("Alex", "5"),
-  ]),
-  getItem("Team", "sub2", <TeamOutlined />, [
-    getItem("Team 1", "6"),
-    getItem("Team 2", "8"),
-  ]),
-  getItem("Files", "9", <FileOutlined />),
-];
+const width = window.innerWidth / 1.71;
 
 const App = () => {
   const mount = useRef();
@@ -64,10 +37,10 @@ const App = () => {
   const [geneWithAcc, setGeneWithAcc] = useState(false);
 
   // sliders
-  const [atomSlider, setAtomSlider] = useState(1);
-  const [geneSlider, setGeneSlider] = useState(1);
-  const [tubeSlider, setTubeSlider] = useState(0.1);
-  const [accSlider, setAccSlider] = useState(0.5);
+  const [atomSlider, setAtomSlider] = useState(0);
+  const [geneSlider, setGeneSlider] = useState(0.5);
+  const [tubeSlider, setTubeSlider] = useState(0.02);
+  const [accSlider, setAccSlider] = useState(0);
 
   const [accRange, setAccRange] = useState(null);
   const [chrRange, setChrRange] = useState(null);
@@ -76,6 +49,8 @@ const App = () => {
   const [chordClicked, setChordClicked] = useState(null);
 
   const [tubeColor, setTubeColor] = useState("none");
+
+  const [isCardVisible, setIsCardVisible] = useState(false);
 
   // mounting the app and create worker
   // mounting the app and create worker
@@ -124,20 +99,15 @@ const App = () => {
     }
   }, [species, chromosome]);
 
-  console.log(data);
+  // console.log(data);
   // console.log(accRange);
+
+  const panelVisible = () => {
+    setIsCardVisible(!isCardVisible);
+  };
 
   return (
     <Layout>
-      <Sider
-        theme="light"
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
-      >
-        <Menu defaultSelectedKeys={["1"]} mode="inline" items={items} />
-      </Sider>
-
       <Layout className="viewContainer">
         <Row>
           <SpeciesDropdown
@@ -173,30 +143,46 @@ const App = () => {
               resolution={meta_data[species].resolution}
             />
           )}
-          {accRange && (
-            <AccessibilityRangeSlider
-              minVal={data.before_data.accessibility.domain_min}
-              maxVal={data.before_data.accessibility.domain_max}
-              accRange={accRange}
-              setAccRange={setAccRange}
-            />
-          )}
         </Row>
         <Row>
-          <RadiusSliders
-            atomSlider={atomSlider}
-            setAtomSlider={setAtomSlider}
-            geneSlider={geneSlider}
-            setGeneSlider={setGeneSlider}
-            tubeSlider={tubeSlider}
-            setTubeSlider={setTubeSlider}
-            accSlider={accSlider}
-            setAccSlider={setAccSlider}
-            geneWithAcc={geneWithAcc}
-            setGeneWithAcc={setGeneWithAcc}
-            tubeColor={tubeColor}
-            setTubeColor={setTubeColor}
-          />
+          <Card
+            className="sliderCard"
+            style={{
+              width: width * 0.25,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "absolute",
+              // top: "5px",
+              // left: "73%",
+              zIndex: 100,
+            }}
+          >
+            <a id="titleSlider" onClick={panelVisible}>
+              <ControlOutlined /> Radius Sliders <DownOutlined />
+            </a>
+            {isCardVisible && data && (
+              <RadiusSliders
+                atomSlider={atomSlider}
+                setAtomSlider={setAtomSlider}
+                geneSlider={geneSlider}
+                setGeneSlider={setGeneSlider}
+                tubeSlider={tubeSlider}
+                setTubeSlider={setTubeSlider}
+                accSlider={accSlider}
+                setAccSlider={setAccSlider}
+                geneWithAcc={geneWithAcc}
+                setGeneWithAcc={setGeneWithAcc}
+                tubeColor={tubeColor}
+                setTubeColor={setTubeColor}
+                accRange={accRange}
+                minVal={data.before_data.accessibility.domain_min}
+                maxVal={data.before_data.accessibility.domain_max}
+                setAccRange={setAccRange}
+              />
+            )}
+          </Card>
         </Row>
         <Row>
           <Col span={24}>

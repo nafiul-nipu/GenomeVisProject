@@ -176,3 +176,18 @@
   fill: grey;
   font-weight: bold;
 }
+
+.sliderCard .ant-card-body {
+  width: 100%;
+  padding: 0;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#titleSlider {
+  font-size: 0.9em;
+  font-weight: bold;
+  padding: 5px 0 5px 0;
+  color: black;
+}

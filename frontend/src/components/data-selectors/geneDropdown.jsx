@@ -9,14 +9,15 @@ export const GeneDropdown = (props) => {
   // console.log(props.data)
 
   function resetGeneDropDown() {
+    console.log("resetting gene dropdown");
     props.setGeneName("All");
     props.changeToggleGene(false);
-    props.setAtomSlider(1);
-    props.setGeneSlider(1);
-    props.setTubeSlider(0.1);
+    props.setAtomSlider(0);
+    props.setGeneSlider(0.5);
+    props.setTubeSlider(0.02);
     props.setChordSelection(null);
     props.setChordClicked(null);
-    props.setAccSlider(0.5);
+    props.setAccSlider(0);
   }
 
   function handleSelect(value) {
