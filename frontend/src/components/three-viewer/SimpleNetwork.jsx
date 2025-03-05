@@ -385,16 +385,10 @@ const DrawObjects = ({
   return (
     <Center
       onCentered={({ container, height, width }) => {
-        console.log(viewChanged);
         if (viewChanged) {
-          console.log(viewport.width, viewport.height, width, height);
           container.scale.setScalar(viewport.width / width - margin);
           container.scale.setScalar(viewport.height / height - margin);
-          // setViewChanged(false);
-          console.log(
-            viewport.width / width - margin,
-            viewport.height / height - margin
-          );
+          setViewChanged(false);
         }
       }}
     >
