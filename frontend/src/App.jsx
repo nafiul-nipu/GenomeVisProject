@@ -209,6 +209,7 @@ const App = () => {
                 ]}
                 geneWithAcc={geneWithAcc}
                 tubeColor={tubeColor}
+                timehr={timehr}
               />
             )}
           </Col>

@@ -482,38 +482,3 @@ const DrawObjects = ({
     </Center>
   );
 };
-
-const DrawGeneAccTube = ({
-  data,
-  edgectl,
-  tubeSlider,
-  item,
-  rotationCtl,
-  viewChanged,
-  setViewChanged,
-}) => {
-  const margin = 0;
-  const viewport = useThree((state) => state.viewport);
-  return (
-    <Center
-      onCentered={({ container, height, width }) => {
-        if (viewChanged) {
-          console.log(
-            container,
-            viewport.width,
-            viewport.height,
-            width,
-            height
-          );
-          container.scale.setScalar(viewport.width / 6.5);
-          container.scale.setScalar(viewport.height / 4.5);
-          setViewChanged(false);
-        }
-      }}
-    >
-      <group>
-        <DrawGeneWithAcc data={data} />
-      </group>
-    </Center>
-  );
-};

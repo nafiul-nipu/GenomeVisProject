@@ -4,7 +4,7 @@ import SimpleNetwork from "../three-viewer/SimpleNetwork";
 
 export const ContentContainer = (props) => {
   // console.log("content container rendering");
-  console.log(props.data)
+  console.log(props.data);
   return (
     <div className="contentContainer">
       {props.data && (
@@ -24,6 +24,7 @@ export const ContentContainer = (props) => {
           viewTitles={props.viewTitles}
           geneWithAcc={props.geneWithAcc}
           tubeColor={props.tubeColor}
+          timehr={props.timehr}
         />
       )}
     </div>
