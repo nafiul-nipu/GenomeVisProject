@@ -1,0 +1,6 @@
+tracks:
+    peak:
+        ATAC: Vacv_A_24HPI_2803_006_autosomes_peaks.narrowPeak
+    point:
+        compartment: Vacv_A_24HPI_2803_026_compartment_scores_100kb.bed
+structure: Vacv_A_24HPI_2803_026_juiced_30.csv

@@ -1,0 +1,32 @@
+description:
+  title: Multiomic Dataset from Vaccinia Infection Experiments in the Vero Cell line
+  desc:  >
+        The genome is dynamic and folds into complex structures and configurations
+        import for cellular health and function. Here we have designed a set of
+        experiments and collected data to elucidate this dynamic structure-function
+        relationship, which is not well understood particularly in the context of viral
+        infection. These data (published in Venu et al. 2024) include processed genomic
+        sequencing data from 3D chromatin conformation experiments which included both
+        Hi-C and ATAC-seq. From these data, we have generated 3D models of various
+        chromosomes using methods described by our collaborators in Lappala et al 2021.
+        Post processing, these data include structure files delineating 3D points in
+        space, processed ATAC-seq data (which measure open chromatin states), and
+        estimates of interacting chromatin. Together, this data will be used to develop
+        applications for rendering 3D volumetric models of chromosomes for biological
+        exploration. The results of this modeling and testing will be published in a
+        report to the sponsor.
+  citations: 
+    - >
+      Venu, Vrinda, et al. "Multi-omics analysis reveals the dynamic
+      interplay between Vero host chromatin structure and function during vaccinia
+      virus infection." Communications Biology 7.1 (2024): 721. 
+    - >
+      Lappala, Anna, et al. "Four-dimensional chromosome reconstruction elucidates the spatiotemporal
+      reorganization of the mammalian X chromosome." Proceedings of the National
+      Academy of Sciences 118.42 (2021): e2107092118.
+
+release:
+    date: 17 June 2054 
+    time: 11:00:00 MDT
+hierarchy:
+    version: 1.1

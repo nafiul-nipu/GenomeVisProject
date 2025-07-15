@@ -1,0 +1,6 @@
+tracks:
+    peak:
+        ATAC: Untr_A_18HPI_2803_003_autosomes_peaks.narrowPeak
+    point:
+        compartment: Untr_A_18HPI_2803_021_compartment_scores_100kb.bed
+structure: Untr_A_18HPI_2803_021_juiced_30.csv
