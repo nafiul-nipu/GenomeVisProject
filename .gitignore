@@ -75,3 +75,5 @@ pip-selfcheck.json
 data_processing_python/data/GSE248049/annotation_files/Chlorocebus_sabaeus_genome.gff
 data_processing_python/data/GSE248049/ata-sec
 /data_processing_python/data/GSE248049/HiC_files
+data_processing_python/data/green_monkey/annotation/Chlorocebus_sabaeus_genome.gff
+/data_processing_python/data/green_monkey/hic_files
