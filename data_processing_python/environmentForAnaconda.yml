@@ -1,5 +1,6 @@
 name: genomevis
 channels:
+  - jrhawley
   - conda-forge
   - bioconda
   - defaults
@@ -17,14 +18,14 @@ dependencies:
   - scikit-learn
   - biopython
   - h5py
-  - pybigwig
-  - hic-straw
+  # - pybigwig
+  # - hic-straw
   - hmmlearn
   - networkx
   - nglview
   - joblib
   - kneed
-  - MACS3
+  # - MACS3
   - pip
   - pip:
       # pip-only dependencies, if any, go here
