@@ -23,6 +23,15 @@
 5. (if new package is installed) update requirements.txt `pip freeze > requirements.txt`
 6. Run `jupyter notebook` to start the notebook
 
+
+### For anaconda -- Windows users
+1. Open Anaconda Prompt
+2. Navigate to the `data_processing_python` folder
+3. Create the conda environment with for the first time `conda env create -f environment.yml`
+3.1. If you want to update the environment, run `conda env update -f environment.yml --prune`
+4. Activate the conda environment with `conda activate genomevis`
+5. Run `jupyter notebook` to start the notebook
+
 ## Data Processing Guide
 
 - Run the ipynb files based on the order they are created (e.g, 01*{file_name}, 02*{file_name})
