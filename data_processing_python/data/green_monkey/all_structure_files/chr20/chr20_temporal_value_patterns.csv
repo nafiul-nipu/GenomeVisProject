@@ -38,7 +38,7 @@ LOC103223725,flat,gradual down,flat & gradual down
 PEX19,flat,gradual down,flat & gradual down
 DCAF8,flat,noise,flat & noise
 PEA15,flat,gradual down,flat & gradual down
-CASQ1,flat,brief spike,flat & brief spike
+CASQ1,flat,complex/other,flat & complex/other
 ATP1A2,flat,gradual down,flat & gradual down
 IGSF8,flat,gradual down,flat & gradual down
 KCNJ9,flat,gradual down,flat & gradual down
@@ -53,7 +53,7 @@ VSIG8,flat,gradual down,flat & gradual down
 FCRL6,flat,gradual down,flat & gradual down
 DUSP23,flat,gradual down,flat & gradual down
 IFI16,flat,gradual down,flat & gradual down
-KIRREL,flat,brief spike,flat & brief spike
+KIRREL,flat,complex/other,flat & complex/other
 ETV3,flat,noise,flat & noise
 ARHGEF11,flat,noise,flat & noise
 LRRC71,flat,gradual down,flat & gradual down
@@ -82,7 +82,7 @@ TMEM79,flat,gradual down,flat & gradual down
 SMG5,flat,gradual down,flat & gradual down
 PAQR6,flat,gradual down,flat & gradual down
 BGLAP,flat,gradual down,flat & gradual down
-PMF1,flat,brief spike,flat & brief spike
+PMF1,flat,complex/other,flat & complex/other
 SLC25A44,flat,gradual down,flat & gradual down
 SEMA4A,flat,gradual down,flat & gradual down
 LMNA,flat,gradual down,flat & gradual down
@@ -114,7 +114,7 @@ LOC103223885,flat,gradual down,flat & gradual down
 MUC1,flat,gradual down,flat & gradual down
 TRIM46,flat,gradual down,flat & gradual down
 KRTCAP2,flat,gradual down,flat & gradual down
-DPM3,flat,brief spike,flat & brief spike
+DPM3,flat,complex/other,flat & complex/other
 SLC50A1,flat,noise,flat & noise
 EFNA1,flat,noise,flat & noise
 EFNA3,flat,gradual down,flat & gradual down
@@ -244,7 +244,7 @@ CD101,flat,noise,flat & noise
 PTGFRN,flat,gradual down,flat & gradual down
 IGSF3,flat,gradual down,flat & gradual down
 CD58,flat,gradual down,flat & gradual down
-ATP1A1,flat,brief spike,flat & brief spike
+ATP1A1,flat,complex/other,flat & complex/other
 MAB21L3,flat,noise,flat & noise
 SLC22A15,flat,gradual down,flat & gradual down
 LOC103224147,flat,gradual down,flat & gradual down
@@ -376,7 +376,7 @@ DR1,flat,gradual down,flat & gradual down
 CCDC18,flat,noise,flat & noise
 TMED5,flat,gradual down,flat & gradual down
 MTF2,flat,gradual down,flat & gradual down
-FAM69A,flat,brief spike,flat & brief spike
+FAM69A,flat,complex/other,flat & complex/other
 RPL5,flat,gradual down,flat & gradual down
 EVI5,flat,gradual down,flat & gradual down
 GFI1,flat,gradual down,flat & gradual down
@@ -406,7 +406,7 @@ HS2ST1,flat,gradual down,flat & gradual down
 LOC103224494,flat,noise,flat & noise
 SH3GLB1,flat,gradual down,flat & gradual down
 ODF2L,flat,gradual down,flat & gradual down
-COL24A1,flat,brief spike,flat & brief spike
+COL24A1,flat,complex/other,flat & complex/other
 ZNHIT6,flat,noise,flat & noise
 CYR61,flat,gradual down,flat & gradual down
 DDAH1,flat,gradual down,flat & gradual down
@@ -429,16 +429,16 @@ GIPC2,flat,brief dip,flat & brief dip
 DNAJB4,flat,noise,flat & noise
 FUBP1,flat,gradual down,flat & gradual down
 NEXN,flat,noise,flat & noise
-FAM73A,flat,brief spike,flat & brief spike
+FAM73A,flat,complex/other,flat & complex/other
 USP33,flat,gradual down,flat & gradual down
 ZZZ3,flat,gradual down,flat & gradual down
 AK5,flat,gradual down,flat & gradual down
 PIGK,flat,gradual down,flat & gradual down
-ST6GALNAC5,flat,brief spike,flat & brief spike
+ST6GALNAC5,flat,complex/other,flat & complex/other
 ST6GALNAC3,flat,brief dip,flat & brief dip
 RABGGTB,flat,noise,flat & noise
 ACADM,flat,gradual down,flat & gradual down
-SLC44A5,flat,brief spike,flat & brief spike
+SLC44A5,flat,complex/other,flat & complex/other
 TYW3,flat,gradual down,flat & gradual down
 CRYZ,flat,gradual down,flat & gradual down
 ERICH3,flat,gradual down,flat & gradual down
@@ -533,7 +533,7 @@ CC2D1B,flat,gradual down,flat & gradual down
 ZFYVE9,flat,gradual down,flat & gradual down
 LOC103225923,noise,gradual down,noise & gradual down
 BTF3L4,flat,gradual down,flat & gradual down
-TXNDC12,flat,brief spike,flat & brief spike
+TXNDC12,flat,complex/other,flat & complex/other
 KTI12,flat,gradual down,flat & gradual down
 RAB3B,flat,gradual down,flat & gradual down
 NRD1,flat,noise,flat & noise
@@ -604,7 +604,7 @@ LOC103224946,noise,gradual down,noise & gradual down
 SLC6A9,flat,gradual down,flat & gradual down
 CCDC24,flat,gradual down,flat & gradual down
 B4GALT2,flat,gradual down,flat & gradual down
-ATP6V0B,flat,brief spike,flat & brief spike
+ATP6V0B,flat,complex/other,flat & complex/other
 DPH2,flat,noise,flat & noise
 IPO13,flat,gradual down,flat & gradual down
 LOC103224959,flat,brief dip,flat & brief dip
@@ -646,10 +646,10 @@ SLFNL1,flat,gradual down,flat & gradual down
 CTPS1,flat,gradual down,flat & gradual down
 CITED4,noise,gradual down,noise & gradual down
 KCNQ4,flat,gradual down,flat & gradual down
-NFYC,flat,brief spike,flat & brief spike
+NFYC,flat,complex/other,flat & complex/other
 LOC103225021,flat,gradual down,flat & gradual down
 LOC103225940,flat,gradual down,flat & gradual down
-RIMS3,flat,brief spike,flat & brief spike
+RIMS3,flat,complex/other,flat & complex/other
 ZNF684,flat,gradual down,flat & gradual down
 ZFP69,flat,noise,flat & noise
 SMAP2,flat,noise,flat & noise
@@ -701,7 +701,7 @@ MAP7D1,flat,gradual down,flat & gradual down
 TRAPPC3,flat,gradual down,flat & gradual down
 COL8A2,flat,gradual down,flat & gradual down
 ADPRHL2,flat,noise,flat & noise
-TEKT2,flat,brief spike,flat & brief spike
+TEKT2,flat,complex/other,flat & complex/other
 LOC103225120,flat,noise,flat & noise
 AGO3,flat,brief dip,flat & brief dip
 AGO1,flat,gradual down,flat & gradual down
@@ -823,7 +823,7 @@ GPN2,flat,noise,flat & noise
 SFN,flat,noise,flat & noise
 ZDHHC18,flat,noise,flat & noise
 PIGV,flat,gradual down,flat & gradual down
-ARID1A,flat,brief spike,flat & brief spike
+ARID1A,flat,complex/other,flat & complex/other
 RPS6KA1,flat,gradual down,flat & gradual down
 HMGN2,flat,noise,flat & noise
 DHDDS,flat,gradual down,flat & gradual down
@@ -1002,7 +1002,7 @@ SRM,flat,gradual down,flat & gradual down
 MASP2,flat,gradual down,flat & gradual down
 TARDBP,flat,gradual down,flat & gradual down
 C20H1orf127,flat,noise,flat & noise
-CASZ1,flat,brief spike,flat & brief spike
+CASZ1,flat,complex/other,flat & complex/other
 PEX14,flat,gradual down,flat & gradual down
 DFFA,flat,gradual down,flat & gradual down
 LOC103225627,flat,noise,flat & noise

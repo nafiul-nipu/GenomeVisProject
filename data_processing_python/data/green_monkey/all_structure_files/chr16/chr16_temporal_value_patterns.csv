@@ -14,7 +14,7 @@ NXN,flat,gradual down,flat & gradual down
 TIMM22,flat,gradual down,flat & gradual down
 ABR,flat,gradual down,flat & gradual down
 LOC103242070,flat,gradual down,flat & gradual down
-BHLHA9,complex/other,gradual down,complex/other & gradual down
+BHLHA9,brief dip,gradual down,brief dip & gradual down
 YWHAE,flat,gradual down,flat & gradual down
 MYO1C,flat,gradual down,flat & gradual down
 LOC103242116,flat,gradual down,flat & gradual down
@@ -75,7 +75,7 @@ PELP1,flat,gradual down,flat & gradual down
 ARRB2,flat,gradual down,flat & gradual down
 MED11,flat,noise,flat & noise
 CXCL16,flat,gradual down,flat & gradual down
-ZMYND15,complex/other,gradual down,complex/other & gradual down
+ZMYND15,brief dip,gradual down,brief dip & gradual down
 PSMB6,flat,gradual down,flat & gradual down
 PLD2,flat,gradual down,flat & gradual down
 MINK1,flat,gradual down,flat & gradual down
@@ -338,7 +338,7 @@ NLE1,flat,gradual down,flat & gradual down
 SLFN12,flat,gradual down,flat & gradual down
 SLFN13,flat,gradual down,flat & gradual down
 RASL10B,flat,gradual down,flat & gradual down
-GAS2L2,complex/other,gradual down,complex/other & gradual down
+GAS2L2,brief dip,gradual down,brief dip & gradual down
 MMP28,flat,gradual down,flat & gradual down
 TAF15,flat,gradual up,flat & gradual up
 LOC103243824,flat,gradual down,flat & gradual down
@@ -469,7 +469,7 @@ SMIM6,flat,gradual down,flat & gradual down
 SMIM5,flat,gradual down,flat & gradual down
 LOC103243036,flat,gradual down,flat & gradual down
 LLGL2,flat,gradual down,flat & gradual down
-LOC103243046,complex/other,gradual down,complex/other & gradual down
+LOC103243046,brief dip,gradual down,brief dip & gradual down
 TSEN54,flat,gradual down,flat & gradual down
 CASKIN2,flat,gradual down,flat & gradual down
 KIAA0195,flat,gradual down,flat & gradual down
@@ -561,9 +561,9 @@ PECAM1,flat,gradual down,flat & gradual down
 TEX2,flat,gradual down,flat & gradual down
 LOC103243203,flat,gradual up,flat & gradual up
 ERN1,flat,noise,flat & noise
-PRR29,complex/other,gradual down,complex/other & gradual down
-SCN4A,complex/other,gradual down,complex/other & gradual down
-LOC103243205,complex/other,gradual down,complex/other & gradual down
+PRR29,brief dip,gradual down,brief dip & gradual down
+SCN4A,brief dip,gradual down,brief dip & gradual down
+LOC103243205,brief dip,gradual down,brief dip & gradual down
 CD79B,flat,gradual down,flat & gradual down
 LOC103243216,flat,gradual down,flat & gradual down
 SMARCD2,flat,gradual down,flat & gradual down
@@ -581,7 +581,7 @@ KCNH6,flat,gradual down,flat & gradual down
 LOC103243232,flat,gradual down,flat & gradual down
 LOC103243239,flat,gradual down,flat & gradual down
 TANC2,flat,gradual down,flat & gradual down
-LOC103243236,complex/other,gradual down,complex/other & gradual down
+LOC103243236,brief dip,gradual down,brief dip & gradual down
 MARCH10,flat,gradual down,flat & gradual down
 MRC2,flat,gradual up,flat & gradual up
 TLK2,flat,gradual down,flat & gradual down
@@ -625,7 +625,7 @@ GFAP,flat,gradual down,flat & gradual down
 LOC103243306,flat,gradual down,flat & gradual down
 CCDC103,flat,gradual down,flat & gradual down
 EFTUD2,flat,gradual down,flat & gradual down
-HIGD1B,complex/other,gradual down,complex/other & gradual down
+HIGD1B,brief dip,gradual down,brief dip & gradual down
 GJC1,flat,gradual down,flat & gradual down
 ADAM11,flat,gradual down,flat & gradual down
 DBF4B,flat,gradual down,flat & gradual down
@@ -727,7 +727,7 @@ KRT16,flat,gradual down,flat & gradual down
 KRT19,flat,gradual down,flat & gradual down
 KRT15,flat,gradual down,flat & gradual down
 KRT13,flat,gradual down,flat & gradual down
-LOC103243862,complex/other,gradual down,complex/other & gradual down
+LOC103243862,brief dip,gradual down,brief dip & gradual down
 LOC103243482,flat,gradual down,flat & gradual down
 LOC103243485,flat,gradual down,flat & gradual down
 KRT39,flat,gradual down,flat & gradual down
@@ -738,7 +738,7 @@ SMARCE1,flat,gradual down,flat & gradual down
 CCR7,flat,gradual down,flat & gradual down
 IGFBP4,flat,gradual down,flat & gradual down
 TOP2A,flat,gradual down,flat & gradual down
-GJD3,complex/other,gradual down,complex/other & gradual down
+GJD3,brief dip,gradual down,brief dip & gradual down
 RARA,flat,gradual down,flat & gradual down
 CDC6,flat,gradual down,flat & gradual down
 WIPF2,flat,gradual down,flat & gradual down
@@ -754,8 +754,8 @@ GSDMA,flat,gradual down,flat & gradual down
 LRRC3C,flat,gradual down,flat & gradual down
 ORMDL3,flat,gradual down,flat & gradual down
 GSDMB,flat,gradual down,flat & gradual down
-ZPBP2,complex/other,gradual down,complex/other & gradual down
-IKZF3,complex/other,gradual down,complex/other & gradual down
+ZPBP2,brief dip,gradual down,brief dip & gradual down
+IKZF3,brief dip,gradual down,brief dip & gradual down
 GRB7,flat,gradual down,flat & gradual down
 MIEN1,flat,gradual down,flat & gradual down
 ERBB2,flat,gradual down,flat & gradual down
@@ -811,7 +811,7 @@ COPZ2,flat,noise,flat & noise
 NFE2L1,flat,gradual down,flat & gradual down
 CBX1,flat,gradual down,flat & gradual down
 SNX11,flat,gradual down,flat & gradual down
-LOC103243595,complex/other,gradual down,complex/other & gradual down
+LOC103243595,brief dip,gradual down,brief dip & gradual down
 LOC103243606,flat,gradual down,flat & gradual down
 HOXB1,flat,gradual down,flat & gradual down
 HOXB2,flat,gradual down,flat & gradual down
@@ -835,7 +835,7 @@ SNF8,flat,gradual down,flat & gradual down
 IGF2BP1,flat,gradual down,flat & gradual down
 TRNAQ-UUG,flat,gradual down,flat & gradual down
 ABI3,flat,gradual down,flat & gradual down
-PHOSPHO1,complex/other,gradual down,complex/other & gradual down
+PHOSPHO1,brief dip,gradual down,brief dip & gradual down
 LOC103243638,flat,gradual down,flat & gradual down
 ZNF652,flat,gradual down,flat & gradual down
 PHB,flat,gradual down,flat & gradual down
@@ -845,7 +845,7 @@ NXPH3,flat,gradual down,flat & gradual down
 SPOP,flat,gradual down,flat & gradual down
 SLC35B1,flat,gradual down,flat & gradual down
 FAM117A,flat,gradual down,flat & gradual down
-C16H17orf99,complex/other,gradual down,complex/other & gradual down
+C16H17orf99,brief dip,gradual down,brief dip & gradual down
 SYNGR2,flat,gradual down,flat & gradual down
 TK1,flat,gradual down,flat & gradual down
 AFMID,flat,gradual down,flat & gradual down
@@ -888,7 +888,7 @@ RPTOR,flat,gradual down,flat & gradual down
 CHMP6,flat,gradual up,flat & gradual up
 BAIAP2,flat,gradual down,flat & gradual down
 AATK,flat,gradual down,flat & gradual down
-LOC103243708,complex/other,gradual down,complex/other & gradual down
+LOC103243708,brief dip,gradual down,brief dip & gradual down
 LOC103243707,flat,gradual down,flat & gradual down
 CEP131,flat,gradual down,flat & gradual down
 ENTHD2,flat,gradual down,flat & gradual down
@@ -938,7 +938,7 @@ SLC16A3,flat,gradual down,flat & gradual down
 CSNK1D,flat,gradual up,flat & gradual up
 LOC103243762,flat,gradual down,flat & gradual down
 LOC103243760,flat,gradual down,flat & gradual down
-LOC103243764,complex/other,gradual down,complex/other & gradual down
+LOC103243764,brief dip,gradual down,brief dip & gradual down
 UTS2R,flat,gradual down,flat & gradual down
 LOC103243770,flat,gradual down,flat & gradual down
 OGFOD3,flat,gradual down,flat & gradual down
