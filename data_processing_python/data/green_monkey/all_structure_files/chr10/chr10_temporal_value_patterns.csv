@@ -1,0 +1,480 @@
+gene_name,expression_pattern,accessibility_pattern,combined_pattern
+PTPN18,gradual down,noise,flat & brief spike
+IMP4,flat,noise,noise
+TRNAE-UUC,noise,brief dip,noise
+MZT2B,gradual down,gradual down,flat & brief spike
+SMPD4,noise,gradual up,flat & brief spike
+CCDC74B,noise,noise,noise
+LOC103216853,flat,noise,noise
+LOC103216860,flat,brief dip,noise
+HS6ST1,gradual down,noise,flat & brief spike
+UGGT1,noise,noise,noise
+SAP130,flat,noise,noise
+AMMECR1L,noise,noise,noise
+POLR2D,noise,brief dip,noise
+WDR33,noise,noise,flat & gradual down
+LIMS2,noise,gradual up,noise
+LOC103216872,noise,gradual down,noise
+MYO7B,noise,noise,noise
+IWS1,noise,noise,noise
+PROC,noise,noise,noise
+MAP3K2,flat,brief dip,noise
+ERCC3,flat,noise,noise
+BIN1,noise,noise,noise
+LOC103216899,noise,noise,noise
+TSN,noise,noise,noise
+NIFK,noise,brief dip,noise
+CLASP1,flat,brief dip,noise
+TFCP2L1,flat,gradual down,noise
+GLI2,noise,gradual down,noise
+LOC103216906,noise,gradual down,noise
+RALB,gradual down,gradual down,flat & brief spike
+EPB41L5,flat,brief dip,noise
+PTPN4,noise,noise,flat & brief spike
+TMEM177,gradual down,brief dip,noise
+TMEM37,noise,gradual up,noise
+DBI,gradual down,brief dip,noise
+C10H2orf76,flat,brief dip,flat & brief spike
+STEAP3,gradual down,noise,flat & brief spike
+INSIG2,flat,gradual up,flat & brief spike
+LOC103216938,noise,noise,noise
+DDX18,noise,noise,noise
+DPP10,flat,brief dip,noise
+ACTR3,gradual down,noise,flat & brief spike
+SLC35F5,flat,gradual down,noise
+LOC103216964,noise,noise,noise
+LYPD1,noise,brief dip,noise
+NCKAP5,noise,gradual down,flat & brief spike
+MGAT5,gradual down,noise,noise
+TMEM163,noise,noise,noise
+ACMSD,noise,gradual up,noise
+CCNT2,flat,gradual up,noise
+RAB3GAP1,gradual down,noise,noise
+ZRANB3,flat,noise,flat & brief spike
+R3HDM1,gradual down,noise,noise
+UBXN4,noise,noise,noise
+LCT,flat,noise,noise
+MCM6,flat,noise,flat & brief spike
+DARS,gradual down,gradual down,flat & brief spike
+THSD7B,noise,noise,noise
+LRP1B,noise,gradual down,noise
+GTDC1,noise,noise,flat & brief spike
+ZEB2,noise,noise,noise
+LOC103217036,flat,noise,flat & brief spike
+ORC4,flat,noise,flat & brief spike
+MBD5,noise,brief dip,noise
+EPC2,noise,brief dip,flat & brief spike
+KIF5C,flat,noise,flat & brief spike
+LYPD6,noise,noise,noise
+NMI,gradual down,brief dip,noise
+RIF1,flat,noise,noise
+NEB,noise,brief dip,noise
+ARL5A,flat,noise,flat & brief spike
+CACNB4,gradual down,gradual down,flat & brief spike
+STAM2,flat,noise,noise
+FMNL2,noise,gradual down,noise
+PRPF40A,noise,noise,noise
+ARL6IP6,noise,noise,noise
+NR4A2,noise,noise,noise
+LOC103217124,noise,noise,flat & brief spike
+TRNAA-CGC,flat,noise,noise
+TRNAG-GCC,noise,noise,flat & gradual down
+GPD2,flat,brief dip,flat & brief spike
+CYTIP,noise,gradual down,noise
+ACVR1,noise,noise,noise
+LOC103217140,noise,brief dip,flat & gradual down
+CCDC148,flat,noise,flat & brief spike
+PKP4,flat,noise,noise
+TANC1,flat,noise,flat & brief spike
+WDSUB1,gradual down,brief dip,noise
+BAZ2B,flat,brief dip,noise
+LOC103217158,noise,brief dip,flat & brief spike
+MARCH7,noise,noise,noise
+LOC103218293,noise,gradual up,noise
+PLA2R1,noise,gradual up,noise
+LOC103217168,noise,noise,noise
+RBMS1,flat,noise,noise
+LOC103218294,flat,noise,noise
+TANK,noise,noise,flat & gradual down
+DPP4,gradual down,brief dip,noise
+LOC103217192,gradual down,brief dip,noise
+GCA,noise,noise,noise
+FIGN,flat,noise,noise
+GRB14,gradual down,brief dip,noise
+COBLL1,noise,gradual down,noise
+CSRNP3,noise,brief dip,noise
+TTC21B,flat,brief dip,flat & brief spike
+SCN9A,gradual down,noise,noise
+XIRP2,noise,gradual down,noise
+B3GALT1,noise,noise,flat & brief spike
+STK39,noise,gradual down,flat & brief spike
+BBS5,flat,gradual down,flat & brief spike
+FASTKD1,flat,gradual up,flat & brief spike
+PPIG,noise,gradual down,flat & brief spike
+CCDC173,flat,noise,noise
+PHOSPHO2,flat,brief dip,noise
+SSB,noise,brief dip,noise
+METTL5,noise,gradual down,noise
+UBR3,noise,noise,noise
+ERICH2,noise,noise,noise
+GAD1,flat,gradual up,noise
+GORASP2,gradual down,brief dip,flat & brief spike
+TLK1,flat,noise,flat & brief spike
+METTL8,noise,brief dip,flat & brief spike
+DCAF17,flat,noise,noise
+LOC103217305,gradual down,noise,flat & brief spike
+DYNC1I2,gradual down,noise,noise
+SLC25A12,flat,noise,noise
+HAT1,gradual down,brief dip,noise
+LOC103217321,noise,brief dip,noise
+METAP1D,flat,noise,noise
+DLX1,flat,noise,noise
+LOC103218297,flat,gradual down,noise
+DLX2,flat,noise,noise
+ITGA6,gradual down,gradual down,noise
+PDK1,flat,brief dip,noise
+RAPGEF4,flat,brief dip,flat & brief spike
+LOC103217331,noise,gradual down,flat & brief spike
+CDCA7,noise,noise,flat & brief spike
+SP3,flat,brief dip,flat & brief spike
+LOC103217342,gradual down,gradual down,noise
+OLA1,gradual down,brief dip,flat & brief spike
+SP9,flat,noise,noise
+CIR1,noise,brief dip,noise
+SCRN3,gradual down,brief dip,flat & gradual down
+GPR155,noise,gradual up,noise
+WIPF1,flat,noise,flat & brief spike
+LOC103218304,flat,noise,noise
+CHN1,noise,noise,flat & brief spike
+ATF2,flat,noise,flat & brief spike
+ATP5G3,gradual down,noise,noise
+KIAA1715,flat,brief dip,flat & brief spike
+HOXD13,flat,noise,flat & brief spike
+HOXD11,noise,noise,noise
+HOXD10,noise,noise,noise
+HOXD9,noise,brief dip,flat & gradual down
+HOXD4,noise,gradual down,noise
+HOXD3,noise,noise,noise
+MTX2,noise,noise,noise
+LOC103217390,noise,noise,noise
+HNRNPA3,gradual down,brief dip,noise
+NFE2L2,noise,noise,noise
+AGPS,gradual down,noise,noise
+LOC103217397,gradual down,brief dip,noise
+PDE11A,flat,brief dip,noise
+LOC103217402,flat,noise,noise
+RBM45,noise,noise,noise
+OSBPL6,noise,brief dip,flat & brief spike
+LOC103217415,noise,brief dip,noise
+PRKRA,noise,noise,noise
+FKBP7,gradual down,noise,flat & brief spike
+PLEKHA3,flat,noise,noise
+SESTD1,gradual down,noise,noise
+ZNF385B,noise,noise,noise
+CWC22,flat,brief dip,noise
+LOC103217450,gradual down,gradual down,noise
+SSFA2,noise,gradual up,flat & brief spike
+DNAJC10,gradual down,noise,flat & brief spike
+FRZB,noise,noise,noise
+NCKAP1,flat,gradual down,flat & brief spike
+DUSP19,noise,noise,flat & gradual down
+NUP35,flat,brief dip,noise
+ZNF804A,noise,gradual down,noise
+ZC3H15,noise,noise,flat & gradual down
+ITGAV,gradual down,noise,flat & brief spike
+FAM171B,flat,brief dip,flat & brief spike
+TFPI,noise,brief dip,noise
+LOC103217499,noise,noise,noise
+GULP1,noise,noise,flat & brief spike
+COL5A2,gradual down,brief dip,noise
+LOC103217506,noise,gradual up,noise
+WDR75,flat,noise,noise
+SLC40A1,noise,noise,flat & brief spike
+ASNSD1,gradual down,noise,noise
+ANKAR,noise,noise,noise
+OSGEPL1,flat,gradual down,flat & brief spike
+ORMDL1,gradual down,noise,noise
+PMS1,flat,brief dip,noise
+C10H2orf88,flat,noise,noise
+HIBCH,flat,gradual down,flat & brief spike
+INPP1,flat,noise,noise
+MFSD6,flat,gradual down,flat & brief spike
+TMEM194B,noise,brief dip,noise
+GLS,noise,noise,noise
+STAT1,gradual down,gradual up,flat & brief spike
+STAT4,gradual down,gradual down,noise
+MYO1B,gradual down,noise,noise
+NABP1,noise,gradual down,noise
+TMEFF2,flat,noise,flat & brief spike
+SLC39A10,gradual down,brief dip,noise
+DNAH7,gradual down,noise,flat & brief spike
+STK17B,flat,noise,noise
+HECW2,flat,brief dip,noise
+CCDC150,flat,noise,flat & gradual down
+GTF3C3,noise,brief dip,noise
+PGAP1,noise,gradual down,flat & brief spike
+ANKRD44,flat,gradual up,flat & brief spike
+SF3B1,noise,noise,flat & brief spike
+COQ10B,flat,noise,noise
+HSPD1,flat,noise,noise
+LOC103217585,gradual down,noise,noise
+RFTN2,noise,noise,noise
+MARS2,noise,gradual down,noise
+PLCL1,noise,noise,noise
+SATB2,noise,brief dip,noise
+LOC103218311,noise,gradual down,noise
+LOC103217603,noise,noise,noise
+C10H2orf69,flat,noise,noise
+TYW5,flat,brief dip,noise
+C10H2orf47,noise,brief dip,noise
+SPATS2L,gradual down,noise,flat & brief spike
+KCTD18,gradual down,noise,noise
+SGOL2,noise,noise,flat & brief spike
+LOC103217611,gradual down,noise,noise
+LOC103217619,flat,noise,flat & gradual down
+BZW1,gradual down,noise,noise
+CLK1,flat,noise,noise
+PPIL3,noise,brief dip,noise
+NIF3L1,noise,brief dip,noise
+ORC2,noise,noise,flat & gradual down
+FAM126B,flat,noise,noise
+NDUFB3,gradual down,noise,flat & brief spike
+CFLAR,gradual down,noise,noise
+LOC103217634,flat,noise,flat & gradual down
+CASP8,gradual down,brief dip,noise
+TRAK2,gradual down,noise,noise
+STRADB,noise,noise,flat & gradual down
+ALS2CR11,flat,brief dip,noise
+TMEM237,noise,brief dip,flat & gradual down
+MPP4,flat,brief dip,noise
+ALS2,flat,noise,flat & gradual down
+CDK15,gradual down,brief dip,noise
+FZD7,flat,noise,flat & brief spike
+LOC103217662,gradual down,noise,noise
+SUMO1,noise,noise,noise
+NOP58,flat,noise,flat & gradual down
+BMPR2,gradual down,brief dip,noise
+FAM117B,gradual down,noise,noise
+ICA1L,flat,noise,flat & brief spike
+CARF,noise,noise,flat & brief spike
+NBEAL1,flat,noise,noise
+LOC103217679,noise,noise,noise
+ABI2,flat,noise,flat & brief spike
+RAPH1,flat,noise,flat & brief spike
+PARD3B,flat,gradual down,flat & brief spike
+NRP2,gradual down,brief dip,noise
+LOC103217697,noise,gradual down,noise
+INO80D,noise,noise,flat & brief spike
+NDUFS1,gradual down,noise,flat & gradual down
+EEF1B2,gradual down,brief dip,noise
+ZDBF2,noise,gradual up,noise
+MDH1B,gradual down,noise,noise
+FASTKD2,noise,noise,noise
+KLF7,gradual down,noise,flat & brief spike
+LOC103217715,noise,brief dip,noise
+LOC103217718,noise,noise,flat & brief spike
+CREB1,gradual down,noise,noise
+METTL21A,gradual down,noise,noise
+CCNYL1,flat,noise,flat & brief spike
+FZD5,flat,gradual up,flat & brief spike
+PLEKHM3,flat,gradual down,flat & brief spike
+CRYGD,noise,gradual down,noise
+LOC103217729,noise,brief dip,noise
+IDH1,gradual down,noise,noise
+PIKFYVE,flat,noise,noise
+LOC103218319,gradual down,gradual up,flat & brief spike
+RPE,flat,noise,flat & brief spike
+KANSL1L,noise,gradual down,flat & brief spike
+LANCL1,gradual down,brief dip,noise
+ERBB4,noise,noise,flat & brief spike
+SPAG16,noise,noise,noise
+BARD1,noise,noise,flat & brief spike
+ATIC,gradual down,noise,noise
+FN1,gradual down,noise,noise
+LOC103217805,gradual down,noise,noise
+PECR,noise,gradual up,flat & brief spike
+TMEM169,noise,brief dip,noise
+XRCC5,gradual down,brief dip,noise
+MARCH4,noise,gradual up,noise
+LOC103217814,noise,brief dip,noise
+SMARCAL1,flat,noise,flat & brief spike
+LOC103217818,noise,noise,noise
+RPL37A,gradual down,brief dip,noise
+IGFBP2,gradual down,noise,noise
+IGFBP5,noise,noise,noise
+LOC103217838,noise,gradual up,noise
+LOC103217845,noise,noise,flat & brief spike
+TNS1,gradual down,gradual up,flat & brief spike
+LOC103217846,noise,noise,flat & brief spike
+LOC103217852,flat,noise,flat & brief spike
+RUFY4,flat,noise,noise
+ARPC2,gradual down,noise,noise
+GPBAR1,noise,brief dip,noise
+AAMP,gradual down,noise,noise
+PNKD,gradual down,noise,flat & brief spike
+TMBIM1,noise,noise,flat & brief spike
+CATIP,noise,noise,noise
+LOC103218324,noise,gradual down,flat & brief spike
+LOC103217867,noise,noise,flat & brief spike
+CTDSP1,noise,gradual down,noise
+VIL1,noise,gradual up,noise
+USP37,noise,brief dip,noise
+RQCD1,noise,noise,flat & brief spike
+PLCD4,gradual down,noise,noise
+ZNF142,flat,gradual up,flat & brief spike
+LOC103217874,gradual down,brief dip,flat & brief spike
+RNF25,noise,noise,noise
+STK36,noise,gradual down,noise
+TTLL4,flat,brief dip,noise
+LOC103217882,flat,gradual down,noise
+PRKAG3,flat,gradual down,noise
+WNT6,noise,noise,noise
+WNT10A,noise,gradual up,noise
+FEV,noise,noise,noise
+CRYBA2,noise,gradual down,noise
+LOC103217893,noise,gradual down,noise
+IHH,flat,noise,noise
+NHEJ1,flat,noise,flat & brief spike
+CNPPD1,noise,noise,flat & brief spike
+FAM134A,gradual down,noise,flat & brief spike
+ZFAND2B,flat,brief dip,noise
+ABCB6,noise,noise,flat & brief spike
+ATG9A,flat,gradual down,noise
+ANKZF1,flat,noise,flat & brief spike
+GLB1L,gradual down,noise,noise
+STK16,gradual down,noise,noise
+TUBA4A,noise,noise,noise
+DNAJB2,gradual down,noise,noise
+PTPRN,flat,noise,noise
+LOC103217908,gradual down,noise,flat & brief spike
+DNPEP,flat,noise,noise
+DES,noise,gradual down,flat & brief spike
+SPEG,noise,gradual down,flat & brief spike
+LOC103217915,noise,gradual down,noise
+GMPPA,noise,brief dip,noise
+ASIC4,flat,noise,noise
+CHPF,noise,gradual up,noise
+TMEM198,flat,noise,noise
+OBSL1,flat,noise,flat & brief spike
+INHA,noise,gradual down,noise
+STK11IP,noise,noise,noise
+SLC4A3,noise,gradual down,flat & brief spike
+SGPP2,noise,gradual down,noise
+FARSB,gradual down,noise,flat & brief spike
+MOGAT1,flat,noise,flat & brief spike
+ACSL3,noise,brief dip,noise
+KCNE4,gradual down,gradual down,flat & brief spike
+AP1S3,flat,noise,flat & brief spike
+LOC103217954,noise,noise,noise
+WDFY1,noise,noise,noise
+MRPL44,gradual down,noise,flat & brief spike
+SERPINE2,noise,brief dip,flat & gradual down
+CUL3,flat,noise,noise
+DOCK10,noise,noise,noise
+NYAP2,noise,noise,flat & brief spike
+IRS1,flat,brief dip,noise
+LOC103217983,flat,noise,flat & brief spike
+LOC103218327,noise,noise,noise
+COL4A3,flat,gradual down,noise
+AGFG1,flat,gradual down,flat & brief spike
+PID1,gradual down,noise,noise
+DNER,gradual down,noise,flat & brief spike
+TRIP12,noise,noise,noise
+FBXO36,noise,brief dip,noise
+SP110,noise,brief dip,noise
+SP100,noise,gradual down,flat & brief spike
+CAB39,flat,gradual down,flat & brief spike
+ITM2C,gradual down,noise,noise
+GPR55,noise,gradual down,noise
+LOC103218044,noise,noise,noise
+C10H2orf72,noise,gradual down,noise
+PSMD1,noise,noise,flat & gradual down
+ARMC9,gradual down,noise,noise
+LOC103218055,noise,noise,noise
+B3GNT7,gradual down,gradual down,noise
+NCL,noise,brief dip,flat & brief spike
+LOC103218057,noise,noise,flat & gradual down
+LOC103218063,noise,noise,noise
+PDE6D,noise,noise,noise
+COPS7B,noise,noise,flat & brief spike
+NPPC,gradual down,gradual down,flat & brief spike
+DIS3L2,flat,noise,noise
+ALPP,noise,noise,noise
+LOC103218076,noise,noise,noise
+LOC103218080,noise,noise,noise
+ALPI,noise,gradual up,noise
+ECEL1,noise,noise,noise
+PRSS56,flat,noise,noise
+CHRND,noise,gradual down,noise
+CHRNG,noise,gradual down,noise
+TIGD1,noise,noise,noise
+EIF4E2,noise,noise,noise
+EFHD1,gradual down,gradual up,noise
+GIGYF2,noise,noise,flat & brief spike
+C10H2orf82,flat,gradual up,noise
+NGEF,noise,gradual up,noise
+INPP5D,noise,noise,noise
+ATG16L1,flat,noise,noise
+SAG,noise,noise,noise
+DGKD,flat,noise,flat & brief spike
+USP40,flat,gradual down,flat & brief spike
+LOC103218110,noise,noise,noise
+HJURP,flat,gradual up,flat & brief spike
+LOC103218127,noise,brief dip,noise
+ARL4C,noise,gradual down,flat & brief spike
+SH3BP4,gradual down,noise,flat & brief spike
+AGAP1,noise,noise,flat & brief spike
+GBX2,flat,noise,flat & brief spike
+LOC103218336,flat,brief dip,noise
+LOC103218144,noise,gradual down,noise
+ASB18,noise,gradual up,noise
+IQCA1,noise,gradual down,flat & brief spike
+ACKR3,gradual down,gradual down,flat & brief spike
+COPS8,flat,noise,noise
+COL6A3,noise,noise,noise
+MLPH,flat,gradual down,noise
+LRRFIP1,flat,gradual up,noise
+RAMP1,flat,noise,noise
+UBE2F,noise,noise,flat & brief spike
+SCLY,noise,brief dip,noise
+ESPNL,noise,noise,noise
+KLHL30,flat,noise,noise
+FAM132B,noise,noise,noise
+ILKAP,flat,gradual down,flat & brief spike
+HES6,gradual down,gradual down,flat & brief spike
+PER2,flat,noise,noise
+TRAF3IP1,noise,brief dip,flat & brief spike
+ASB1,noise,noise,noise
+TWIST2,gradual down,noise,noise
+HDAC4,flat,gradual up,noise
+LOC103218194,flat,noise,noise
+LOC103218193,noise,noise,flat & brief spike
+NDUFA10,noise,gradual down,flat & brief spike
+LOC103218209,gradual down,gradual down,noise
+LOC103218208,flat,gradual down,noise
+GPC1,gradual down,noise,noise
+ANKMY1,noise,gradual up,noise
+DUSP28,noise,brief dip,noise
+RNPEPL1,gradual down,gradual up,flat & brief spike
+CAPN10,flat,noise,flat & gradual down
+GPR35,noise,brief dip,noise
+KIF1A,noise,noise,noise
+C10H2orf54,flat,gradual up,noise
+LOC103218229,flat,gradual down,noise
+LOC103218233,flat,gradual down,flat & brief spike
+SNED1,flat,noise,noise
+PASK,flat,noise,flat & brief spike
+PPP1R7,gradual down,brief dip,noise
+ANO7,flat,noise,flat & brief spike
+HDLBP,gradual down,noise,flat & brief spike
+SEPT2,gradual down,noise,flat & gradual down
+FARP2,noise,noise,flat & brief spike
+STK25,gradual down,noise,noise
+BOK,gradual down,noise,flat & brief spike
+THAP4,noise,noise,flat & brief spike
+ATG4B,flat,noise,flat & brief spike
+DTYMK,gradual down,noise,noise
+ING5,noise,noise,noise
+D2HGDH,noise,noise,flat & brief spike
+GAL3ST2,noise,gradual down,noise
+LOC103218261,noise,gradual down,noise
