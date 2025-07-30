@@ -1,483 +1,483 @@
 gene_name,expression_pattern,accessibility_pattern,combined_pattern
-PCMTD2,late down,complex/other,late down & complex/other
-MYT1,late up,noise,late up & noise
-OPRL1,noise,noise,noise & noise
-LOC103242338,late down,complex/other,late down & complex/other
-RGS19,late down,complex/other,late down & complex/other
-TCEA2,late down,complex/other,late down & complex/other
-LOC103242374,late down,noise,late down & noise
-PRPF6,late down,complex/other,late down & complex/other
-SAMD10,late down,complex/other,late down & complex/other
-ZNF512B,late down,noise,late down & noise
-UCKL1,late down,noise,late down & noise
-DNAJC5,late down,noise,late down & noise
-TPD52L2,late down,noise,late down & noise
-LOC103248979,late down,complex/other,late down & complex/other
-ZBTB46,late down,complex/other,late down & complex/other
-LOC103242511,late down,noise,late down & noise
-SLC2A4RG,late down,noise,late down & noise
-LIME1,late down,noise,late down & noise
-ZGPAT,late down,complex/other,late down & complex/other
-ARFRP1,late down,complex/other,late down & complex/other
-TNFRSF6B,late down,noise,late down & noise
-RTEL1,late down,noise,late down & noise
-STMN3,late down,noise,late down & noise
-LOC103242614,late down,noise,late down & noise
-GMEB2,late down,noise,late down & noise
-HELZ2,late down,noise,late down & noise
-SRMS,late down,noise,late down & noise
-PTK6,late down,noise,late down & noise
-PPDPF,late down,noise,late down & noise
-EEF1A2,late down,noise,late down & noise
-LOC103242748,late down,complex/other,late down & complex/other
-COL20A1,late down,noise,late down & noise
-ARFGAP1,late down,noise,late down & noise
-YTHDF1,late down,noise,late down & noise
-LOC103242877,late down,complex/other,late down & complex/other
-SLC17A9,late down,noise,late down & noise
-GID8,late down,noise,late down & noise
-DIDO1,late down,complex/other,late down & complex/other
-OGFR,late down,noise,late down & noise
-MRGBP,late down,noise,late down & noise
-SLCO4A1,late down,complex/other,late down & complex/other
-GATA5,late down,noise,late down & noise
-CABLES2,late down,noise,late down & noise
-RPS21,late down,noise,late down & noise
-LOC103249004,late down,noise,late down & noise
-LAMA5,late down,complex/other,late down & complex/other
-ADRM1,late down,noise,late down & noise
-OSBPL2,late down,noise,late down & noise
-LOC103243110,late down,brief dip,late down & brief dip
-HRH3,late up,noise,late up & noise
-MTG2,late down,noise,late down & noise
-SS18L1,late down,noise,late down & noise
-LSM14B,late down,complex/other,late down & complex/other
-LOC103243157,late up,noise,late up & noise
-TAF4,late down,noise,late down & noise
-FAM217B,late down,brief dip,late down & brief dip
-PPP1R3D,late down,brief dip,late down & brief dip
-PHACTR3,late up,complex/other,late up & complex/other
-SLMO2,late down,noise,late down & noise
-ATP5E,late down,brief dip,late down & brief dip
-CTSZ,late down,noise,late down & noise
-GNAS,late down,noise,late down & noise
-LOC103243470,late down,noise,late down & noise
-NPEPL1,noise,noise,noise & noise
-STX16,late down,noise,late down & noise
-APCDD1L,late up,complex/other,late up & complex/other
-LOC103243620,late down,noise,late down & noise
-LOC103243665,late down,noise,late down & noise
-PMEPA1,late down,noise,late down & noise
-ZBP1,late down,noise,late down & noise
-PCK1,late down,noise,late down & noise
-RBM38,late down,complex/other,late down & complex/other
-RAE1,late down,complex/other,late down & complex/other
-BMP7,late down,noise,late down & noise
-TFAP2C,late down,complex/other,late down & complex/other
-CASS4,late down,noise,late down & noise
-CSTF1,late down,noise,late down & noise
-AURKA,late down,noise,late down & noise
-FAM210B,late down,complex/other,late down & complex/other
-DOK5,late down,noise,late down & noise
-PFDN4,late down,noise,late down & noise
-LOC103243975,late down,noise,late down & noise
-LOC103243965,late down,brief dip,late down & brief dip
-BCAS1,late down,noise,late down & noise
-LOC103244031,late down,noise,late down & noise
-ZNF217,late down,noise,late down & noise
-ZFP64,late down,brief dip,late down & brief dip
-ATP9A,late down,noise,late down & noise
-NFATC2,late down,noise,late down & noise
-KCNG1,late down,noise,late down & noise
-LOC103244277,late down,noise,late down & noise
-MOCS3,late down,noise,late down & noise
-DPM1,late down,noise,late down & noise
-BCAS4,late down,complex/other,late down & complex/other
-PARD6B,late down,complex/other,late down & complex/other
-FAM65C,late down,noise,late down & noise
-PTPN1,late down,noise,late down & noise
-LOC103244417,late up,noise,late up & noise
-LOC103244429,late down,noise,late down & noise
-CEBPB,late down,noise,late down & noise
-LOC103244431,late down,noise,late down & noise
-TMEM189,late down,noise,late down & noise
-UBE2V1,late down,noise,late down & noise
-SNAI1,late down,noise,late down & noise
-RNF114,late down,noise,late down & noise
-SPATA2,late down,noise,late down & noise
-SLC9A8,late down,noise,late down & noise
-LOC103244547,late down,noise,late down & noise
-B4GALT5,late down,complex/other,late down & complex/other
-PTGIS,late down,noise,late down & noise
-KCNB1,late down,complex/other,late down & complex/other
-ZNFX1,late down,noise,late down & noise
-DDX27,late down,noise,late down & noise
-STAU1,late down,brief dip,late down & brief dip
-CSE1L,late down,noise,late down & noise
-ARFGEF2,late down,noise,late down & noise
-PREX1,late down,noise,late down & noise
-LOC103244657,late down,noise,late down & noise
-LOC103244721,late down,noise,late down & noise
-SULF2,late down,noise,late down & noise
-NCOA3,late down,noise,late down & noise
-LOC103244818,late down,complex/other,late down & complex/other
-ZMYND8,late down,noise,late down & noise
-SLC2A10,late down,complex/other,late down & complex/other
-TP53RK,late down,noise,late down & noise
-SLC13A3,late down,noise,late down & noise
-ZNF334,late down,noise,late down & noise
-LOC103214207,late down,noise,late down & noise
-ELMO2,late down,brief dip,late down & brief dip
-SLC35C2,late down,brief dip,late down & brief dip
-LOC103245038,late down,noise,late down & noise
-CDH22,late down,noise,late down & noise
-CD40,late down,complex/other,late down & complex/other
-NCOA5,late down,brief dip,late down & brief dip
-SLC12A5,late down,noise,late down & noise
-MMP9,late down,noise,late down & noise
-ZNF335,late down,noise,late down & noise
-PLTP,late down,noise,late down & noise
-ZSWIM3,late down,noise,late down & noise
-ACOT8,late down,noise,late down & noise
-SNX21,late down,complex/other,late down & complex/other
-UBE2C,late down,noise,late down & noise
-DNTTIP1,late down,complex/other,late down & complex/other
-WFDC3,late down,noise,late down & noise
-WFDC2,late down,noise,late down & noise
-PIGT,late down,complex/other,late down & complex/other
-DBNDD2,late down,complex/other,late down & complex/other
-TP53TG5,late down,noise,late down & noise
-MATN4,late down,noise,late down & noise
-KCNS1,late down,noise,late down & noise
-PABPC1L,late down,complex/other,late down & complex/other
-YWHAB,late down,noise,late down & noise
-RIMS4,late down,noise,late down & noise
-WISP2,late down,noise,late down & noise
-ADA,late down,noise,late down & noise
-PKIG,late down,noise,late down & noise
-SERINC3,late down,noise,late down & noise
-TTPAL,late down,brief dip,late down & brief dip
-HNF4A,late down,noise,late down & noise
-FITM2,late down,noise,late down & noise
-GDAP1L1,late down,noise,late down & noise
-LOC103245676,late down,noise,late down & noise
-JPH2,late down,complex/other,late down & complex/other
-MYBL2,late down,complex/other,late down & complex/other
-IFT52,late down,noise,late down & noise
-SGK2,late down,noise,late down & noise
-L3MBTL1,late down,noise,late down & noise
-SRSF6,late down,brief dip,late down & brief dip
-CHD6,late down,noise,late down & noise
-LPIN3,late down,complex/other,late down & complex/other
-LOC103245982,late down,noise,late down & noise
-ZHX3,late down,brief dip,late down & brief dip
-PLCG1,late down,complex/other,late down & complex/other
-TOP1,late down,noise,late down & noise
-MAFB,late down,noise,late down & noise
-DHX35,late down,noise,late down & noise
-FAM83D,late down,noise,late down & noise
-ACTR5,late down,noise,late down & noise
-ARHGAP40,late down,noise,late down & noise
-ADIG,late down,noise,late down & noise
-LOC103246243,late down,noise,late down & noise
-KIAA1755,late down,noise,late down & noise
-TGM2,late down,noise,late down & noise
-LOC103246302,late down,noise,late down & noise
-RPRD1B,late down,noise,late down & noise
-TTI1,late down,complex/other,late down & complex/other
-VSTM2L,late down,noise,late down & noise
-CTNNBL1,late down,noise,late down & noise
-BLCAP,late down,noise,late down & noise
-SRC,late down,noise,late down & noise
-MANBAL,late down,noise,late down & noise
-RPN2,late down,noise,late down & noise
-MROH8,late down,noise,late down & noise
-JAG1,late down,noise,late down & noise
-SLX4IP,late down,noise,late down & noise
-MKKS,late down,noise,late down & noise
-SNAP25,late down,noise,late down & noise
-ANKEF1,late down,noise,late down & noise
-PLCB1,late down,noise,late down & noise
-LOC103246674,late down,noise,late down & noise
-TMX4,late down,noise,late down & noise
-LOC103246731,late down,brief dip,late down & brief dip
-LRRN4,late down,noise,late down & noise
-CRLS1,late down,noise,late down & noise
-MCM8,late down,noise,late down & noise
-TRMT6,late down,noise,late down & noise
-C2H20orf196,late down,complex/other,late down & complex/other
-GPCPD1,late down,noise,late down & noise
-CDS2,late down,complex/other,late down & complex/other
-PCNA,late down,noise,late down & noise
-TMEM230,late down,brief dip,late down & brief dip
-LOC103246970,late down,complex/other,late down & complex/other
-SLC23A2,late down,noise,late down & noise
-RASSF2,late down,complex/other,late down & complex/other
-PRNP,late down,noise,late down & noise
-PCED1A,late down,noise,late down & noise
-VPS16,late down,noise,late down & noise
-PTPRA,late down,noise,late down & noise
-GNRH2,late down,noise,late down & noise
-MRPS26,late down,noise,late down & noise
-OXT,late down,complex/other,late down & complex/other
-AVP,late up,complex/other,late up & complex/other
-UBOX5,late down,complex/other,late down & complex/other
-FASTKD5,late down,noise,late down & noise
-LOC103247226,late down,complex/other,late down & complex/other
-DDRGK1,late down,noise,late down & noise
-ITPA,late down,noise,late down & noise
-SLC4A11,late down,noise,late down & noise
-C2H20orf194,late down,noise,late down & noise
-LOC103247341,late down,noise,late down & noise
-ATRN,late down,noise,late down & noise
-ADAM33,late up,noise,late up & noise
-SIGLEC1,late down,noise,late down & noise
-C2H20orf27,late down,noise,late down & noise
-SPEF1,late down,complex/other,late down & complex/other
-CENPB,late down,noise,late down & noise
-CDC25B,late down,noise,late down & noise
-AP5S1,late down,noise,late down & noise
-MAVS,late down,noise,late down & noise
-PANK2,late down,brief dip,late down & brief dip
-RNF24,late down,complex/other,late down & complex/other
-C2H20orf96,late down,noise,late down & noise
-ZCCHC3,late down,brief dip,late down & brief dip
-SOX12,late down,noise,late down & noise
-NRSN2,late down,noise,late down & noise
-TRIB3,late down,brief dip,late down & brief dip
-RBCK1,late down,noise,late down & noise
-HM13,late down,noise,late down & noise
-ID1,late down,noise,late down & noise
-LOC103248003,late down,brief dip,late down & brief dip
-BCL2L1,late down,noise,late down & noise
-LOC103214277,late down,noise,late down & noise
-TPX2,late down,noise,late down & noise
-MYLK2,late down,noise,late down & noise
-TTLL9,late up,noise,late up & noise
-PDRG1,late down,brief dip,late down & brief dip
-XKR7,late down,noise,late down & noise
-TM9SF4,late down,noise,late down & noise
-LOC103248163,late down,noise,late down & noise
-PLAGL2,late down,noise,late down & noise
-POFUT1,late down,noise,late down & noise
-KIF3B,late down,noise,late down & noise
-LOC103248217,late down,noise,late down & noise
-ASXL1,late down,noise,late down & noise
-NOL4L,late down,complex/other,late down & complex/other
-COMMD7,late down,noise,late down & noise
-DNMT3B,late down,complex/other,late down & complex/other
-MAPRE1,late down,noise,late down & noise
-EFCAB8,late down,noise,late down & noise
-LOC103248391,late down,complex/other,late down & complex/other
-BPIFB4,noise,noise,noise & noise
-BPIFB1,late down,noise,late down & noise
-CDK5RAP1,late down,noise,late down & noise
-SNTA1,late down,noise,late down & noise
-CBFA2T2,late down,noise,late down & noise
-NECAB3,late down,noise,late down & noise
-ACTL10,late down,complex/other,late down & complex/other
-E2F1,late down,noise,late down & noise
-PXMP4,late down,noise,late down & noise
-ZNF341,late down,noise,late down & noise
-CHMP4B,late down,brief dip,late down & brief dip
-RALY,late down,noise,late down & noise
-EIF2S2,late down,noise,late down & noise
-ASIP,late up,noise,late up & noise
-AHCY,late down,noise,late down & noise
-ITCH,late down,noise,late down & noise
-DYNLRB1,late down,noise,late down & noise
-MAP1LC3A,late down,noise,late down & noise
-PIGU,late down,noise,late down & noise
-TP53INP2,late down,noise,late down & noise
-NCOA6,late down,brief dip,late down & brief dip
-GGT7,late down,noise,late down & noise
-ACSS2,late down,complex/other,late down & complex/other
-GSS,late down,noise,late down & noise
-PROCR,late down,brief dip,late down & brief dip
-BTBD3,late down,noise,late down & noise
-SPTLC3,late down,brief dip,late down & brief dip
-TASP1,late down,noise,late down & noise
-ESF1,late down,brief dip,late down & brief dip
-NDUFAF5,late down,brief dip,late down & brief dip
-FLRT3,late down,noise,late down & noise
-KIF16B,late down,noise,late down & noise
-SNRPB2,late down,complex/other,late down & complex/other
-RRBP1,late down,complex/other,late down & complex/other
-SNX5,late down,noise,late down & noise
-MGME1,late down,noise,late down & noise
-PET117,late up,noise,late up & noise
-DZANK1,late down,noise,late down & noise
-POLR3F,late down,noise,late down & noise
-RBBP9,late down,noise,late down & noise
-SEC23B,late down,brief dip,late down & brief dip
-RIN2,late down,complex/other,late down & complex/other
-CRNKL1,late down,noise,late down & noise
-LOC103220827,late down,noise,late down & noise
-RALGAPA2,late down,noise,late down & noise
-KIZ,late down,brief dip,late down & brief dip
-XRN2,late down,noise,late down & noise
-THBD,late down,noise,late down & noise
-CD93,late down,complex/other,late down & complex/other
-LOC103215396,late up,noise,late up & noise
-LOC103215404,late down,noise,late down & noise
-CST3,late down,complex/other,late down & complex/other
-LOC103215467,late up,noise,late up & noise
-SYNDIG1,late down,noise,late down & noise
-IDH3B,late down,noise,late down & noise
-NOP56,late down,complex/other,late down & complex/other
-ZNF343,late down,noise,late down & noise
-SNRPB,late down,brief dip,late down & brief dip
-STK35,late down,noise,late down & noise
-SIRPA,late down,noise,late down & noise
-LOC103215761,late down,noise,late down & noise
-LOC103215749,late down,noise,late down & noise
-LOC103215800,late down,noise,late down & noise
-SDCBP2,late down,noise,late down & noise
-SNPH,late down,noise,late down & noise
-TMEM74B,late down,complex/other,late down & complex/other
-PSMF1,late down,noise,late down & noise
-ANGPT4,late down,noise,late down & noise
-LOC103215971,late down,noise,late down & noise
-SRXN1,late down,noise,late down & noise
-TCF15,late down,brief dip,late down & brief dip
-CSNK2A1,late down,noise,late down & noise
-TBC1D20,late down,noise,late down & noise
-MMP24,late down,noise,late down & noise
-EIF6,late down,complex/other,late down & complex/other
-FAM83C,late down,complex/other,late down & complex/other
-CEP250,late down,brief dip,late down & brief dip
-LOC103216154,late down,noise,late down & noise
-ERGIC3,late down,complex/other,late down & complex/other
-SPAG4,late down,noise,late down & noise
-ROMO1,late down,noise,late down & noise
-LOC103216292,late down,noise,late down & noise
-PHF20,late down,noise,late down & noise
-SCAND1,late down,noise,late down & noise
-CNBD2,late down,noise,late down & noise
-LOC103220939,noise,noise,noise & noise
-EPB41L1,late down,noise,late down & noise
-AAR2,late down,noise,late down & noise
-DLGAP4,late down,noise,late down & noise
-C2H20orf24,late down,noise,late down & noise
-SOGA1,late down,noise,late down & noise
-TLDC2,late down,noise,late down & noise
-MRPS6,late down,brief dip,late down & brief dip
-SLC5A3,late down,noise,late down & noise
-ATP5O,late down,noise,late down & noise
-ITSN1,late down,noise,late down & noise
-CRYZL1,late down,noise,late down & noise
-SON,late down,noise,late down & noise
-GART,late down,noise,late down & noise
-DNAJC28,late down,noise,late down & noise
-TMEM50B,late down,noise,late down & noise
-IFNGR2,late down,noise,late down & noise
-IFNAR1,late down,noise,late down & noise
-IL10RB,late down,complex/other,late down & complex/other
-IFNAR2,late down,noise,late down & noise
-PAXBP1,late down,noise,late down & noise
-SYNJ1,late down,noise,late down & noise
-C2H21orf59,late down,noise,late down & noise
-EVA1C,late up,noise,late up & noise
-URB1,late down,noise,late down & noise
-SOD1,late down,noise,late down & noise
-BACH1,late down,noise,late down & noise
-MAP3K7CL,late down,noise,late down & noise
-CCT8,late down,noise,late down & noise
-USP16,late down,noise,late down & noise
-RWDD2B,late down,noise,late down & noise
-LTN1,late down,noise,late down & noise
-N6AMT1,late down,noise,late down & noise
-ADAMTS5,late down,noise,late down & noise
-ADAMTS1,late down,noise,late down & noise
-LOC103217700,late down,noise,late down & noise
-APP,late down,noise,late down & noise
-GABPA,late down,noise,late down & noise
-ATP5J,late down,noise,late down & noise
-MRPL39,late down,noise,late down & noise
-LOC103217839,late down,noise,late down & noise
-LOC103217885,late down,noise,late down & noise
-LOC103218004,late down,noise,late down & noise
-NCAM2,late down,noise,late down & noise
-LOC103221053,late up,noise,late up & noise
-C2H21orf91,late down,noise,late down & noise
-BTG3,late down,noise,late down & noise
-CXADR,late down,complex/other,late down & complex/other
-LOC103218171,late down,complex/other,late down & complex/other
-USP25,late down,noise,late down & noise
-LOC103218312,late up,noise,late up & noise
-HSPA13,late down,noise,late down & noise
-RBM11,late down,noise,late down & noise
-KCNE1,late down,complex/other,late down & complex/other
-RCAN1,late down,noise,late down & noise
-RUNX1,late down,noise,late down & noise
-LOC103218472,late down,noise,late down & noise
-LOC103218461,late down,noise,late down & noise
-LOC103218455,late down,noise,late down & noise
-LOC103218435,late down,brief dip,late down & brief dip
-SETD4,late down,noise,late down & noise
-CBR3,late down,noise,late down & noise
-DOPEY2,late down,noise,late down & noise
-RIPPLY3,late down,noise,late down & noise
-PIGP,late down,noise,late down & noise
-TTC3,late down,noise,late down & noise
-DSCR3,late down,noise,late down & noise
-DYRK1A,late down,noise,late down & noise
-KCNJ6,late down,noise,late down & noise
-LOC103218803,late down,noise,late down & noise
-ERG,late down,brief dip,late down & brief dip
-BRWD1,late down,noise,late down & noise
-HMGN1,late down,complex/other,late down & complex/other
-WRB,late down,noise,late down & noise
-LCA5L,late down,noise,late down & noise
-B3GALT5,late down,noise,late down & noise
-BACE2,late down,noise,late down & noise
-RIPK4,late down,noise,late down & noise
-LOC103219219,late down,complex/other,late down & complex/other
-C2CD2,late down,noise,late down & noise
-ZBTB21,late down,noise,late down & noise
-TMPRSS3,late down,complex/other,late down & complex/other
-RSPH1,late down,complex/other,late down & complex/other
-WDR4,late down,complex/other,late down & complex/other
-NDUFV3,late down,noise,late down & noise
-LOC103219513,late down,noise,late down & noise
-CBS,late down,noise,late down & noise
-LOC103219487,late down,noise,late down & noise
-U2AF1,late down,noise,late down & noise
-LOC103221111,late down,complex/other,late down & complex/other
-LOC103219534,late down,noise,late down & noise
-SIK1,late down,noise,late down & noise
-HSF2BP,late down,complex/other,late down & complex/other
-RRP1B,late down,noise,late down & noise
-PDXK,late down,noise,late down & noise
-CSTB,late down,noise,late down & noise
-RRP1,late down,noise,late down & noise
-AGPAT3,late down,noise,late down & noise
-PWP2,late down,noise,late down & noise
-C2H21orf33,late down,brief dip,late down & brief dip
-PFKL,late down,noise,late down & noise
-C2H21orf2,late down,complex/other,late down & complex/other
-TRPM2,late up,complex/other,late up & complex/other
-UBE2G2,late down,noise,late down & noise
-SUMO3,late down,noise,late down & noise
-PTTG1IP,late down,noise,late down & noise
-ITGB2,late down,noise,late down & noise
-FAM207A,late down,noise,late down & noise
-LOC103220064,late down,complex/other,late down & complex/other
-LOC103220067,late down,complex/other,late down & complex/other
-ADARB1,late down,noise,late down & noise
-POFUT2,late down,noise,late down & noise
-LOC103220153,late down,noise,late down & noise
-COL18A1,late down,noise,late down & noise
-LOC103220184,late down,complex/other,late down & complex/other
-SLC19A1,late down,noise,late down & noise
-PCBP3,late down,noise,late down & noise
-COL6A1,late down,brief dip,late down & brief dip
-LOC103220294,late down,brief dip,late down & brief dip
-SPATC1L,late down,noise,late down & noise
-LSS,late down,noise,late down & noise
-MCM3AP,late down,complex/other,late down & complex/other
-YBEY,late down,noise,late down & noise
-C2H21orf58,late up,noise,late up & noise
-PCNT,late down,noise,late down & noise
-DIP2A,late down,noise,late down & noise
-PRMT2,late down,noise,late down & noise
+PCMTD2,late up,late down,late up & late down
+MYT1,late up,late up,late up & late up
+OPRL1,late up,late up,late up & late up
+LOC103242338,gradual down,late down,gradual down & late down
+RGS19,late down,late down,late down & late down
+TCEA2,gradual up,late down,gradual up & late down
+LOC103242374,late down,late down,late down & late down
+PRPF6,late down,late down,late down & late down
+SAMD10,late up,late up,late up & late up
+ZNF512B,gradual up,flat,gradual up & flat
+UCKL1,late down,gradual up,late down & gradual up
+DNAJC5,flat,gradual down,flat & gradual down
+TPD52L2,late down,late up,late down & late up
+LOC103248979,gradual up,late up,gradual up & late up
+ZBTB46,late down,late down,late down & late down
+LOC103242511,late down,gradual up,late down & gradual up
+SLC2A4RG,late down,gradual down,late down & gradual down
+LIME1,gradual up,late down,gradual up & late down
+ZGPAT,gradual up,late down,gradual up & late down
+ARFRP1,gradual up,late down,gradual up & late down
+TNFRSF6B,gradual down,late down,gradual down & late down
+RTEL1,gradual up,late up,gradual up & late up
+STMN3,late up,late down,late up & late down
+LOC103242614,gradual down,late down,gradual down & late down
+GMEB2,gradual up,flat,gradual up & flat
+HELZ2,gradual down,gradual down,gradual down & gradual down
+SRMS,late up,flat,late up & flat
+PTK6,late up,late down,late up & late down
+PPDPF,late down,late down,late down & late down
+EEF1A2,gradual up,late up,gradual up & late up
+LOC103242748,gradual down,late up,gradual down & late up
+COL20A1,late up,late down,late up & late down
+ARFGAP1,late down,late down,late down & late down
+YTHDF1,gradual up,late down,gradual up & late down
+LOC103242877,late up,late down,late up & late down
+SLC17A9,flat,late down,flat & late down
+GID8,gradual up,gradual up,gradual up & gradual up
+DIDO1,flat,gradual up,flat & gradual up
+OGFR,gradual up,late down,gradual up & late down
+MRGBP,late down,late down,late down & late down
+SLCO4A1,late down,late down,late down & late down
+GATA5,late down,gradual down,late down & gradual down
+CABLES2,flat,flat,flat & flat
+RPS21,late down,late up,late down & late up
+LOC103249004,gradual down,flat,gradual down & flat
+LAMA5,late up,late down,late up & late down
+ADRM1,late down,gradual up,late down & gradual up
+OSBPL2,gradual up,gradual down,gradual up & gradual down
+LOC103243110,late up,late up,late up & late up
+HRH3,flat,gradual down,flat & gradual down
+MTG2,late up,late down,late up & late down
+SS18L1,late up,gradual down,late up & gradual down
+LSM14B,gradual up,late down,gradual up & late down
+LOC103243157,gradual up,flat,gradual up & flat
+TAF4,gradual up,late down,gradual up & late down
+FAM217B,gradual down,late up,gradual down & late up
+PPP1R3D,late down,late up,late down & late up
+PHACTR3,late up,gradual up,late up & gradual up
+SLMO2,late down,late up,late down & late up
+ATP5E,late down,late up,late down & late up
+CTSZ,late down,flat,late down & flat
+GNAS,flat,gradual up,flat & gradual up
+LOC103243470,gradual up,flat,gradual up & flat
+NPEPL1,late up,late up,late up & late up
+STX16,late up,gradual up,late up & gradual up
+APCDD1L,gradual up,late down,gradual up & late down
+LOC103243620,late up,late down,late up & late down
+LOC103243665,gradual down,gradual up,gradual down & gradual up
+PMEPA1,gradual down,gradual down,gradual down & gradual down
+ZBP1,late up,late down,late up & late down
+PCK1,gradual up,gradual down,gradual up & gradual down
+RBM38,late down,late down,late down & late down
+RAE1,late down,late down,late down & late down
+BMP7,late down,flat,late down & flat
+TFAP2C,late down,late down,late down & late down
+CASS4,gradual down,late up,gradual down & late up
+CSTF1,gradual up,gradual down,gradual up & gradual down
+AURKA,gradual up,late up,gradual up & late up
+FAM210B,gradual down,gradual up,gradual down & gradual up
+DOK5,late up,gradual up,late up & gradual up
+PFDN4,late down,gradual down,late down & gradual down
+LOC103243975,flat,gradual down,flat & gradual down
+LOC103243965,late up,late up,late up & late up
+BCAS1,gradual down,late up,gradual down & late up
+LOC103244031,late down,gradual up,late down & gradual up
+ZNF217,late down,late up,late down & late up
+ZFP64,gradual down,late up,gradual down & late up
+ATP9A,gradual up,late down,gradual up & late down
+NFATC2,late down,flat,late down & flat
+KCNG1,late down,flat,late down & flat
+LOC103244277,late down,gradual down,late down & gradual down
+MOCS3,late down,gradual down,late down & gradual down
+DPM1,late down,gradual down,late down & gradual down
+BCAS4,late down,gradual down,late down & gradual down
+PARD6B,gradual down,flat,gradual down & flat
+FAM65C,gradual down,late down,gradual down & late down
+PTPN1,gradual up,late up,gradual up & late up
+LOC103244417,flat,late down,flat & late down
+LOC103244429,late down,late up,late down & late up
+CEBPB,gradual up,gradual up,gradual up & gradual up
+LOC103244431,late up,gradual down,late up & gradual down
+TMEM189,late up,gradual down,late up & gradual down
+UBE2V1,late up,late down,late up & late down
+SNAI1,gradual down,gradual down,gradual down & gradual down
+RNF114,late up,late up,late up & late up
+SPATA2,late up,late up,late up & late up
+SLC9A8,late up,late down,late up & late down
+LOC103244547,late down,gradual up,late down & gradual up
+B4GALT5,gradual down,late down,gradual down & late down
+PTGIS,late up,gradual down,late up & gradual down
+KCNB1,gradual down,late down,gradual down & late down
+ZNFX1,gradual up,gradual up,gradual up & gradual up
+DDX27,late up,late down,late up & late down
+STAU1,late down,late up,late down & late up
+CSE1L,late down,gradual down,late down & gradual down
+ARFGEF2,gradual up,late down,gradual up & late down
+PREX1,gradual up,late down,gradual up & late down
+LOC103244657,late up,late up,late up & late up
+LOC103244721,late up,gradual up,late up & gradual up
+SULF2,gradual down,gradual up,gradual down & gradual up
+NCOA3,gradual up,late up,gradual up & late up
+LOC103244818,gradual up,late down,gradual up & late down
+ZMYND8,late up,gradual down,late up & gradual down
+SLC2A10,late up,flat,late up & flat
+TP53RK,late up,late down,late up & late down
+SLC13A3,late up,gradual down,late up & gradual down
+ZNF334,late up,late up,late up & late up
+LOC103214207,gradual up,late down,gradual up & late down
+ELMO2,gradual up,late down,gradual up & late down
+SLC35C2,gradual up,late up,gradual up & late up
+LOC103245038,late down,late up,late down & late up
+CDH22,late down,late down,late down & late down
+CD40,late down,gradual up,late down & gradual up
+NCOA5,late down,flat,late down & flat
+SLC12A5,gradual up,late down,gradual up & late down
+MMP9,gradual up,flat,gradual up & flat
+ZNF335,gradual up,gradual down,gradual up & gradual down
+PLTP,gradual down,late down,gradual down & late down
+ZSWIM3,late down,gradual down,late down & gradual down
+ACOT8,late up,late up,late up & late up
+SNX21,late down,flat,late down & flat
+UBE2C,late down,late up,late down & late up
+DNTTIP1,late down,flat,late down & flat
+WFDC3,late up,late down,late up & late down
+WFDC2,late up,gradual down,late up & gradual down
+PIGT,gradual down,flat,gradual down & flat
+DBNDD2,gradual up,gradual up,gradual up & gradual up
+TP53TG5,late down,gradual up,late down & gradual up
+MATN4,flat,gradual down,flat & gradual down
+KCNS1,late down,late up,late down & late up
+PABPC1L,flat,flat,flat & flat
+YWHAB,gradual down,gradual down,gradual down & gradual down
+RIMS4,late down,late up,late down & late up
+WISP2,gradual up,gradual down,gradual up & gradual down
+ADA,late up,gradual down,late up & gradual down
+PKIG,gradual down,late up,gradual down & late up
+SERINC3,gradual down,late down,gradual down & late down
+TTPAL,late up,late up,late up & late up
+HNF4A,late down,late down,late down & late down
+FITM2,late down,gradual down,late down & gradual down
+GDAP1L1,late down,gradual down,late down & gradual down
+LOC103245676,gradual up,late up,gradual up & late up
+JPH2,gradual down,gradual down,gradual down & gradual down
+MYBL2,late down,flat,late down & flat
+IFT52,late down,late down,late down & late down
+SGK2,late up,flat,late up & flat
+L3MBTL1,late up,gradual up,late up & gradual up
+SRSF6,gradual up,late up,gradual up & late up
+CHD6,flat,flat,flat & flat
+LPIN3,late down,late down,late down & late down
+LOC103245982,gradual up,gradual down,gradual up & gradual down
+ZHX3,late up,late up,late up & late up
+PLCG1,late up,late down,late up & late down
+TOP1,flat,gradual down,flat & gradual down
+MAFB,late up,late up,late up & late up
+DHX35,gradual up,late up,gradual up & late up
+FAM83D,gradual down,late down,gradual down & late down
+ACTR5,gradual up,gradual up,gradual up & gradual up
+ARHGAP40,late down,late up,late down & late up
+ADIG,late down,gradual up,late down & gradual up
+LOC103246243,gradual down,late up,gradual down & late up
+KIAA1755,gradual down,late down,gradual down & late down
+TGM2,gradual down,gradual down,gradual down & gradual down
+LOC103246302,late down,late down,late down & late down
+RPRD1B,flat,late up,flat & late up
+TTI1,flat,late down,flat & late down
+VSTM2L,late up,gradual down,late up & gradual down
+CTNNBL1,gradual up,flat,gradual up & flat
+BLCAP,late up,late up,late up & late up
+SRC,flat,gradual down,flat & gradual down
+MANBAL,late down,gradual up,late down & gradual up
+RPN2,gradual down,late up,gradual down & late up
+MROH8,late up,gradual up,late up & gradual up
+JAG1,gradual down,gradual down,gradual down & gradual down
+SLX4IP,late down,gradual up,late down & gradual up
+MKKS,gradual down,late up,gradual down & late up
+SNAP25,late up,gradual down,late up & gradual down
+ANKEF1,gradual up,late up,gradual up & late up
+PLCB1,late down,gradual up,late down & gradual up
+LOC103246674,late up,late down,late up & late down
+TMX4,gradual down,late down,gradual down & late down
+LOC103246731,flat,late up,flat & late up
+LRRN4,gradual down,gradual down,gradual down & gradual down
+CRLS1,gradual down,gradual up,gradual down & gradual up
+MCM8,late down,gradual down,late down & gradual down
+TRMT6,gradual up,late up,gradual up & late up
+C2H20orf196,gradual up,late down,gradual up & late down
+GPCPD1,gradual down,late down,gradual down & late down
+CDS2,gradual down,flat,gradual down & flat
+PCNA,late down,late down,late down & late down
+TMEM230,gradual down,late up,gradual down & late up
+LOC103246970,gradual up,late down,gradual up & late down
+SLC23A2,late down,late up,late down & late up
+RASSF2,flat,gradual up,flat & gradual up
+PRNP,late down,late up,late down & late up
+PCED1A,late up,late down,late up & late down
+VPS16,late up,gradual up,late up & gradual up
+PTPRA,late down,gradual up,late down & gradual up
+GNRH2,late down,late up,late down & late up
+MRPS26,gradual down,gradual down,gradual down & gradual down
+OXT,flat,gradual up,flat & gradual up
+AVP,flat,gradual up,flat & gradual up
+UBOX5,gradual up,late down,gradual up & late down
+FASTKD5,gradual up,late down,gradual up & late down
+LOC103247226,late up,late down,late up & late down
+DDRGK1,flat,gradual down,flat & gradual down
+ITPA,late up,gradual down,late up & gradual down
+SLC4A11,late up,gradual down,late up & gradual down
+C2H20orf194,late up,flat,late up & flat
+LOC103247341,late down,late down,late down & late down
+ATRN,gradual down,late up,gradual down & late up
+ADAM33,gradual up,gradual down,gradual up & gradual down
+SIGLEC1,late up,late up,late up & late up
+C2H20orf27,gradual down,late down,gradual down & late down
+SPEF1,gradual up,late down,gradual up & late down
+CENPB,late up,flat,late up & flat
+CDC25B,gradual up,late up,gradual up & late up
+AP5S1,late down,gradual down,late down & gradual down
+MAVS,late up,gradual down,late up & gradual down
+PANK2,gradual up,late up,gradual up & late up
+RNF24,late up,late down,late up & late down
+C2H20orf96,late up,late down,late up & late down
+ZCCHC3,gradual up,late up,gradual up & late up
+SOX12,gradual down,gradual down,gradual down & gradual down
+NRSN2,late up,late up,late up & late up
+TRIB3,late up,late up,late up & late up
+RBCK1,late up,late down,late up & late down
+HM13,flat,gradual up,flat & gradual up
+ID1,gradual down,late up,gradual down & late up
+LOC103248003,flat,late down,flat & late down
+BCL2L1,gradual down,gradual down,gradual down & gradual down
+LOC103214277,gradual down,gradual down,gradual down & gradual down
+TPX2,late down,late up,late down & late up
+MYLK2,gradual up,late down,gradual up & late down
+TTLL9,flat,gradual down,flat & gradual down
+PDRG1,gradual up,late up,gradual up & late up
+XKR7,gradual down,late up,gradual down & late up
+TM9SF4,late up,gradual down,late up & gradual down
+LOC103248163,late down,gradual down,late down & gradual down
+PLAGL2,gradual up,late up,gradual up & late up
+POFUT1,gradual down,gradual down,gradual down & gradual down
+KIF3B,gradual up,late down,gradual up & late down
+LOC103248217,gradual up,late up,gradual up & late up
+ASXL1,gradual up,gradual down,gradual up & gradual down
+NOL4L,gradual up,late down,gradual up & late down
+COMMD7,gradual up,flat,gradual up & flat
+DNMT3B,gradual up,late down,gradual up & late down
+MAPRE1,gradual up,late down,gradual up & late down
+EFCAB8,late up,late up,late up & late up
+LOC103248391,late up,late down,late up & late down
+BPIFB4,late up,late down,late up & late down
+BPIFB1,flat,late down,flat & late down
+CDK5RAP1,late down,flat,late down & flat
+SNTA1,flat,late up,flat & late up
+CBFA2T2,late down,late up,late down & late up
+NECAB3,late up,gradual down,late up & gradual down
+ACTL10,gradual up,late down,gradual up & late down
+E2F1,gradual down,flat,gradual down & flat
+PXMP4,gradual down,gradual down,gradual down & gradual down
+ZNF341,late up,late up,late up & late up
+CHMP4B,late down,gradual down,late down & gradual down
+RALY,flat,late down,flat & late down
+EIF2S2,late down,gradual up,late down & gradual up
+ASIP,flat,gradual down,flat & gradual down
+AHCY,gradual down,late down,gradual down & late down
+ITCH,gradual up,late up,gradual up & late up
+DYNLRB1,gradual down,gradual up,gradual down & gradual up
+MAP1LC3A,late up,late down,late up & late down
+PIGU,gradual down,gradual down,gradual down & gradual down
+TP53INP2,flat,late down,flat & late down
+NCOA6,gradual up,late up,gradual up & late up
+GGT7,gradual up,late up,gradual up & late up
+ACSS2,late up,late down,late up & late down
+GSS,late down,late down,late down & late down
+PROCR,flat,late up,flat & late up
+BTBD3,gradual down,late down,gradual down & late down
+SPTLC3,gradual down,late up,gradual down & late up
+TASP1,late up,late up,late up & late up
+ESF1,late down,late up,late down & late up
+NDUFAF5,gradual up,late up,gradual up & late up
+FLRT3,gradual down,late down,gradual down & late down
+KIF16B,gradual up,late up,gradual up & late up
+SNRPB2,late down,late down,late down & late down
+RRBP1,late down,flat,late down & flat
+SNX5,gradual up,late up,gradual up & late up
+MGME1,flat,late up,flat & late up
+PET117,gradual up,gradual down,gradual up & gradual down
+DZANK1,gradual down,late up,gradual down & late up
+POLR3F,flat,gradual up,flat & gradual up
+RBBP9,gradual down,gradual up,gradual down & gradual up
+SEC23B,gradual down,gradual down,gradual down & gradual down
+RIN2,flat,flat,flat & flat
+CRNKL1,late down,gradual up,late down & gradual up
+LOC103220827,flat,gradual up,flat & gradual up
+RALGAPA2,late up,late up,late up & late up
+KIZ,late up,gradual down,late up & gradual down
+XRN2,gradual up,gradual down,gradual up & gradual down
+THBD,gradual up,late down,gradual up & late down
+CD93,gradual up,gradual up,gradual up & gradual up
+LOC103215396,late up,flat,late up & flat
+LOC103215404,gradual down,gradual down,gradual down & gradual down
+CST3,gradual down,gradual up,gradual down & gradual up
+LOC103215467,gradual up,late down,gradual up & late down
+SYNDIG1,late up,gradual down,late up & gradual down
+IDH3B,late up,gradual up,late up & gradual up
+NOP56,flat,late up,flat & late up
+ZNF343,gradual up,late up,gradual up & late up
+SNRPB,gradual down,gradual down,gradual down & gradual down
+STK35,late up,gradual up,late up & gradual up
+SIRPA,gradual down,gradual up,gradual down & gradual up
+LOC103215761,gradual down,flat,gradual down & flat
+LOC103215749,late down,flat,late down & flat
+LOC103215800,late up,gradual down,late up & gradual down
+SDCBP2,late up,gradual up,late up & gradual up
+SNPH,late down,flat,late down & flat
+TMEM74B,late up,late down,late up & late down
+PSMF1,late down,gradual down,late down & gradual down
+ANGPT4,late down,late down,late down & late down
+LOC103215971,flat,late up,flat & late up
+SRXN1,gradual up,gradual down,gradual up & gradual down
+TCF15,late down,late up,late down & late up
+CSNK2A1,gradual down,late up,gradual down & late up
+TBC1D20,late down,gradual up,late down & gradual up
+MMP24,gradual up,late down,gradual up & late down
+EIF6,late up,gradual up,late up & gradual up
+FAM83C,late up,late up,late up & late up
+CEP250,gradual down,late up,gradual down & late up
+LOC103216154,gradual down,gradual down,gradual down & gradual down
+ERGIC3,late up,late down,late up & late down
+SPAG4,late up,late down,late up & late down
+ROMO1,late down,gradual up,late down & gradual up
+LOC103216292,gradual up,gradual down,gradual up & gradual down
+PHF20,gradual up,late up,gradual up & late up
+SCAND1,late down,gradual up,late down & gradual up
+CNBD2,late up,gradual up,late up & gradual up
+LOC103220939,late up,gradual down,late up & gradual down
+EPB41L1,late up,gradual down,late up & gradual down
+AAR2,gradual down,late down,gradual down & late down
+DLGAP4,gradual up,late down,gradual up & late down
+C2H20orf24,late down,late down,late down & late down
+SOGA1,gradual up,gradual up,gradual up & gradual up
+TLDC2,flat,gradual up,flat & gradual up
+MRPS6,gradual up,late up,gradual up & late up
+SLC5A3,late up,late up,late up & late up
+ATP5O,gradual down,late down,gradual down & late down
+ITSN1,late down,gradual down,late down & gradual down
+CRYZL1,gradual up,late up,gradual up & late up
+SON,gradual up,late up,gradual up & late up
+GART,gradual up,gradual down,gradual up & gradual down
+DNAJC28,gradual up,gradual down,gradual up & gradual down
+TMEM50B,flat,gradual down,flat & gradual down
+IFNGR2,gradual down,gradual down,gradual down & gradual down
+IFNAR1,gradual down,late down,gradual down & late down
+IL10RB,gradual down,late down,gradual down & late down
+IFNAR2,gradual down,gradual up,gradual down & gradual up
+PAXBP1,gradual up,late down,gradual up & late down
+SYNJ1,late down,late up,late down & late up
+C2H21orf59,late down,gradual down,late down & gradual down
+EVA1C,flat,flat,flat & flat
+URB1,flat,late down,flat & late down
+SOD1,late down,gradual down,late down & gradual down
+BACH1,late up,late up,late up & late up
+MAP3K7CL,gradual down,gradual down,gradual down & gradual down
+CCT8,late down,gradual up,late down & gradual up
+USP16,gradual up,gradual up,gradual up & gradual up
+RWDD2B,late down,late down,late down & late down
+LTN1,gradual up,late down,gradual up & late down
+N6AMT1,late down,gradual down,late down & gradual down
+ADAMTS5,gradual down,late down,gradual down & late down
+ADAMTS1,gradual down,gradual down,gradual down & gradual down
+LOC103217700,late up,late down,late up & late down
+APP,gradual down,late up,gradual down & late up
+GABPA,late down,gradual down,late down & gradual down
+ATP5J,late down,late down,late down & late down
+MRPL39,late down,gradual down,late down & gradual down
+LOC103217839,gradual down,gradual down,gradual down & gradual down
+LOC103217885,gradual up,late down,gradual up & late down
+LOC103218004,gradual up,late up,gradual up & late up
+NCAM2,gradual down,flat,gradual down & flat
+LOC103221053,late up,gradual up,late up & gradual up
+C2H21orf91,gradual up,gradual up,gradual up & gradual up
+BTG3,gradual down,gradual down,gradual down & gradual down
+CXADR,gradual down,gradual up,gradual down & gradual up
+LOC103218171,late down,gradual down,late down & gradual down
+USP25,gradual up,late up,gradual up & late up
+LOC103218312,late up,late down,late up & late down
+HSPA13,gradual down,late down,gradual down & late down
+RBM11,late down,late down,late down & late down
+KCNE1,late down,late down,late down & late down
+RCAN1,gradual down,flat,gradual down & flat
+RUNX1,gradual down,gradual down,gradual down & gradual down
+LOC103218472,gradual down,late up,gradual down & late up
+LOC103218461,flat,flat,flat & flat
+LOC103218455,late up,gradual up,late up & gradual up
+LOC103218435,late down,flat,late down & flat
+SETD4,gradual up,late up,gradual up & late up
+CBR3,gradual up,late down,gradual up & late down
+DOPEY2,late down,late down,late down & late down
+RIPPLY3,late up,gradual up,late up & gradual up
+PIGP,late down,gradual down,late down & gradual down
+TTC3,gradual down,late down,gradual down & late down
+DSCR3,late down,late down,late down & late down
+DYRK1A,gradual up,late up,gradual up & late up
+KCNJ6,gradual down,gradual up,gradual down & gradual up
+LOC103218803,flat,late up,flat & late up
+ERG,late down,late up,late down & late up
+BRWD1,gradual up,gradual down,gradual up & gradual down
+HMGN1,late down,flat,late down & flat
+WRB,gradual down,late up,gradual down & late up
+LCA5L,flat,late down,flat & late down
+B3GALT5,late down,gradual up,late down & gradual up
+BACE2,gradual down,flat,gradual down & flat
+RIPK4,flat,flat,flat & flat
+LOC103219219,late up,late down,late up & late down
+C2CD2,late down,late up,late down & late up
+ZBTB21,gradual up,late down,gradual up & late down
+TMPRSS3,gradual up,late down,gradual up & late down
+RSPH1,flat,gradual down,flat & gradual down
+WDR4,late up,late down,late up & late down
+NDUFV3,late down,late up,late down & late up
+LOC103219513,late down,gradual up,late down & gradual up
+CBS,flat,late down,flat & late down
+LOC103219487,late up,late down,late up & late down
+U2AF1,gradual up,gradual up,gradual up & gradual up
+LOC103221111,late up,late down,late up & late down
+LOC103219534,gradual down,gradual up,gradual down & gradual up
+SIK1,late down,flat,late down & flat
+HSF2BP,late up,flat,late up & flat
+RRP1B,gradual down,late up,gradual down & late up
+PDXK,late up,late up,late up & late up
+CSTB,late down,gradual up,late down & gradual up
+RRP1,gradual up,late down,gradual up & late down
+AGPAT3,late up,late up,late up & late up
+PWP2,gradual up,flat,gradual up & flat
+C2H21orf33,gradual down,late up,gradual down & late up
+PFKL,gradual down,late up,gradual down & late up
+C2H21orf2,late down,late down,late down & late down
+TRPM2,flat,late down,flat & late down
+UBE2G2,late up,late up,late up & late up
+SUMO3,late down,gradual down,late down & gradual down
+PTTG1IP,gradual down,late down,gradual down & late down
+ITGB2,late down,late up,late down & late up
+FAM207A,late up,gradual down,late up & gradual down
+LOC103220064,late up,flat,late up & flat
+LOC103220067,late up,gradual down,late up & gradual down
+ADARB1,late up,gradual down,late up & gradual down
+POFUT2,late down,flat,late down & flat
+LOC103220153,gradual down,late down,gradual down & late down
+COL18A1,gradual down,gradual down,gradual down & gradual down
+LOC103220184,flat,late down,flat & late down
+SLC19A1,late down,gradual down,late down & gradual down
+PCBP3,late up,gradual down,late up & gradual down
+COL6A1,gradual down,late up,gradual down & late up
+LOC103220294,gradual down,late up,gradual down & late up
+SPATC1L,gradual up,gradual down,gradual up & gradual down
+LSS,gradual down,gradual up,gradual down & gradual up
+MCM3AP,gradual up,late up,gradual up & late up
+YBEY,late down,gradual down,late down & gradual down
+C2H21orf58,late up,gradual up,late up & gradual up
+PCNT,gradual up,late down,gradual up & late down
+DIP2A,late up,gradual down,late up & gradual down
+PRMT2,late up,late down,late up & late down
