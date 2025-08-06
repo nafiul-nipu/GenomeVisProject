@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Three.js OBJ Viewer (Importmap, Centered, Bright)</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+
+      // Scene, Camera, Renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        5000
+      );
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setClearColor(0x222222);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Bright lights!
+      scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+      const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
+      light1.position.set(1, 1, 1);
+      scene.add(light1);
+
+      // Controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+
+      // Load OBJ
+      const loader = new OBJLoader();
+      loader.load(
+        "chr1_12hrs_vacv_metaball.obj", // <-- update as needed
+        function (obj) {
+          obj.traverse(function (child) {
+            if (child.isMesh) {
+              child.material = new THREE.MeshStandardMaterial({
+                vertexColors: true,
+                side: THREE.DoubleSide,
+                flatShading: false,
+              });
+            }
+          });
+
+          // Center and scale mesh
+          const box = new THREE.Box3().setFromObject(obj);
+          const center = box.getCenter(new THREE.Vector3());
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 200 / maxDim; // Make the object fill more of the screen
+
+          obj.position.sub(center); // Center at origin
+          obj.scale.setScalar(scale);
+
+          scene.add(obj);
+
+          // Position camera and controls
+          camera.position.set(0, 0, maxDim * 2);
+          controls.target.set(0, 0, 0); // Center orbit controls on mesh
+          controls.update(); // Make the change take effect
+        },
+        undefined,
+        function (error) {
+          console.error("Error loading OBJ:", error);
+        }
+      );
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Responsive resize
+      window.addEventListener("resize", function () {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
