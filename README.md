@@ -14,6 +14,8 @@
 
 ### How to run the data processing
 
+(python version == 3.9.6)
+
 1. Go to `data_processing_python` folder
 2. Create a virtual environment with `python3 -m venv venv`
 3. Activate the virtual environment with
@@ -22,7 +24,6 @@
 4. Run `pip install -r requirements.txt` to install all dependencies (only the first time running the project)
 5. (if new package is installed) update requirements.txt `pip freeze > requirements.txt`
 6. Run `jupyter notebook` to start the notebook
-
 
 ## Data Processing Guide
 
