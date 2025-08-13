@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Density: Color vs Embossed (Side-by-Side)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden}
+    #ui{position:fixed;top:10px;left:10px;max-width:360px;background:#111a;border:1px solid #333;border-radius:12px;padding:12px;color:#eee;font:14px system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    #ui h3{margin:0 0 8px;font-size:15px}
+    .row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin:8px 0}
+    .file{grid-column:1 / span 3}
+    button{background:#2b5cff;color:#fff;border:0;border-radius:10px;padding:6px 10px;cursor:pointer}
+    .hr{height:1px;background:#333;margin:10px 0}
+    #hint{font-size:12px;color:#bbb;margin-top:6px}
+  </style>
+  <link rel="icon" href="data:,">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<div id="ui">
+  <h3>Density: Color vs Embossed</h3>
+
+  <div class="row">
+    <button id="loadPresets">Load presets</button>
+    <button id="fitView">Fit view</button>
+    <label><input type="checkbox" id="wireframe"> wireframe</label>
+  </div>
+  <div class="hr"></div>
+
+  <div class="row">
+    <strong>Color mesh</strong><span></span><span></span>
+    <input class="file" type="file" id="file_color" accept=".ply" />
+  </div>
+  <div class="row">
+    <strong>Embossed mesh</strong><span></span><span></span>
+    <input class="file" type="file" id="file_emboss" accept=".ply" />
+  </div>
+
+  <div id="hint">Presets try to load (same folder):<br>
+    <code>chr1_12hrs_vacv_density_color.ply</code> &nbsp;|&nbsp; <code>chr1_12hrs_vacv_density_embossed.ply</code>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
+
+const FILE_COLOR   = 'chr1_12hrs_vacv_density_color.ply';
+const FILE_EMBOSS  = 'chr1_12hrs_vacv_density_embossed.ply';
+const GAP_FACTOR   = 1.25; // spacing multiplier between the two meshes
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0f1013);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 10000);
+camera.position.set(0,0,400);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+dir.position.set(120,140,200);
+scene.add(dir);
+
+// Two groups so we can center each mesh then offset them apart
+const root = new THREE.Group();
+const leftGroup  = new THREE.Group();   // color mesh
+const rightGroup = new THREE.Group();   // embossed mesh
+root.add(leftGroup, rightGroup);
+scene.add(root);
+
+const loader = new PLYLoader();
+
+let colorMesh = null;
+let embossMesh = null;
+
+function makeMaterialVertexColor() {
+  // Unlit so vertex colors are vivid
+  return new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide, transparent: false });
+}
+
+function centerGroupOnGeometry(group, mesh) {
+  // center the mesh within its group so pivots are consistent
+  const box = new THREE.Box3().setFromObject(mesh);
+  const center = new THREE.Vector3();
+  box.getCenter(center);
+  mesh.position.sub(center);
+}
+
+async function loadPLYIntoGroup(urlOrBlob, group, isVertexColored) {
+  return new Promise((resolve, reject) => {
+    loader.load(urlOrBlob, (geometry) => {
+      geometry.computeVertexNormals();
+
+      const hasColors = !!geometry.attributes.color;
+      const mat = isVertexColored && hasColors
+        ? makeMaterialVertexColor()
+        : new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.0, roughness: 0.95, side: THREE.DoubleSide });
+
+      const mesh = new THREE.Mesh(geometry, mat);
+      group.clear(); // remove previous children if any
+      group.add(mesh);
+      centerGroupOnGeometry(group, mesh);
+
+      resolve(mesh);
+    }, undefined, (err) => reject(err));
+  });
+}
+
+function layoutSideBySide() {
+  // Compute sizes of each group
+  const boxL = new THREE.Box3().setFromObject(leftGroup);
+  const boxR = new THREE.Box3().setFromObject(rightGroup);
+  const sizeL = new THREE.Vector3(); boxL.getSize(sizeL);
+  const sizeR = new THREE.Vector3(); boxR.getSize(sizeR);
+
+  const widthL = sizeL.x || 0;
+  const widthR = sizeR.x || 0;
+  const maxH   = Math.max(sizeL.y || 0, sizeR.y || 0);
+  const maxD   = Math.max(sizeL.z || 0, sizeR.z || 0);
+
+  // Horizontal separation based on widths
+  const sep = (widthL/2 + widthR/2) * GAP_FACTOR || 50;
+
+  leftGroup.position.set(-sep/2, 0, 0);
+  rightGroup.position.set( sep/2, 0, 0);
+
+  // Frame camera to fit both
+  const combined = new THREE.Box3().setFromObject(root);
+  const size = new THREE.Vector3(); combined.getSize(size);
+  const maxDim = Math.max(size.x, size.y, size.z, maxH, maxD);
+  const fitDist = maxDim / (2 * Math.tan((camera.fov * Math.PI / 180) / 2));
+  camera.position.set(0, 0, fitDist * 1.3);
+  controls.target.set(0,0,0);
+  controls.update();
+}
+
+function fitView(){ layoutSideBySide(); }
+
+document.getElementById('wireframe').addEventListener('change', (e) => {
+  const on = e.target.checked;
+  if (colorMesh)  { colorMesh.material.wireframe  = on; colorMesh.material.needsUpdate = true; }
+  if (embossMesh) { embossMesh.material.wireframe = on; embossMesh.material.needsUpdate = true; }
+});
+
+document.getElementById('fitView').addEventListener('click', fitView);
+
+document.getElementById('loadPresets').addEventListener('click', async () => {
+  try {
+    colorMesh  = await loadPLYIntoGroup(FILE_COLOR,  leftGroup,  true);
+  } catch (e) { console.warn('Missing preset:', FILE_COLOR); }
+  try {
+    embossMesh = await loadPLYIntoGroup(FILE_EMBOSS, rightGroup, true);
+  } catch (e) { console.warn('Missing preset:', FILE_EMBOSS); }
+  layoutSideBySide();
+});
+
+// File pickers
+document.getElementById('file_color').addEventListener('change', async (e) => {
+  if (!e.target.files || !e.target.files[0]) return;
+  const url = URL.createObjectURL(e.target.files[0]);
+  colorMesh = await loadPLYIntoGroup(url, leftGroup, true);
+  layoutSideBySide();
+});
+document.getElementById('file_emboss').addEventListener('change', async (e) => {
+  if (!e.target.files || !e.target.files[0]) return;
+  const url = URL.createObjectURL(e.target.files[0]);
+  embossMesh = await loadPLYIntoGroup(url, rightGroup, true);
+  layoutSideBySide();
+});
+
+// Resize + render loop
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+(function animate(){ requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); })();
+</script>
+</body>
+</html>
