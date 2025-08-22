@@ -17,11 +17,15 @@
   "n_boot": 128,
   "sample_frac": 0.9,
   "grid_base": 160,
-  "sigma_vox": 3.0,
+  "sigma_vox": 4.008205713047576,
   "metaball_level": 0.1,
+  "metaball_q": 0.9,
+  "thr_mode": "quantile",
+  "min_blob_vox": 278,
   "prob_levels": [
     0.6,
     0.8,
+    0.9,
     0.95
   ]
 }
