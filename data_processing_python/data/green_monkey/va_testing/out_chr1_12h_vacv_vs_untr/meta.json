@@ -1,0 +1,17 @@
+{
+  "csv_A": "data/green_monkey/all_structure_files/chr1/12hrs/untr/structure_12hrs_untr_gene_info.csv",
+  "csv_B": "data/green_monkey/all_structure_files/chr1/12hrs/vacv/structure_12hrs_vacv_gene_info.csv",
+  "cfg": {
+    "grid_base": 160,
+    "pad_frac": 0.05,
+    "sigma_vox": 3.0,
+    "thr_quantile": 0.9,
+    "min_blob_vox": 200,
+    "post_close": 2,
+    "out_dir": "data/green_monkey/va_testing/out_chr1_12h_vacv_vs_untr",
+    "trim_q": 0.1,
+    "icp_iters": 30,
+    "sample_icp": 50000
+  },
+  "note": "Alignment = best-PCA perm/sign + robust ICP; silhouettes from voxelized masks."
+}
