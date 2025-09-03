@@ -25,10 +25,13 @@
       0.5
     ],
     "sigma_px": 1.2,
+    "density_floor_frac": 0.002,
+    "use_support_p100": true,
+    "support_min_hits": 1,
     "trim_q": 0.1,
     "icp_iters": 30,
     "sample_icp": 50000,
     "out_dir": "data/green_monkey/va_testing/out_chr1_12h_untr_vs_vacv_hdr"
   },
-  "note": "Coverage (HDR) per view via 2D bootstrapped densities; PCA+ICP-aligned & scaled."
+  "note": "2D HDR coverage per view from bootstrapped densities; optional support-based p100; PCA+ICP-aligned & scaled; density tail floor applied before HDR."
 }
