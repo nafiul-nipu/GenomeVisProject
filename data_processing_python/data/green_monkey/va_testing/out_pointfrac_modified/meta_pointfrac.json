@@ -1,0 +1,25 @@
+{
+  "csv_A": "data/green_monkey/all_structure_files/chr1/12hrs/untr/structure_12hrs_untr_gene_info.csv",
+  "csv_B": "data/green_monkey/all_structure_files/chr1/12hrs/vacv/structure_12hrs_vacv_gene_info.csv",
+  "label_A": "12 h \u2014 UNTR",
+  "label_B": "12 h \u2014 VACV",
+  "cfg": {
+    "grid_base": 160,
+    "pad_frac": 0.05,
+    "frac_levels": [
+      1.0,
+      0.95,
+      0.9,
+      0.8,
+      0.6,
+      0.5
+    ],
+    "disk_px": 2,
+    "bandwidth": null,
+    "trim_q": 0.1,
+    "icp_iters": 30,
+    "sample_icp": 50000,
+    "out_dir": "data/green_monkey/va_testing/out_pointfrac_modified"
+  },
+  "note": "Per-plane silhouettes enclosing a chosen fraction of points (densest ceil(frac*N) by KDE); PCA+ICP-aligned & shared bbox; masks rasterized and cleaned; main component contoured."
+}
