@@ -17,6 +17,7 @@
 
 # misc
 .DS_Store
+.vscode/
 
 # debug
 npm-debug.log*
@@ -63,6 +64,8 @@ ipython_config.py
 [Ss]hare
 pyvenv.cfg
 .venv
+.venv3.10
+venv3.10/
 pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/jupyternotebooks,venv
