@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>Three.js Silhouette Viewer</title>
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+  }
+  #hud {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  #hud select {
+    margin-right: 6px;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+<div id="hud">
+  <label
+    >Plane
+    <select id="plane">
+      <option value="XY">XY</option>
+      <option value="YZ">YZ</option>
+      <option value="XZ">XZ</option>
+    </select>
+  </label>
+  <label
+    >Variant
+    <select id="variant">
+      <option value="hdr">hdr</option>
+      <option value="pf">pf</option>
+    </select>
+  </label>
+  <label
+    >Level
+    <select id="level"></select>
+  </label>
+  <label>Contours <input type="checkbox" id="showPaths" checked /></label>
+  <label>Boundary <input type="checkbox" id="showHull" checked /></label>
+  <label>Points <input type="checkbox" id="showPoints" checked /></label>
+</div>
+<canvas id="c"></canvas>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+  import * as THREE from "three";
+  import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+  const ROOT = "./web_data"; // change if needed
+  const meta = await (await fetch(`${ROOT}/meta.json`)).json();
+  const contours = await (await fetch(`${ROOT}/contours_three.json`)).json();
+  const points3d = await (await fetch(`${ROOT}/points3d.json`)).json();
+  const hullA = await (await fetch(`${ROOT}/boundary_A.mesh.json`)).json();
+  const hullB = await (await fetch(`${ROOT}/boundary_B.mesh.json`)).json();
+
+  const canvas = document.getElementById("c");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(devicePixelRatio);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf6f7fb);
+
+  const camera = new THREE.PerspectiveCamera(50, 2, 0.01, 100);
+  camera.position.set(1.8, 1.2, 1.8);
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  const light = new THREE.HemisphereLight(0xffffff, 0x223344, 1.1);
+  scene.add(light);
+
+  const axes = new THREE.AxesHelper(0.5);
+  axes.position.set(0, 0, 0);
+  scene.add(axes);
+
+  // ---------- helpers ----------
+  function resizeRendererToDisplaySize() {
+    const width = canvas.clientWidth || window.innerWidth;
+    const height = canvas.clientHeight || window.innerHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+  }
+  window.addEventListener("resize", () => resizeRendererToDisplaySize());
+
+  // ---------- point clouds ----------
+  function makePoints(positions, color, size = 0.01) {
+    const geom = new THREE.BufferGeometry();
+    const arr = new Float32Array(positions.flat());
+    geom.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+    const mat = new THREE.PointsMaterial({
+      color,
+      size,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.85,
+    });
+    return new THREE.Points(geom, mat);
+  }
+  const ptsA = makePoints(points3d.A.positions, 0x1f77b4, 0.012);
+  const ptsB = makePoints(points3d.B.positions, 0xd62728, 0.012);
+  scene.add(ptsA, ptsB);
+
+  // ---------- boundary hulls ----------
+  function meshFromJson(mesh, color) {
+    const geom = new THREE.BufferGeometry();
+    const pos = new Float32Array(mesh.positions.flat());
+    const idx = new Uint32Array(mesh.faces.flat());
+    geom.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    geom.setIndex(new THREE.BufferAttribute(idx, 1));
+    geom.computeVertexNormals();
+    const mat = new THREE.MeshStandardMaterial({
+      color,
+      metalness: 0.0,
+      roughness: 0.9,
+      opacity: 0.3,
+      transparent: true,
+    });
+    const wire = new THREE.MeshBasicMaterial({
+      color,
+      wireframe: true,
+      opacity: 0.55,
+      transparent: true,
+    });
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(geom, mat));
+    group.add(new THREE.Mesh(geom, wire));
+    return group;
+  }
+  const hullMeshA = meshFromJson(hullA, 0x1f77b4);
+  const hullMeshB = meshFromJson(hullB, 0xd62728);
+  scene.add(hullMeshA, hullMeshB);
+
+  // ---------- contour panels (as thin lines on orthogonal planes) ----------
+  const panelGroup = new THREE.Group();
+  scene.add(panelGroup);
+
+  // map (plane, [u,v]) to 3D
+  function uvTo3D(plane, u, v, scale = 1.0, offset = 0.0) {
+    // center panels at origin in [-0.5,0.5] range
+    const x = (u - 0.5) * scale;
+    const y = (v - 0.5) * scale;
+    switch (plane) {
+      case "XY":
+        return new THREE.Vector3(x, y, offset);
+      case "YZ":
+        return new THREE.Vector3(offset, x, y); // rotate so u->Y, v->Z
+      case "XZ":
+        return new THREE.Vector3(x, offset, y);
+    }
+  }
+
+  function drawPaths(plane, variant, level) {
+    panelGroup.clear();
+    const paths = contours.paths.filter(
+      (p) => p.plane === plane && p.variant === variant && p.level === +level
+    );
+    const scale = 1.2; // size of panel square
+    const depth = 0.0;
+
+    for (const p of paths) {
+      const pts = p.path01.map(([u, v]) => uvTo3D(plane, u, v, scale, 0));
+      const geom = new THREE.BufferGeometry().setFromPoints(pts);
+      // close loop visually
+      if (pts.length > 2) {
+        const loopPts = [...pts, pts[0]];
+        geom.setFromPoints(loopPts);
+      }
+      const mat = new THREE.LineBasicMaterial({
+        color: p.label === "A" ? 0x1f77b4 : 0xd62728,
+        linewidth: 2,
+        transparent: true,
+        opacity: 0.95,
+      });
+      const line = new THREE.Line(geom, mat);
+      // offset slightly above hull so it doesn't z-fight
+      const nudge =
+        plane === "XY"
+          ? new THREE.Vector3(0, 0, 0.001)
+          : plane === "YZ"
+          ? new THREE.Vector3(0.001, 0, 0)
+          : new THREE.Vector3(0, 0.001, 0);
+      line.position.add(nudge);
+      panelGroup.add(line);
+    }
+  }
+
+  // ---------- UI ----------
+  const planeSel = document.getElementById("plane");
+  const variantSel = document.getElementById("variant");
+  const levelSel = document.getElementById("level");
+  const chkPaths = document.getElementById("showPaths");
+  const chkHull = document.getElementById("showHull");
+  const chkPoints = document.getElementById("showPoints");
+
+  // populate levels from meta
+  function setLevels() {
+    const v = variantSel.value;
+    const levels = v === "hdr" ? meta.levels.hdr : meta.levels.pf;
+    levelSel.innerHTML = "";
+    for (const L of levels) {
+      const opt = document.createElement("option");
+      opt.value = L;
+      opt.textContent = L;
+      levelSel.appendChild(opt);
+    }
+  }
+  setLevels();
+
+  // visibility toggles
+  function updateVisibility() {
+    hullMeshA.visible = hullMeshB.visible = chkHull.checked;
+    ptsA.visible = ptsB.visible = chkPoints.checked;
+    panelGroup.visible = chkPaths.checked;
+  }
+
+  planeSel.onchange = () => {
+    drawPaths(planeSel.value, variantSel.value, levelSel.value);
+  };
+  variantSel.onchange = () => {
+    setLevels();
+    drawPaths(planeSel.value, variantSel.value, levelSel.value);
+  };
+  levelSel.onchange = () => {
+    drawPaths(planeSel.value, variantSel.value, levelSel.value);
+  };
+  chkPaths.onchange = updateVisibility;
+  chkHull.onchange = updateVisibility;
+  chkPoints.onchange = updateVisibility;
+
+  // initial
+  drawPaths(planeSel.value, variantSel.value, levelSel.value);
+  updateVisibility();
+
+  // ---------- animate ----------
+  function animate() {
+    resizeRendererToDisplaySize();
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>

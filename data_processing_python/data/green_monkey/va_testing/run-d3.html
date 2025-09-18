@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>D3 Silhouette Viewer</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    margin: 20px;
+  }
+  .row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  .panel {
+    display: inline-block;
+  }
+  svg {
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+  canvas {
+    border: 1px solid #ccc;
+    background: #fff;
+    image-rendering: pixelated;
+  }
+  .legend {
+    font-size: 13px;
+    color: #444;
+  }
+  .controls label {
+    margin-right: 8px;
+  }
+  .a {
+    stroke: #1f77b4;
+    fill: none;
+    stroke-width: 2;
+  }
+  .b {
+    stroke: #d62728;
+    fill: none;
+    stroke-width: 2;
+  }
+  .scatterA {
+    fill: #1f77b4;
+    opacity: 0.6;
+  }
+  .scatterB {
+    fill: #d62728;
+    opacity: 0.6;
+  }
+</style>
+<div class="controls">
+  <label
+    >Plane
+    <select id="plane"></select>
+  </label>
+  <label
+    >Variant
+    <select id="variant">
+      <option value="hdr">hdr</option>
+      <option value="pf">pf</option>
+    </select>
+  </label>
+  <label
+    >Level
+    <select id="level"></select>
+  </label>
+  <label><input type="checkbox" id="showScatter" checked /> scatter</label>
+  <label><input type="checkbox" id="showMask" checked /> background mask</label>
+</div>
+
+<div class="row">
+  <div class="panel">
+    <canvas id="bg"></canvas>
+  </div>
+  <div class="panel">
+    <svg id="svg"></svg>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<script type="module">
+  import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+  const ROOT = "./web_data"; // change if your folder name differs
+  const meta = await (await fetch(`${ROOT}/meta.json`)).json();
+  const bgmask = await (await fetch(`${ROOT}/background_mask.json`)).json();
+  const contoursData = await (await fetch(`${ROOT}/contours_d3.json`)).json();
+  const projections = await (await fetch(`${ROOT}/projections.json`)).json();
+  const metrics = await (await fetch(`${ROOT}/metrics.json`)).json();
+
+  const planeSel = d3.select("#plane");
+  const variantSel = d3.select("#variant");
+  const levelSel = d3.select("#level");
+  const showScatter = d3.select("#showScatter");
+  const showMask = d3.select("#showMask");
+  meta.planes.forEach((p) =>
+    planeSel.append("option").text(p).attr("value", p)
+  );
+  planeSel.property("value", meta.planes[0]);
+
+  function setLevels() {
+    const v = variantSel.property("value");
+    const levels = v === "hdr" ? meta.levels.hdr : meta.levels.pf;
+    levelSel.selectAll("option").remove();
+    levels.forEach((L) => levelSel.append("option").text(L).attr("value", L));
+    levelSel.property("value", levels[0] ?? 100);
+  }
+  setLevels();
+
+  planeSel.on("change", render);
+  variantSel.on("change", () => {
+    setLevels();
+    render();
+  });
+  levelSel.on("change", render);
+  showScatter.on("change", render);
+  showMask.on("change", render);
+
+  const canvas = document.getElementById("bg");
+  const svg = d3.select("#svg");
+  const legend = d3.select("#legend");
+
+  function drawMask(plane) {
+    const arr = bgmask[plane]; // [ny][nx], 0/1
+    const ny = arr.length,
+      nx = arr[0].length;
+    canvas.width = nx;
+    canvas.height = ny;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const img = ctx.createImageData(nx, ny);
+    let p = 0;
+    for (let y = 0; y < ny; y++) {
+      const row = arr[y];
+      for (let x = 0; x < nx; x++) {
+        const v = row[x] ? 32 : 0; // very light gray
+        img.data[p++] = v; // R
+        img.data[p++] = v; // G
+        img.data[p++] = v; // B
+        img.data[p++] = row[x] ? 255 : 0; // A
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function render() {
+    const plane = planeSel.property("value");
+    const variant = variantSel.property("value");
+    const level = +levelSel.property("value");
+    const [nx, ny] = meta.grid[plane];
+
+    // size svg to grid
+    svg.attr("viewBox", `0 0 ${nx} ${ny}`).attr("width", nx).attr("height", ny);
+
+    // mask
+    if (showMask.property("checked")) drawMask(plane);
+    else {
+      canvas.width = nx;
+      canvas.height = ny;
+    } // clear
+
+    // contours
+    const contours = contoursData.contours.filter(
+      (d) => d.plane === plane && d.variant === variant && d.level === level
+    );
+    const line = d3
+      .line()
+      .x((d) => d[0])
+      .y((d) => d[1]);
+    const g = svg.selectAll("g.main").data([0]).join("g").attr("class", "main");
+    g.selectAll("path.contour")
+      .data(contours, (d) => d.label + d.variant + d.level)
+      .join(
+        (enter) =>
+          enter
+            .append("path")
+            .attr("class", (d) => "contour " + (d.label === "A" ? "a" : "b"))
+            .attr("d", (d) => line(d.points)),
+        (update) => update.attr("d", (d) => line(d.points)),
+        (exit) => exit.remove()
+      );
+
+    // scatter
+    const show = showScatter.property("checked");
+    const proj = projections[plane];
+    const scat = [];
+    if (show) {
+      scat.push(...proj.A.map((p) => ({ xy: p, cls: "scatterA" })));
+      scat.push(...proj.B.map((p) => ({ xy: p, cls: "scatterB" })));
+    }
+    g.selectAll("circle.scatter")
+      .data(scat)
+      .join(
+        (enter) =>
+          enter
+            .append("circle")
+            .attr("class", (d) => "scatter " + d.cls)
+            .attr("r", 0.8)
+            .attr("cx", (d) => d.xy[0])
+            .attr("cy", (d) => d.xy[1]),
+        (update) =>
+          update.attr("cx", (d) => d.xy[0]).attr("cy", (d) => d.xy[1]),
+        (exit) => exit.remove()
+      );
+
+    // legend with metrics
+    const m = metrics.find(
+      (d) => d.plane === plane && d.variant === variant && d.level === level
+    );
+    legend.html(
+      m
+        ? `
+      <div><b>${plane}</b> — ${variant} ${level}%</div>
+      <div>IoU: ${m.IoU?.toFixed(3)} | meanNN: ${m.meanNN?.toFixed(
+            3
+          )} | Hausdorff: ${m.Hausdorff?.toFixed(3)}</div>
+    `
+        : `<div><b>${plane}</b> — ${variant} ${level}%</div><div>No metrics.</div>`
+    );
+  }
+
+  render();
+</script>

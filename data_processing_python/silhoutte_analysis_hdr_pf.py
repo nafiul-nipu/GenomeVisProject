@@ -1,4 +1,4 @@
-# silhouette_core.py
+# silhouette_analysis_hdr_point_frac.py
 # Minimal, dependency-light core that runs HDR and/or PF given two CSVs + optional configs.
 
 # imports
@@ -85,6 +85,7 @@ class RunResult(TypedDict):
     meta: dict
     background: Dict[Plane, np.ndarray]  # union-of-points mask per plane (bool [ny,nx])
     densities: Optional[Dict[str, Dict[Plane, np.ndarray]]]  # None if HDR not run; else {'A':{plane:D}, 'B':{...}}
+    projections: Dict[Plane, Dict[str, np.ndarray]]  # {"XY":{"xs","ys","A2","B2"}, ...}
 
 # ---------------------------- IO ----------------------------
 def load_points(csv: str, cols: Tuple[str,str,str]=("middle_x","middle_y","middle_z")) -> np.ndarray:
@@ -786,15 +787,18 @@ def run_silhouettes(csv_A: Optional[str] = None,
         metrics=metrics,
         meta=meta,
         background=background,    
-        densities=densities        
+        densities=densities,
+        projections=per_plane,
     )
 
 # ============================= Visualization helpers (optional) =============================
 
 # parse levels argument (int, list[int], or "all") into a tuple of ints
+# ============================= Visualization helpers (optional) =============================
+
+# parse levels argument (int, list[int], or "all") into a tuple of ints
 def _levels_from_result(kind: str, cfg_hdr: CfgHDR, cfg_pf: CfgPF, levels):
     # supports int, list[int], or "all"
-    # "all" means all levels hdr and point_fraction
     if isinstance(levels, str) and levels.lower() == "all":
         if kind == "hdr":
             return tuple(sorted({int(round(p*100)) for p in cfg_hdr.mass_levels}, reverse=True))
@@ -811,11 +815,13 @@ def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct, bg: np.ndarray
     if bg is not None:
         ax.imshow(bg, cmap="gray", alpha=0.12)
     if shapeA.get("contour") is not None:
-        C = shapeA["contour"]; ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#1f77b4", alpha=0.95,
-                                       label=f"{labelA} {shapeA['variant']} {shapeA['level']}%")
+        C = shapeA["contour"]
+        ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#1f77b4", alpha=0.95,
+                label=f"{labelA} {shapeA['variant']} {shapeA['level']}%")
     if shapeB.get("contour") is not None:
-        C = shapeB["contour"]; ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#d62728", alpha=0.95,
-                                       label=f"{labelB} {shapeB['variant']} {shapeB['level']}%")
+        C = shapeB["contour"]
+        ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#d62728", alpha=0.95,
+                label=f"{labelB} {shapeB['variant']} {shapeB['level']}%")
     ax.set_title(title); ax.set_axis_off(); ax.legend(frameon=False, loc="upper right")
 
 def view(result: RunResult,
@@ -839,7 +845,6 @@ def view(result: RunResult,
     cfg_pf  = cfg_pf  or CfgPF()
     lvls = _levels_from_result(kind, cfg_hdr, cfg_pf, levels)
 
-    # choose shape table
     if kind not in result["shapes"]:
         print(f"[view] No shapes for kind='{kind}'. Did you run with run_{kind}=True?")
         return
@@ -848,65 +853,13 @@ def view(result: RunResult,
     if plane not in shapes_kind:
         print(f"[view] No shapes for plane '{plane}' and kind '{kind}'.")
         return
-    shapes_by_plane = shapes_kind[plane]  # def save_figures(result: RunResult,
-                 kind: Literal["hdr","point_fraction"] = "hdr",
-                 plane: Plane = "XY",
-                 levels: "int|list[int]|str" = "all",
-                 *,
-                 out_dir: str = "figures",
-                 labelA: str = "A",
-                 labelB: str = "B",
-                 show_heat: bool = False,
-                 cfg_hdr: Optional[CfgHDR] = None,
-                 cfg_pf: Optional[CfgPF] = None):
-    """
-    Save per-plane overlays as PNGs for the selected kind/levels.
-    Signature is consistent with `view()`.
-    - kind: 'hdr' or 'point_fraction'
-    - plane: 'XY' | 'YZ' | 'XZ'
-    - levels: int | list[int] | 'all'
-    - out_dir: folder to save images into (default "figures")
-    """
-    os.makedirs(out_dir, exist_ok=True)
-    cfg_hdr = cfg_hdr or CfgHDR()
-    cfg_pf  = cfg_pf  or CfgPF()
 
-    lvls = _levels_from_result(kind, cfg_hdr, cfg_pf, levels)
-    if kind not in result["shapes"]:
-        print(f"[save_figures] No shapes for kind='{kind}'.")
-        return
-    if plane not in result["shapes"][kind]:
-        print(f"[save_figures] No shapes for plane='{plane}' and kind='{kind}'.")
-        return
-
-    shapes_by_plane = result["shapes"][kind][plane]
-
-    # density heat if requested
-    D_A_plane = None
-    if show_heat and kind=="hdr" and result.get("densities"):
-        D_A_plane = result["densities"]["A"].get(plane)
-
-    for lvl in lvls:
-        pair = shapes_by_plane.get(lvl)
-        if pair is None:
-            continue
-        spA, spB = pair
-        bg = result["background"].get(plane)
-
-        fig, ax = plt.subplots(figsize=(5.2,5.2))
-        if D_A_plane is not None:
-            ax.imshow(D_A_plane, alpha=0.35, cmap="inferno")
-        _plot_overlay(ax, spA, spB, bg,
-                      f"{plane} — {kind} {lvl}%",
-                      labelA, labelB)
-
-        fname = f"{kind}_{plane}_{lvl}.png"
-        fig.savefig(os.path.join(out_dir, fname), dpi=200, bbox_inches="tight")
-        plt.close(fig)dict: level -> (spA, spB)
+    shapes_by_plane = shapes_kind[plane]  # dict: level -> (spA, spB)
 
     # figure
     fig, axes = plt.subplots(1, len(lvls), figsize=(5.4*len(lvls), 5.2))
-    if not isinstance(axes, (list, np.ndarray)): axes = [axes]
+    if not isinstance(axes, (list, np.ndarray)):
+        axes = [axes]
 
     # density heat if available (A only, for context)
     D_A_plane = None
@@ -938,10 +891,6 @@ def save_figures(result: RunResult,
     """
     Save per-plane overlays as PNGs for the selected kind/levels.
     Signature is consistent with `view()`.
-    - kind: 'hdr' or 'point_fraction'
-    - plane: 'XY' | 'YZ' | 'XZ'
-    - levels: int | list[int] | 'all'
-    - out_dir: folder to save images into (default "figures")
     """
     os.makedirs(out_dir, exist_ok=True)
     cfg_hdr = cfg_hdr or CfgHDR()
@@ -959,7 +908,7 @@ def save_figures(result: RunResult,
 
     # density heat if requested
     D_A_plane = None
-    if show_heat and kind=="hdr" and result.get("densities"):
+    if show_heat and kind=="hdr" and result.get("densities") and result["densities"].get("A"):
         D_A_plane = result["densities"]["A"].get(plane)
 
     for lvl in lvls:
@@ -980,5 +929,73 @@ def save_figures(result: RunResult,
         fig.savefig(os.path.join(out_dir, fname), dpi=200, bbox_inches="tight")
         plt.close(fig)
 
+def view_projections(result: RunResult,
+                     *,
+                     planes: Tuple[Plane, ...] = ("XY","YZ","XZ"),
+                     labelA: str = "A",
+                     labelB: str = "B",
+                     s: float = 3.0,
+                     alphaA: float = 0.7,
+                     alphaB: float = 0.7):
+    """
+    Show aligned point scatter plots for each plane.
+    """
+    proj = result.get("projections", {})
+    if not proj:
+        print("[view_projections] No projections in result.")
+        return
 
+    for plane in planes:
+        if plane not in proj:
+            print(f"[view_projections] No plane '{plane}' in projections.")
+            continue
+        A2 = proj[plane]["A2"]; B2 = proj[plane]["B2"]
+        fig, ax = plt.subplots(figsize=(5.2, 5.2))
+        ax.scatter(A2[:,0], A2[:,1], s=s, alpha=alphaA, label=labelA)
+        ax.scatter(B2[:,0], B2[:,1], s=s, alpha=alphaB, label=labelB)
+        ax.set_title(f"{plane} projection (aligned & scaled)")
+        ax.set_xlabel(plane[0]); ax.set_ylabel(plane[1])
+        ax.set_aspect("equal"); ax.legend(frameon=False)
+        plt.show()
 
+def save_projections(result: RunResult,
+                     *,
+                     out_dir: str = "figures",
+                     planes: Tuple[Plane, ...] = ("XY","YZ","XZ"),
+                     labelA: str = "A",
+                     labelB: str = "B",
+                     s: float = 3.0,
+                     alphaA: float = 0.7,
+                     alphaB: float = 0.7,
+                     dpi: int = 220,
+                     save_csv: bool = False):
+    """
+    Save aligned point scatter plots (and optionally CSVs) for each plane.
+    """
+    
+    os.makedirs(out_dir, exist_ok=True)
+    proj = result.get("projections", {})
+    if not proj:
+        print("[save_projections] No projections in result.")
+        return
+
+    for plane in planes:
+        if plane not in proj:
+            print(f"[save_projections] No plane '{plane}' in projections.")
+            continue
+        A2 = proj[plane]["A2"]; B2 = proj[plane]["B2"]
+
+        fig, ax = plt.subplots(figsize=(5.2, 5.2))
+        ax.scatter(A2[:,0], A2[:,1], s=s, alpha=alphaA, label=labelA)
+        ax.scatter(B2[:,0], B2[:,1], s=s, alpha=alphaB, label=labelB)
+        ax.set_title(f"{plane} projection (aligned & scaled)")
+        ax.set_xlabel(plane[0]); ax.set_ylabel(plane[1])
+        ax.set_aspect("equal"); ax.legend(frameon=False)
+        fig.savefig(os.path.join(out_dir, f"projection_{plane}.png"),
+                    dpi=dpi, bbox_inches="tight")
+        plt.close(fig)
+
+        if save_csv:
+            base = os.path.join(out_dir, f"projection_{plane}")
+            pd.DataFrame(A2, columns=[f"{plane[0]}", f"{plane[1]}"]).to_csv(base + "_A.csv", index=False)
+            pd.DataFrame(B2, columns=[f"{plane[0]}", f"{plane[1]}"]).to_csv(base + "_B.csv", index=False)
