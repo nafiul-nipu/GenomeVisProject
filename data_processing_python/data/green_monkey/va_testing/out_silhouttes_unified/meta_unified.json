@@ -26,12 +26,15 @@
       0.6,
       0.5
     ],
-    "use_support_p100": true,
-    "support_min_hits": 1
+    "rng_seed": 0
   },
   "cfg_pf": {
     "frac_levels": [
       1.0,
+      0.99,
+      0.98,
+      0.97,
+      0.96,
       0.95,
       0.9,
       0.8,
@@ -39,7 +42,13 @@
       0.5
     ],
     "bandwidth": null,
-    "disk_px": 2
+    "disk_px": 2,
+    "morph": {
+      "closing": 1,
+      "opening": 1,
+      "keep_largest": true,
+      "fill_holes": true
+    }
   },
   "planes": [
     "YZ",
