@@ -80,144 +80,294 @@
 </div>
 
 <script type="module">
-  import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+  (async () => {
+    // --- boot + error hooks ---
+    window.addEventListener("error", (e) =>
+      console.error("[window.onerror]", e.error || e.message)
+    );
+    window.addEventListener("unhandledrejection", (e) =>
+      console.error("[unhandledrejection]", e.reason)
+    );
+    console.log("[boot] module started");
 
-  const ROOT = "./web_data"; // change if your folder name differs
-  const meta = await (await fetch(`${ROOT}/meta.json`)).json();
-  const bgmask = await (await fetch(`${ROOT}/background_mask.json`)).json();
-  const contoursData = await (await fetch(`${ROOT}/contours_d3.json`)).json();
-  const projections = await (await fetch(`${ROOT}/projections.json`)).json();
-  const metrics = await (await fetch(`${ROOT}/metrics.json`)).json();
-
-  const planeSel = d3.select("#plane");
-  const variantSel = d3.select("#variant");
-  const levelSel = d3.select("#level");
-  const showScatter = d3.select("#showScatter");
-  const showMask = d3.select("#showMask");
-  meta.planes.forEach((p) =>
-    planeSel.append("option").text(p).attr("value", p)
-  );
-  planeSel.property("value", meta.planes[0]);
-
-  function setLevels() {
-    const v = variantSel.property("value");
-    const levels = v === "hdr" ? meta.levels.hdr : meta.levels.pf;
-    levelSel.selectAll("option").remove();
-    levels.forEach((L) => levelSel.append("option").text(L).attr("value", L));
-    levelSel.property("value", levels[0] ?? 100);
-  }
-  setLevels();
-
-  planeSel.on("change", render);
-  variantSel.on("change", () => {
-    setLevels();
-    render();
-  });
-  levelSel.on("change", render);
-  showScatter.on("change", render);
-  showMask.on("change", render);
-
-  const canvas = document.getElementById("bg");
-  const svg = d3.select("#svg");
-  const legend = d3.select("#legend");
-
-  function drawMask(plane) {
-    const arr = bgmask[plane]; // [ny][nx], 0/1
-    const ny = arr.length,
-      nx = arr[0].length;
-    canvas.width = nx;
-    canvas.height = ny;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    const img = ctx.createImageData(nx, ny);
-    let p = 0;
-    for (let y = 0; y < ny; y++) {
-      const row = arr[y];
-      for (let x = 0; x < nx; x++) {
-        const v = row[x] ? 32 : 0; // very light gray
-        img.data[p++] = v; // R
-        img.data[p++] = v; // G
-        img.data[p++] = v; // B
-        img.data[p++] = row[x] ? 255 : 0; // A
-      }
+    // --- load d3 safely ---
+    let d3;
+    try {
+      d3 = await import("https://cdn.jsdelivr.net/npm/d3@7/+esm");
+      console.log("[boot] d3 loaded", d3.version || "ok");
+    } catch (err) {
+      console.error("[boot] failed to load d3", err);
+      return;
     }
-    ctx.putImageData(img, 0, 0);
-  }
 
-  function render() {
-    const plane = planeSel.property("value");
-    const variant = variantSel.property("value");
-    const level = +levelSel.property("value");
-    const [nx, ny] = meta.grid[plane];
+    // --- fetch data ---
+    const ROOT = "./web_data";
+    const meta = await (await fetch(`${ROOT}/meta.json`)).json();
+    const bgmask = await (await fetch(`${ROOT}/background_mask.json`)).json();
+    const contoursAll = await (await fetch(`${ROOT}/contours_d3.json`)).json();
+    const projections = await (await fetch(`${ROOT}/projections.json`)).json();
+    const metrics = await (await fetch(`${ROOT}/metrics.json`)).json();
+    let densityA = null,
+      densityB = null;
+    try {
+      densityA = await (await fetch(`${ROOT}/density_A.json`)).json();
+    } catch {}
+    try {
+      densityB = await (await fetch(`${ROOT}/density_B.json`)).json();
+    } catch {}
+    console.log("[data] ok", {
+      planes: meta.planes,
+      contours: contoursAll?.contours?.length || 0,
+    });
 
-    // size svg to grid
-    svg.attr("viewBox", `0 0 ${nx} ${ny}`).attr("width", nx).attr("height", ny);
+    // --- wire up DOM from your current HTML ---
+    const planeSel = d3.select("#plane");
+    const variantSel = d3.select("#variant");
+    const levelSel = d3.select("#level");
+    const showScatter = d3.select("#showScatter");
+    const showMask = d3.select("#showMask");
+    const canvas = document.getElementById("bg");
+    const svg = d3.select("#svg");
+    const legend = d3.select("#legend");
 
-    // mask
-    if (showMask.property("checked")) drawMask(plane);
-    else {
+    // Populate planes
+    planeSel
+      .selectAll("option")
+      .data(meta.planes)
+      .join("option")
+      .attr("value", (d) => d)
+      .text((d) => d);
+    planeSel.property("value", meta.planes[0]);
+
+    function setLevels() {
+      const v = variantSel.property("value");
+      const levels = v === "hdr" ? meta.levels.hdr : meta.levels.pf;
+      levelSel.selectAll("option").remove();
+      (levels?.length ? levels : [100]).forEach((L) =>
+        levelSel.append("option").attr("value", L).text(L)
+      );
+      levelSel.property("value", levels?.length ? levels[0] : 100);
+    }
+    setLevels();
+
+    planeSel.on("change", render);
+    variantSel.on("change", () => {
+      setLevels();
+      render();
+    });
+    levelSel.on("change", render);
+    showScatter.on("change", render);
+    showMask.on("change", render);
+
+    // --- sizing ---
+    function sizeFigures(nx, ny, scale = 1.6) {
+      // drawing pixels
       canvas.width = nx;
       canvas.height = ny;
-    } // clear
+      // display pixels (bigger)
+      canvas.style.width = nx * scale + "px";
+      canvas.style.height = ny * scale + "px";
 
-    // contours
-    const contours = contoursData.contours.filter(
-      (d) => d.plane === plane && d.variant === variant && d.level === level
-    );
-    const line = d3
-      .line()
-      .x((d) => d[0])
-      .y((d) => d[1]);
-    const g = svg.selectAll("g.main").data([0]).join("g").attr("class", "main");
-    g.selectAll("path.contour")
-      .data(contours, (d) => d.label + d.variant + d.level)
-      .join(
-        (enter) =>
-          enter
-            .append("path")
-            .attr("class", (d) => "contour " + (d.label === "A" ? "a" : "b"))
-            .attr("d", (d) => line(d.points)),
-        (update) => update.attr("d", (d) => line(d.points)),
-        (exit) => exit.remove()
-      );
-
-    // scatter
-    const show = showScatter.property("checked");
-    const proj = projections[plane];
-    const scat = [];
-    if (show) {
-      scat.push(...proj.A.map((p) => ({ xy: p, cls: "scatterA" })));
-      scat.push(...proj.B.map((p) => ({ xy: p, cls: "scatterB" })));
+      svg
+        .attr("viewBox", `0 0 ${nx} ${ny}`)
+        .attr("width", nx * scale)
+        .attr("height", ny * scale);
     }
-    g.selectAll("circle.scatter")
-      .data(scat)
-      .join(
-        (enter) =>
-          enter
-            .append("circle")
-            .attr("class", (d) => "scatter " + d.cls)
-            .attr("r", 0.8)
-            .attr("cx", (d) => d.xy[0])
-            .attr("cy", (d) => d.xy[1]),
-        (update) =>
-          update.attr("cx", (d) => d.xy[0]).attr("cy", (d) => d.xy[1]),
-        (exit) => exit.remove()
+
+    // --- draw helpers ---
+    function drawMask(plane) {
+      const arr = bgmask?.[plane];
+      if (!arr) {
+        console.warn("no bgmask for", plane);
+        return;
+      }
+      const ny = arr.length,
+        nx = arr[0].length;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      // clear to white first so alpha=0 isn't black
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, nx, ny);
+
+      // if you want density, draw it first (under the mask)
+      const dens = densityA?.[plane] || densityB?.[plane] || null;
+      if (dens) {
+        let mn = Infinity,
+          mx = -Infinity;
+        for (let y = 0; y < ny; y++)
+          for (let x = 0; x < nx; x++) {
+            const v = dens[y][x];
+            if (v < mn) mn = v;
+            if (v > mx) mx = v;
+          }
+        const rng = mx - mn || 1,
+          A = Math.round(0.35 * 255);
+        const imgD = ctx.createImageData(nx, ny);
+        let q = 0;
+        for (let y = 0; y < ny; y++)
+          for (let x = 0; x < nx; x++) {
+            const g = Math.max(
+              0,
+              Math.min(255, Math.round(((dens[y][x] - mn) / rng) * 255))
+            );
+            imgD.data[q++] = g;
+            imgD.data[q++] = g;
+            imgD.data[q++] = g;
+            imgD.data[q++] = A;
+          }
+        ctx.putImageData(imgD, 0, 0);
+      }
+
+      // now draw mask as light gray (opaque) only where 1
+      const img = ctx.createImageData(nx, ny);
+      let p = 0;
+      for (let y = 0; y < ny; y++) {
+        const row = arr[y];
+        for (let x = 0; x < nx; x++) {
+          const on = row[x] ? 1 : 0;
+          const v = on ? 90 : 0; // 90 gray where mask=1, 0 = keep whatever was there
+          if (on) {
+            img.data[p++] = v;
+            img.data[p++] = v;
+            img.data[p++] = v;
+            img.data[p++] = 255;
+          } else {
+            // leave transparent (alpha 0) so density/white shows through
+            img.data[p++] = 0;
+            img.data[p++] = 0;
+            img.data[p++] = 0;
+            img.data[p++] = 0;
+          }
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+
+      // optional toggle
+      canvas.style.visibility = showMask.property("checked")
+        ? "visible"
+        : "hidden";
+    }
+
+    function drawContours(plane, variant, level) {
+      const line = d3
+        .line()
+        .x((d) => d[0])
+        .y((d) => d[1]);
+      const data = (contoursAll?.contours || []).filter(
+        (d) => d.plane === plane && d.variant === variant && d.level === +level
       );
+      const g = svg
+        .selectAll("g.main")
+        .data([0])
+        .join("g")
+        .attr("class", "main");
+      g.selectAll("path.contour")
+        .data(data, (d) => d.label + d.variant + d.level)
+        .join(
+          (enter) =>
+            enter
+              .append("path")
+              .attr("class", (d) => "contour " + (d.label === "A" ? "a" : "b"))
+              .attr("fill", "none")
+              .attr("stroke-width", 2)
+              .attr("d", (d) => line(d.points)),
+          (update) => update.attr("d", (d) => line(d.points)),
+          (exit) => exit.remove()
+        );
+    }
 
-    // legend with metrics
-    const m = metrics.find(
-      (d) => d.plane === plane && d.variant === variant && d.level === level
-    );
-    legend.html(
-      m
-        ? `
-      <div><b>${plane}</b> — ${variant} ${level}%</div>
-      <div>IoU: ${m.IoU?.toFixed(3)} | meanNN: ${m.meanNN?.toFixed(
-            3
-          )} | Hausdorff: ${m.Hausdorff?.toFixed(3)}</div>
-    `
-        : `<div><b>${plane}</b> — ${variant} ${level}%</div><div>No metrics.</div>`
-    );
-  }
+    function toPixelPoint(pt) {
+      return pt;
+    } // already pixel coords in image space
 
-  render();
+    function drawScatter(plane) {
+      const proj = projections?.[plane];
+      const g = svg
+        .selectAll("g.scatter")
+        .data([0])
+        .join("g")
+        .attr("class", "scatter");
+
+      if (!proj || !showScatter.property("checked")) {
+        g.selectAll("circle.dot")
+          .data([])
+          .join((exit) => exit.remove());
+        return;
+      }
+
+      const [nx, ny] = meta.grid[plane];
+      const svgW = +svg.attr("width") || nx;
+      const scale = svgW / nx;
+      const r = Math.max(1.2, 1.2 * scale);
+
+      const dots = [
+        ...(proj.A || []).map((p) => ({
+          xy: toPixelPoint(p),
+          cls: "scatterA",
+        })),
+        ...(proj.B || []).map((p) => ({
+          xy: toPixelPoint(p),
+          cls: "scatterB",
+        })),
+      ];
+
+      g.selectAll("circle.dot")
+        .data(dots)
+        .join(
+          (enter) =>
+            enter
+              .append("circle")
+              .attr("class", (d) => "dot " + d.cls)
+              .attr("r", r)
+              .attr("cx", (d) => d.xy[0])
+              .attr("cy", (d) => d.xy[1])
+              .attr("fill-opacity", 0.75)
+              .attr("stroke", "#000")
+              .attr("stroke-opacity", 0.15)
+              .attr("stroke-width", Math.max(0.5, 0.5 * scale)),
+          (update) =>
+            update
+              .attr("r", r)
+              .attr("cx", (d) => d.xy[0])
+              .attr("cy", (d) => d.xy[1]),
+          (exit) => exit.remove()
+        );
+
+      g.raise();
+    }
+
+    function drawLegend(plane, variant, level) {
+      const vMetrics = variant === "pf" ? "point_fraction" : "hdr"; // <-- fix
+      const m = metrics?.find(
+        (d) => d.plane === plane && d.variant === vMetrics && d.level === +level
+      );
+      legend.html(
+        m
+          ? `
+        <div><b>${plane}</b> — ${variant} ${level}%</div>
+        <div>IoU: ${(+m.IoU || +m.IuO || 0).toFixed(3)} |
+             meanNN: ${(+(m.meanNN || 0)).toFixed(3)} |
+             Hausdorff: ${(+(m.Hausdorff || 0)).toFixed(3)}</div>
+      `
+          : `<div><b>${plane}</b> — ${variant} ${level}%</div><div>No metrics.</div>`
+      );
+    }
+
+    // --- main render ---
+    function render() {
+      const plane = planeSel.property("value");
+      const variant = variantSel.property("value"); // 'hdr' | 'pf'
+      const level = +levelSel.property("value");
+      const [nx, ny] = meta.grid[plane];
+
+      sizeFigures(nx, ny, 1.6);
+      drawMask(plane);
+      drawContours(plane, variant, level);
+      drawScatter(plane);
+      drawLegend(plane, variant, level);
+    }
+
+    // kick off
+    render();
+    console.log("[render] done");
+  })();
 </script>
