@@ -67,9 +67,16 @@
         >Level
         <select id="level"></select>
       </label>
-      <label
-        ><input type="checkbox" id="showMask" checked /> background mask</label
-      >
+      <label>
+        Background
+        <select id="bgMode">
+          <option value="mask" selected>mask</option>
+          <option value="densityA">density A</option>
+          <option value="densityB">density B</option>
+          <option value="densityAB">combined density</option>
+          <option value="none">none</option>
+        </select>
+      </label>
     </div>
 
     <div class="row">
@@ -136,7 +143,7 @@
         const planeSel = d3.select("#plane");
         const variantSel = d3.select("#variant");
         const levelSel = d3.select("#level");
-        const showMask = d3.select("#showMask");
+        const bgModeSel = d3.select("#bgMode");
 
         const svgViz = d3.select("#viz");
         const legendCtrs = d3.select("#legendContours");
@@ -177,16 +184,47 @@
           renderAll();
         });
         levelSel.on("change", renderAll);
-        showMask.on("change", renderAll);
+        bgModeSel.on("change", renderAll);
+
+        // ---- turbo colormap ----
+        function lerp(a, b, t) {
+          return a + (b - a) * t;
+        }
+        function lerpRGB(c0, c1, t) {
+          return [
+            Math.round(lerp(c0[0], c1[0], t)),
+            Math.round(lerp(c0[1], c1[1], t)),
+            Math.round(lerp(c0[2], c1[2], t)),
+          ];
+        }
+        const TURBO = [
+          [48, 18, 59],
+          [69, 105, 163],
+          [48, 173, 119],
+          [171, 220, 53],
+          [253, 231, 37],
+          [244, 130, 30],
+          [133, 23, 75],
+        ];
+        function sampleGradient(stops, t) {
+          t = Math.max(0, Math.min(1, t));
+          const n = stops.length - 1;
+          const f = t * n;
+          const i = Math.min(n - 1, Math.floor(f));
+          const local = f - i;
+          return lerpRGB(stops[i], stops[i + 1], local);
+        }
+        function mapColor(v01) {
+          return sampleGradient(TURBO, v01);
+        }
 
         // --- helpers: make dataURL image from mask (+ optional density) ---
-        function makeMaskDataURL(plane) {
+        function makeMaskDataURL(plane, mode = "mask") {
           const arr = bgmask?.[plane];
           if (!arr) return null;
 
           const ny = arr.length,
             nx = arr[0].length;
-          // offscreen canvas
           const c = document.createElement("canvas");
           c.width = nx;
           c.height = ny;
@@ -196,9 +234,40 @@
           ctx.fillStyle = "#ffffff";
           ctx.fillRect(0, 0, nx, ny);
 
-          // density underlay (optional)
-          const dens = densityA?.[plane] || densityB?.[plane] || null;
+          // ----- density underlay -----
+          let dens = null;
+          if (mode === "densityA") dens = densityA?.[plane] || null;
+          else if (mode === "densityB") dens = densityB?.[plane] || null;
+          else if (mode === "densityAB") {
+            const a = densityA?.[plane],
+              b = densityB?.[plane];
+            if (a && b) {
+              const norm = (M) => {
+                let mn = Infinity,
+                  mx = -Infinity;
+                for (let y = 0; y < ny; y++)
+                  for (let x = 0; x < nx; x++) {
+                    const v = M[y][x];
+                    if (v < mn) mn = v;
+                    if (v > mx) mx = v;
+                  }
+                const rng = mx - mn || 1;
+                return Array.from({ length: ny }, (_, y) =>
+                  Array.from({ length: nx }, (_, x) => (M[y][x] - mn) / rng)
+                );
+              };
+              const na = norm(a),
+                nb = norm(b);
+              dens = Array.from({ length: ny }, (_, y) =>
+                Array.from({ length: nx }, (_, x) =>
+                  Math.max(na[y][x], nb[y][x])
+                )
+              );
+            } else dens = a || b || null;
+          }
+
           if (dens) {
+            // normalize if needed
             let mn = Infinity,
               mx = -Infinity;
             for (let y = 0; y < ny; y++)
@@ -208,43 +277,47 @@
                 if (v > mx) mx = v;
               }
             const rng = mx - mn || 1;
-            const A = Math.round(0.35 * 255); // alpha for density layer
+
+            const A = Math.round(0.38 * 255);
             const imgD = ctx.createImageData(nx, ny);
             let q = 0;
-            for (let y = 0; y < ny; y++)
+            for (let y = 0; y < ny; y++) {
               for (let x = 0; x < nx; x++) {
-                const g = Math.max(
-                  0,
-                  Math.min(255, Math.round(((dens[y][x] - mn) / rng) * 255))
-                );
+                const v01 = (dens[y][x] - mn) / rng;
+                const [r, g, b] = mapColor(v01); // turbo colormap
+                imgD.data[q++] = r;
                 imgD.data[q++] = g;
-                imgD.data[q++] = g;
-                imgD.data[q++] = g;
+                imgD.data[q++] = b;
                 imgD.data[q++] = A;
               }
+            }
             ctx.putImageData(imgD, 0, 0);
           }
 
-          // mask overlay (opaque gray where 1)
-          const img = ctx.createImageData(nx, ny);
-          let p = 0;
-          for (let y = 0; y < ny; y++) {
-            const row = arr[y];
-            for (let x = 0; x < nx; x++) {
-              if (row[x]) {
-                img.data[p++] = 200;
-                img.data[p++] = 200;
-                img.data[p++] = 200;
-                img.data[p++] = 255;
-              } else {
-                img.data[p++] = 0;
-                img.data[p++] = 0;
-                img.data[p++] = 0;
-                img.data[p++] = 0;
+          // ----- mask overlay -----
+          if (mode === "mask") {
+            const alphaMask = Math.round(0.45 * 255);
+            const gray = 140;
+            const img = ctx.createImageData(nx, ny);
+            let p = 0;
+            for (let y = 0; y < ny; y++) {
+              const row = arr[y];
+              for (let x = 0; x < nx; x++) {
+                if (row[x]) {
+                  img.data[p++] = gray;
+                  img.data[p++] = gray;
+                  img.data[p++] = gray;
+                  img.data[p++] = alphaMask;
+                } else {
+                  img.data[p++] = 0;
+                  img.data[p++] = 0;
+                  img.data[p++] = 0;
+                  img.data[p++] = 0;
+                }
               }
             }
+            ctx.putImageData(img, 0, 0);
           }
-          ctx.putImageData(img, 0, 0);
 
           return c.toDataURL("image/png");
         }
@@ -270,11 +343,10 @@
             .attr("class", "root");
 
           // (1) Mask image layer (raster) — UNDER
-          let url = null;
-          if (showMask.property("checked")) {
-            url = makeMaskDataURL(plane);
-          }
+          const mode = bgModeSel.property("value"); // "mask" | "density" | "both" | "none"
+          const url = mode === "none" ? null : makeMaskDataURL(plane, mode);
           const imgSel = root.selectAll("image.mask").data(url ? [url] : []);
+
           imgSel.join(
             (enter) =>
               enter
@@ -328,14 +400,14 @@
           );
           legendCtrs.html(
             m
-              ? `<b>${plane}</b> — ${variant} ${level}%<br>IoU: ${(
+              ? `<b>${plane}</b> — ${variant} ${level}% | bg: ${mode}<br>IoU: ${(
                   +m.IoU ||
                   +m.IuO ||
                   0
                 ).toFixed(3)} | meanNN: ${(+(m.meanNN || 0)).toFixed(
                   3
                 )} | Hausdorff: ${(+(m.Hausdorff || 0)).toFixed(3)}`
-              : `<b>${plane}</b> — ${variant} ${level}%`
+              : `<b>${plane}</b> — ${variant} ${level}% | bg: ${mode}`
           );
         }
 
