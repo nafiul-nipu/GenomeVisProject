@@ -1,6 +1,12 @@
 {
-  "csv_A": "data/green_monkey/all_structure_files/chr1/12hrs/untr/structure_12hrs_untr_gene_info.csv",
-  "csv_B": "data/green_monkey/all_structure_files/chr1/12hrs/vacv/structure_12hrs_vacv_gene_info.csv",
+  "sources": [
+    "data/green_monkey/all_structure_files/chr1/12hrs/untr/structure_12hrs_untr_gene_info.csv",
+    "data/green_monkey/all_structure_files/chr1/12hrs/vacv/structure_12hrs_vacv_gene_info.csv"
+  ],
+  "labels": [
+    "12h_UNTR",
+    "12h_VACV"
+  ],
   "cfg_common": {
     "grid_base": 160,
     "pad_frac": 0.05,
@@ -54,5 +60,6 @@
     "YZ",
     "XZ",
     "XY"
-  ]
+  ],
+  "align_mode": "auto"
 }

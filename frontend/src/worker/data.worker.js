@@ -14,7 +14,7 @@ addEventListener("message", async (event) => {
   let hour = event.data.hour;
   let meta_data = event.data.meta_data;
 
-  // console.log("Inside worker", species, chromosome, meta_data);
+  console.log("Inside worker", species, chromosome, meta_data);
   // fetch bead data
   let before_atom_data_nodes = await fetchBeadData(
     species,
