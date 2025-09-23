@@ -1,0 +1,27 @@
+{
+  "sources": [
+    "set1",
+    "set2"
+  ],
+  "labels": [
+    "set1",
+    "set2"
+  ],
+  "cfg_common": {
+    "grid_base": 160,
+    "pad_frac": 0.05,
+    "trim_q": 0.1,
+    "icp_iters": 30,
+    "sample_icp": 50000,
+    "out_dir": "silhouette_analysis_output"
+  },
+  "cfg_hdr": null,
+  "cfg_pf": null,
+  "planes": [
+    "YZ",
+    "XZ",
+    "XY"
+  ],
+  "align_mode": "auto",
+  "note": "Alignment-only run (no HDR/PF/metrics)."
+}

@@ -161,3 +161,5 @@ websocket-client==1.5.3
 widgetsnbextension==4.0.7
 yellowbrick==1.5
 zipp==3.21.0
+# Other deps...
+-e ./mpase_package
