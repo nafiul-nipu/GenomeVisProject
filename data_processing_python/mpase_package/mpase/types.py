@@ -19,7 +19,6 @@ class CfgCommon:
     icp_iters: int = 30 # use ~50 for more difficult cases
     # max points to sample from each set for ICP (None = use all)
     sample_icp: int = 50000
-    out_dir: str = "silhouette_analysis_output"
 
 @dataclass
 class CfgHDR:

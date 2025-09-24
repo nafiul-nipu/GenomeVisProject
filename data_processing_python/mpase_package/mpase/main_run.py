@@ -75,9 +75,9 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
                     points_list: Optional[Sequence[np.ndarray]] = None,
                     labels: Optional[Sequence[str]] = None,
                     xyz_cols: Tuple[str,str,str] = ("middle_x","middle_y","middle_z"),
-                    out_dir: Optional[str] = None,
                     align_mode: Literal["auto","skip"]="auto",
                     point_alignment_only: bool = False,
+                    out_dir: Optional[str] = None,
                     run_hdr: bool = True,
                     run_pf: bool = True,
                     cfg_common: Optional[CfgCommon] = None,
@@ -102,10 +102,8 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
     """
     ################## Prepare configs & output dir ##################
     cfg_common = cfg_common or CfgCommon()
-    if out_dir: cfg_common.out_dir = out_dir
     cfg_hdr = cfg_hdr or CfgHDR()
     cfg_pf  = cfg_pf  or CfgPF()
-    os.makedirs(cfg_common.out_dir, exist_ok=True)
 
     ###################### Load & basic checks 
     if points_list is not None:
@@ -163,8 +161,10 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
 
     ############################ Alignment-only early return ############################
     if point_alignment_only or (not run_hdr and not run_pf):
+        effective_out_dir = out_dir or "mpase_output"
+        os.makedirs(effective_out_dir, exist_ok=True)
         # Optional: save aligned coordinates for users who just want the transform outputs
-        _save_aligned_points(aligned, labels, cfg_common.out_dir)
+        _save_aligned_points(aligned, labels, effective_out_dir)
 
         # Minimal meta receipt
         meta = dict(
@@ -177,7 +177,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
             align_mode=align_mode,
             note="Alignment-only run (no HDR/PF/metrics)."
         )
-        with open(os.path.join(cfg_common.out_dir, "meta_data.json"), "w") as f:
+        with open(os.path.join(effective_out_dir, "meta_data.json"), "w") as f:
             json.dump(meta, f, indent=2)
 
         # Return a lightweight result object, shapes empty, metrics empty
@@ -287,8 +287,6 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
         ["plane", "mode", "level", "A", "B"],
         ascending=[True, True, False, True, True]
     )
-    metrics_path = os.path.join(cfg_common.out_dir, "metrics_data.csv")
-    metrics.to_csv(metrics_path, index=False)
 
     # save a JSON receipt with input files, configs, and planes processed
     meta = dict(
@@ -298,8 +296,6 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
         planes=list(per_plane.keys()),
         align_mode=align_mode
     )
-    with open(os.path.join(cfg_common.out_dir, "meta_data.json"), "w") as f:
-        json.dump(meta, f, indent=2)
 
     # ############################ Return ############################
     return dict(

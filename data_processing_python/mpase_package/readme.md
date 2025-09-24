@@ -56,7 +56,6 @@ pad_frac=0.05, # float: padding around global bbox (fraction of max extent)
 trim_q=0.10, # float [0..0.5): ICP outlier trim per iter (discard worst trim_q matches)
 icp_iters=30, # int: number of ICP iterations (try 50 for hard cases)
 sample_icp=50000, # int or None: max points sampled per set for ICP (None=use all)
-out_dir=out_dir # str: where to save metrics/meta when run_silhouettes executes
 )
 
 # CfgHDR — highest-density-region silhouettes via bootstrap-averaged 2D densities
@@ -108,11 +107,11 @@ morph=cfg_morph # CfgMorph: morphological cleanup options for PF masks
 
 # xyz_cols: Tuple[str,str,str] # CSV x,y,z column names (default: ("middle_x","middle_y","middle_z"))
 
-# out_dir: Optional[str] # overrides cfg_common.out_dir for this run
-
 # align_mode: Literal["auto","skip"] # "auto"=PCA prealign + robust ICP to first set; "skip"=center only
 
 # point_alignment_only: bool # if True OR (not run_hdr and not run_pf): stop after alignment
+
+# out_dir: Optional[str] # only needed when point_alignment_only is True
 
 # run_hdr: bool # compute HDR silhouettes
 
@@ -136,9 +135,9 @@ res = run_silhouettes(
 csv_list=csv_list, # points_list=None, # (alternative) list of (Ni,3) float arrays
 labels=labels,
 xyz_cols=("middle_x","middle_y","middle_z"),
-out_dir=out_dir, # also saved into cfg_common.out_dir internally
 align_mode="auto", # "auto" or "skip"
 point_alignment_only=False, # set True for alignment + projections + background only
+out_dir=out_dir,
 run_hdr=True, # toggle HDR branch
 run_pf=True, # toggle PF branch
 cfg_common=cfg_common,
