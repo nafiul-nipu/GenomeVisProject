@@ -2,7 +2,7 @@ import os
 import re
 import json
 from pathlib import Path
-from typing import Dict, Tuple, Iterable, Optional, List, Any
+from typing import Dict, Tuple, Iterable, Optional, List, Any, Callable
 import numpy as np
 
 # Internal types and configs (from the main pipeline module)
@@ -341,10 +341,10 @@ def export_all(
     export_scales: bool = True,
     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
     which_density: Optional[Iterable[str]] = None,
-    progress_report: bool = True,
-) -> Dict[str, Any]:
+    progress_report: bool = False,
+) -> None:
     """
-    Produces the full pure-data bundle for D3 + Three.js and returns a manifest dict:
+    Produces the full pure-data bundle for D3 + Three.js and writes a manifest file (manifest.json):
       - meta_data.json (root)
       - background_mask.json (root)
       - contours/<Label>_contour.json (per label)
@@ -357,7 +357,7 @@ def export_all(
 
     New:
       - progress notifications via `progress_report` prints
-      - writes export_manifest.json summarizing outputs
+      - writes manifest.json summarizing outputs
     """
     _ensure_dir(out_dir)
     _notify(progress_report, "begin", out_dir=out_dir)
@@ -388,8 +388,8 @@ def export_all(
     }
 
     # Write manifest to disk
-    mpath = _write_json(os.path.join(out_dir, "export_manifest.json"), manifest)
+    mpath = _write_json(os.path.join(out_dir, "manifest.json"), manifest)
     _notify(progress_report, "write", kind="manifest", path=mpath)
 
     _notify(progress_report, "done", files=manifest["summary"]["files"], bytes=manifest["summary"]["bytes"])
-    return manifest
+    
