@@ -7,7 +7,7 @@ from typing import Optional, Tuple, Literal
 from .types import CfgHDR, CfgPF, RunResult, Plane, ShapeProduct
 
 
-# ============================= Visualization helpers (optional) =============================
+################################################### Visualization and Saving ##########################
 
 # pick two labels to visualize
 def _pick_ab_labels(result, A_lab: Optional[str], B_lab: Optional[str]) -> Tuple[str, str]:

@@ -2,7 +2,7 @@ import numpy as np
 from typing import Optional, Tuple
 from scipy.spatial import cKDTree
 from skimage.measure import find_contours
-# ---------------------------- Common metrics ----------------------------
+##################### Common metrics #####################
 # Metrics 
 # Intersection-over-Union (IoU) for boolean masks
 def iou_bool(A: np.ndarray, B: np.ndarray) -> float:

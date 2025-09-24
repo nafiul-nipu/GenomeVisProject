@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.spatial import cKDTree
 from typing import List
 
-# ---------------------------- Alignment ----------------------------
+########################## Alignment ############################
 def pca_axes(pts: np.ndarray):
     C = np.cov((pts - pts.mean(0)).T)
     w, V = np.linalg.eigh(C)

@@ -12,7 +12,7 @@ from .create_grid_planes import rasterize_points
 from .metrics_calculation import contour_from_bool
 
 
-# ---------------------------- Point-Fraction ----------------------------
+########################## Point-Fraction ##########################
 def kde_scores(points2d: np.ndarray, bandwidth: float) -> np.ndarray:
     """Gaussian KDE score per point (log-density up to constant).
     We’re computing per-point density scores using Gaussian kernel density estimation (KDE). 

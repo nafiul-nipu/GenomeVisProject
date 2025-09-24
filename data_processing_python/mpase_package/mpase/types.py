@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 # Config with default values
 # pipeline will use these values unless other values are provided in the main function
-# ---------------------------- Public Configs ----------------------------
+#################### Configs ####################
 @dataclass
 class CfgCommon:
     grid_base: int = 160
@@ -50,7 +50,7 @@ class CfgPF:
     # expose morphology controls to the user
     morph: CfgMorph = field(default_factory=CfgMorph)
 
-# ---------------------------- Public Types ----------------------------
+# ############################ Public Types ############################
 Plane = Literal["XY", "YZ", "XZ"]
 Variant = Literal["hdr", "point_fraction"]
 

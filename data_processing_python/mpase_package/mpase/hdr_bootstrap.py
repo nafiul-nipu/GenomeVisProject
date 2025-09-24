@@ -8,7 +8,7 @@ from skimage.measure import find_contours
 from .types import Plane, ShapeProduct
 from .create_grid_planes import AXPAIR
 
-# ---------------------------- HDR ----------------------------
+#################### HDR ############################
 # Density thresholding & contours
 def apply_density_floor(D: np.ndarray, frac: float) -> np.ndarray:
     # zero out tiny densities below a fraction of the max density

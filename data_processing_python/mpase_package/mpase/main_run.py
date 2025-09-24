@@ -22,7 +22,6 @@ from .point_fraction import make_pf_shape
 # imports
     
     
-# ---------------------------- Orchestration ----------------------------
 def _per_plane_sets(aligned: List[np.ndarray], edges3d, labels: List[str],
                     planes: Tuple[Plane, ...]) -> Tuple[Dict[Plane, Dict[str, object]], Dict[Plane, np.ndarray]]:
     """
@@ -101,14 +100,14 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
       - densities: Optional[{label->{plane->np.ndarray}}]  # HDR densities if run
       - projections: {plane:{'xs','ys','sets':{label->points2d}}}
     """
-    # ---------------------------- Prepare configs & output dir ----------------------------
+    ################## Prepare configs & output dir ##################
     cfg_common = cfg_common or CfgCommon()
     if out_dir: cfg_common.out_dir = out_dir
     cfg_hdr = cfg_hdr or CfgHDR()
     cfg_pf  = cfg_pf  or CfgPF()
     os.makedirs(cfg_common.out_dir, exist_ok=True)
 
-    # ---------------------------- Load & basic checks ----------------------------
+    ###################### Load & basic checks 
     if points_list is not None:
         raw_sets = [np.asarray(P, dtype=np.float32) for P in points_list]
         labels   = list(labels) if labels else [f"S{i}" for i in range(len(raw_sets))]
@@ -122,7 +121,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
     if len(raw_sets) < 2:
         raise ValueError("Need at least 2 point sets for comparison.")
 
-    # ---------------------------- Alignment (center → optional PCA+ICP to ref) ----------------------------
+    ########################## Alignment (center → optional PCA+ICP to ref) ##########################
     # Reference is the first set (index 0)
     ref = raw_sets[0] - raw_sets[0].mean(0)
     aligned: List[np.ndarray] = []
@@ -145,7 +144,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
             X = (R1 @ Ricp.T + ticp)
         aligned.append(X)
 
-    # ---------------------------- Global uniform scale + shared 3D grid ----------------------------
+    #################### Global uniform scale + shared 3D grid ####################
     # Compute single bbox over ALL aligned sets, scale each to that bbox,
     # then create one shared 3D grid for consistent 2D edges.
     mins = np.vstack(aligned).min(0)
@@ -157,12 +156,12 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
                                        base=cfg_common.grid_base,
                                        pad_frac=cfg_common.pad_frac)
 
-    # ---------------------------- Per-plane projections & background ----------------------------
+    ############################ Per-plane projections & background ############################
     # Typical contents: {plane: {"xs","ys","sets":{label->points2d}}}
     # Background is union-of-presence per plane (for light gray plot layer)
     per_plane, background = _per_plane_sets(aligned, edges3d, labels, planes)
 
-    # ---------------------------- Alignment-only early return ----------------------------
+    ############################ Alignment-only early return ############################
     if point_alignment_only or (not run_hdr and not run_pf):
         # Optional: save aligned coordinates for users who just want the transform outputs
         _save_aligned_points(aligned, labels, cfg_common.out_dir)
@@ -193,7 +192,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
             projections=per_plane,
         )
 
-    # ---------------------------- HDR density compute (optional) ----------------------------
+    # ############################ HDR density compute (optional) ############################
     densities: Optional[Dict[str, Dict[Plane, np.ndarray]]] = None
     if run_hdr:
         densities = {lab: {} for lab in labels}
@@ -210,7 +209,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
                                     rng_seed=cfg_hdr.rng_seed)
                 densities[lab][plane] = D[a]  # store [ny,nx] density for this plane
 
-    # ---------------------------- Build shapes + pairwise metrics ----------------------------
+    # ############################ Build shapes + pairwise metrics ############################
     # shapes: variant -> plane -> level -> { label -> ShapeProduct }
     shapes: Dict[Variant, Dict[Plane, Dict[int, Dict[str, ShapeProduct]]]] = {}
     rows: List[dict] = []
@@ -282,7 +281,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
                         rows.append(dict(mode="point_fraction", plane=plane, level=level,
                                          A=A_lab, B=B_lab, IoU=IoU, meanNN=mnn, Hausdorff=haus))
 
-    # ---------------------------- Metrics + meta ----------------------------
+    # ############################ Metrics + meta ############################
     # compile metrics into a DataFrame and save as CSV
     metrics = pd.DataFrame(rows).sort_values(
         ["plane", "mode", "level", "A", "B"],
@@ -302,7 +301,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
     with open(os.path.join(cfg_common.out_dir, "meta_data.json"), "w") as f:
         json.dump(meta, f, indent=2)
 
-    # ---------------------------- Return ----------------------------
+    # ############################ Return ############################
     return dict(
         labels=list(labels),
         aligned_points=aligned,
