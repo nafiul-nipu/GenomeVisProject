@@ -309,7 +309,6 @@ def export_all(
       - (opt) layout.json (root)
       - (opt) scales.json (root)
     """
-    print("this is the new pipeline for extraction")
     _ensure_dir(out_dir)
     export_meta(result, out_dir)
     export_background_mask_json(result, out_dir)
