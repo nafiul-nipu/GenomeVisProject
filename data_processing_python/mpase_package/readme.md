@@ -245,6 +245,8 @@ labelA="12 h — UNTR", labelB="12 h — VACV"
 
 # which_density: Optional[Iterable[str]] # limit which labels to emit densities for (None=all)
 
+# progress_report: bool # prints progress notification # True or False
+
 export_all(
 res,
 out_dir=out_dir,
@@ -252,7 +254,8 @@ include_density=True,
 export_layout=True,
 export_scales=True,
 kind_levels={"hdr": "all", "point_fraction": "all"},
-which_density=None
+which_density=None,
+progress_report=True
 )
 
 # --------------------------------------------------------------------------------------------

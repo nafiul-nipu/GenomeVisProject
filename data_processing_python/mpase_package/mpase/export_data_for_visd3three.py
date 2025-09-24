@@ -2,7 +2,7 @@ import os
 import re
 import json
 from pathlib import Path
-from typing import Dict, Tuple, Iterable, Optional
+from typing import Dict, Tuple, Iterable, Optional, List, Any
 import numpy as np
 
 # Internal types and configs (from the main pipeline module)
@@ -19,6 +19,7 @@ from .visualization_save_image import _levels_from_result
 # meta_data.json
 # layout
 # metrics_data.json
+# + Progress / reporting + manifest
 
 ################# Helpers #################
 
@@ -26,10 +27,12 @@ def _ensure_dir(p: str):
     Path(p).mkdir(parents=True, exist_ok=True)
 
 
-def _write_json(path: str, obj):
+def _write_json(path: str, obj) -> str:
+    """Write JSON and return the path (for manifest)."""
     with open(path, "w") as f:
         # Pretty for readability; small files remain fine, large files will still be large.
         json.dump(obj, f, separators=(",", ":"), allow_nan=False, indent=2)
+    return path
 
 
 def _grid_sizes_from_result(result: RunResult) -> Dict[Plane, Tuple[int, int]]:
@@ -45,9 +48,18 @@ def _safe_name(s: str) -> str:
     s = re.sub(r"_+", "_", s)
     return s.strip("._-") or "unnamed"
 
+
+def _notify(progress_report: bool, event: str, **payload):
+    if progress_report:
+        msg = f"[export] {event}"
+        if payload:
+            msg += ": " + ", ".join(f"{k}={v}" for k, v in payload.items() if k != "obj")
+        print(msg)
+
+
 ################# Core #################
 
-def export_meta(result: RunResult, out_dir: str):
+def export_meta(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     meta_data.json:
       {
@@ -79,30 +91,35 @@ def export_meta(result: RunResult, out_dir: str):
         },
         labels=labels,
     )
-    _write_json(os.path.join(out_dir, "meta_data.json"), meta)
+    path = _write_json(os.path.join(out_dir, "meta_data.json"), meta)
+    _notify(progress_report, "write", kind="meta", path=path)
+    return [path]
 
 
 ################### D3: background-as-data ###################
 
-def export_background_mask_json(result: RunResult, out_dir: str):
+def export_background_mask_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     _ensure_dir(out_dir)
     bg = {}
     for plane, arr in result["background"].items():
         # store as 0/1 (compact)
         bg[plane] = arr.astype(np.uint8).tolist()
-    _write_json(os.path.join(out_dir, "background_mask.json"), bg)
+    path = _write_json(os.path.join(out_dir, "background_mask.json"), bg)
+    _notify(progress_report, "write", kind="background_mask", path=path)
+    return [path]
 
 
 ################### D3: densities (per label) ###################
 
-def export_density_json(result: RunResult, out_dir: str, which: Optional[Iterable[str]] = None):
+def export_density_json(result: RunResult, out_dir: str, which: Optional[Iterable[str]] = None, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     Writes density fields as nested lists (floats) per label. Only if HDR was run.
     Output directory: <out_dir>/density/
     Files: <Label>_density.json (e.g., 12h_UNTR_density.json)
     """
+    written: List[str] = []
     if not result.get("densities"):
-        return
+        return written
     den_dir = os.path.join(out_dir, "density")
     _ensure_dir(den_dir)
     labels = list(which) if which is not None else list(result["densities"].keys())
@@ -111,7 +128,10 @@ def export_density_json(result: RunResult, out_dir: str, which: Optional[Iterabl
             continue
         payload = {plane: D.astype(float).tolist() for plane, D in result["densities"][lab].items()}
         fname = f"{_safe_name(lab)}_density.json"
-        _write_json(os.path.join(den_dir, fname), payload)
+        path = _write_json(os.path.join(den_dir, fname), payload)
+        written.append(path)
+        _notify(progress_report, "write", kind="density", label=str(lab), path=path)
+    return written
 
 
 ################### D3: contours (pixel coords) ###################
@@ -120,7 +140,10 @@ def export_contours_d3(
     result: RunResult,
     out_dir: str,
     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
-):
+    *,
+    progress_report: bool = False,
+    report: Optional[Callable] = None,
+) -> List[str]:
     """
     Writes per-label contour bundles under <out_dir>/contours/.
     Each file aggregates that label's contours across planes and levels.
@@ -135,6 +158,7 @@ def export_contours_d3(
 
     Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
     """
+    written: List[str] = []
     cont_dir = os.path.join(out_dir, "contours")
     _ensure_dir(cont_dir)
 
@@ -171,12 +195,16 @@ def export_contours_d3(
     # Write one file per label
     for label, entries in per_label.items():
         fname = f"{_safe_name(label)}_contour.json"
-        _write_json(os.path.join(cont_dir, fname), {"contours": entries})
+        path = _write_json(os.path.join(cont_dir, fname), {"contours": entries})
+        written.append(path)
+        _notify(progress_report, "write", kind="contours", label=str(label), path=path, entries=len(entries))
+
+    return written
 
 
 ################### D3: 2D projections (per plane) ###################
 
-def export_projections_json(result: RunResult, out_dir: str):
+def export_projections_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     Writes one file per plane under <out_dir>/projections/ in *pixel* grid coords that match contours:
     projections/<PLANE>_projections.json
@@ -184,6 +212,7 @@ def export_projections_json(result: RunResult, out_dir: str):
 
     Uses result["projections"][plane]["sets"][label] as 2D points.
     """
+    written: List[str] = []
     proj_dir = os.path.join(out_dir, "projections")
     _ensure_dir(proj_dir)
 
@@ -215,12 +244,16 @@ def export_projections_json(result: RunResult, out_dir: str):
             plane_out[str(lab)] = to_pixel(np.asarray(P2))
 
         fname = f"{_safe_name(plane)}_projections.json"
-        _write_json(os.path.join(proj_dir, fname), plane_out)
+        path = _write_json(os.path.join(proj_dir, fname), plane_out)
+        written.append(path)
+        _notify(progress_report, "write", kind="projections", plane=str(plane), path=path, labels=len(plane_out))
+
+    return written
 
 
 ############## Metrics ################
 
-def export_metrics_json(result: RunResult, out_dir: str):
+def export_metrics_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     metrics_data.json: list of rows; already pairwise (A,B) in your DataFrame.
     """
@@ -231,12 +264,14 @@ def export_metrics_json(result: RunResult, out_dir: str):
         for k, v in list(r.items()):
             if isinstance(v, (np.floating, np.integer)):
                 r[k] = float(v)
-    _write_json(os.path.join(out_dir, "metrics_data.json"), rows)
+    path = _write_json(os.path.join(out_dir, "metrics_data.json"), rows)
+    _notify(progress_report, "write", kind="metrics", path=path, rows=len(rows))
+    return [path]
 
 
 #################### Three.js: 3D points (per label) ###################
 
-def export_points3d_json(result: RunResult, out_dir: str):
+def export_points3d_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     Writes one file per label under <out_dir>/points3d/:
     points3d/<Label>_points3d.json
@@ -244,6 +279,7 @@ def export_points3d_json(result: RunResult, out_dir: str):
 
     Uses result["aligned_points"] (list aligned to result["labels"]).
     """
+    written: List[str] = []
     pts_dir = os.path.join(out_dir, "points3d")
     _ensure_dir(pts_dir)
     labels = list(result.get("labels", []))
@@ -252,12 +288,16 @@ def export_points3d_json(result: RunResult, out_dir: str):
     for lab, X in zip(labels, aligned):
         payload = {"positions": np.asarray(X, dtype=float).tolist()}
         fname = f"{_safe_name(lab)}_points3d.json"
-        _write_json(os.path.join(pts_dir, fname), payload)
+        path = _write_json(os.path.join(pts_dir, fname), payload)
+        written.append(path)
+        _notify(progress_report, "write", kind="points3d", label=str(lab), path=path, count=len(payload["positions"]))
+
+    return written
 
 
 ################# Optional: scene layout and scales #################
 
-def export_layout_json(out_dir: str, layout: Optional[Dict[str, Dict[str, list]]] = None):
+def export_layout_json(out_dir: str, layout: Optional[Dict[str, Dict[str, list]]] = None, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     layout.json:
       { "XY":{"origin":[0,0,0],"normal":[0,0,1]}, ... }
@@ -268,21 +308,26 @@ def export_layout_json(out_dir: str, layout: Optional[Dict[str, Dict[str, list]]
         "YZ": {"origin": [1.2, 0, 0], "normal": [1, 0, 0]},
         "XZ": {"origin": [0, -1.2, 0], "normal": [0, 1, 0]},
     }
-    _write_json(os.path.join(out_dir, "layout.json"), layout)
+    path = _write_json(os.path.join(out_dir, "layout.json"), layout)
+    _notify(progress_report, "write", kind="layout", path=path)
+    return [path]
 
 
-def export_scales_json(result: RunResult, out_dir: str):
+def export_scales_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     scales.json: bounding box across ALL aligned points.
     """
     _ensure_dir(out_dir)
     if not result.get("aligned_points"):
-        _write_json(os.path.join(out_dir, "scales.json"), {"bbox": {"mins": [0, 0, 0], "maxs": [0, 0, 0]}})
-        return
+        path = _write_json(os.path.join(out_dir, "scales.json"), {"bbox": {"mins": [0, 0, 0], "maxs": [0, 0, 0]}})
+        _notify(progress_report, "write", kind="scales", path=path)
+        return [path]
     P = np.vstack([np.asarray(X) for X in result["aligned_points"] if X is not None and len(X) > 0])
     mins = P.min(axis=0).astype(float).tolist()
     maxs = P.max(axis=0).astype(float).tolist()
-    _write_json(os.path.join(out_dir, "scales.json"), {"bbox": {"mins": mins, "maxs": maxs}})
+    path = _write_json(os.path.join(out_dir, "scales.json"), {"bbox": {"mins": mins, "maxs": maxs}})
+    _notify(progress_report, "write", kind="scales", path=path, mins=mins, maxs=maxs)
+    return [path]
 
 
 ################ One-call convenience ################
@@ -296,9 +341,10 @@ def export_all(
     export_scales: bool = True,
     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
     which_density: Optional[Iterable[str]] = None,
-):
+    progress_report: bool = True,
+) -> Dict[str, Any]:
     """
-    Produces the full pure-data bundle for D3 + Three.js:
+    Produces the full pure-data bundle for D3 + Three.js and returns a manifest dict:
       - meta_data.json (root)
       - background_mask.json (root)
       - contours/<Label>_contour.json (per label)
@@ -308,17 +354,42 @@ def export_all(
       - points3d/<Label>_points3d.json (per label)
       - (opt) layout.json (root)
       - (opt) scales.json (root)
+
+    New:
+      - progress notifications via `progress_report` prints
+      - writes export_manifest.json summarizing outputs
     """
     _ensure_dir(out_dir)
-    export_meta(result, out_dir)
-    export_background_mask_json(result, out_dir)
+    _notify(progress_report, "begin", out_dir=out_dir)
+
+    manifest: Dict[str, Any] = {"root": out_dir, "written": {}}
+
+    def rec(name: str, paths: List[str]):
+        manifest["written"].setdefault(name, []).extend(paths)
+
+    rec("meta", export_meta(result, out_dir, progress_report=progress_report))
+    rec("background", export_background_mask_json(result, out_dir, progress_report=progress_report))
     if include_density:
-        export_density_json(result, out_dir, which=which_density)
-    export_contours_d3(result, out_dir, kind_levels=kind_levels)
-    export_projections_json(result, out_dir)
-    export_metrics_json(result, out_dir)
-    export_points3d_json(result, out_dir)
+        rec("density", export_density_json(result, out_dir, which=which_density, progress_report=progress_report))
+    rec("contours", export_contours_d3(result, out_dir, kind_levels=kind_levels, progress_report=progress_report))
+    rec("projections", export_projections_json(result, out_dir, progress_report=progress_report))
+    rec("metrics", export_metrics_json(result, out_dir, progress_report=progress_report))
+    rec("points3d", export_points3d_json(result, out_dir, progress_report=progress_report))
     if export_layout:
-        export_layout_json(out_dir)
+        rec("layout", export_layout_json(out_dir, progress_report=progress_report))
     if export_scales:
-        export_scales_json(result, out_dir)
+        rec("scales", export_scales_json(result, out_dir, progress_report=progress_report))
+
+    # Flat summary
+    all_paths = [p for group in manifest["written"].values() for p in group]
+    manifest["summary"] = {
+        "files": len(all_paths),
+        "bytes": int(sum(os.path.getsize(p) for p in all_paths if os.path.exists(p))),
+    }
+
+    # Write manifest to disk
+    mpath = _write_json(os.path.join(out_dir, "export_manifest.json"), manifest)
+    _notify(progress_report, "write", kind="manifest", path=mpath)
+
+    _notify(progress_report, "done", files=manifest["summary"]["files"], bytes=manifest["summary"]["bytes"])
+    return manifest
