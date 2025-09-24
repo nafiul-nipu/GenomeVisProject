@@ -17,8 +17,7 @@ from .types import (
 )
 
 # ---- Main entrypoint ----
-from .main_run import run_silhouettes as run_silhouettes  # you can also alias to `run` below
-run = run_silhouettes  # convenience alias
+from .main_run import mpase  # you can also alias to `run` below
 
 # ---- Visualization (user-facing) ----
 from .visualization_save_image import (
@@ -34,7 +33,7 @@ from .io_load import load_points
 __all__ = [
     "__version__",
     # main
-    "run_silhouettes", "run",
+    "mpase",
     # configs / types
     "CfgCommon", "CfgHDR", "CfgPF", "CfgMorph",
     "Plane", "Variant", "ShapeProduct", "RunResult",

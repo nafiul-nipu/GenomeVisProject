@@ -71,7 +71,7 @@ def _per_plane_sets(aligned: List[np.ndarray], edges3d, labels: List[str],
 # accepts N CSVs or N point arrays (including the 2-set case)
 # toggles HDR and PF computations
 # returns a RunResult-like dict with per-set shapes and pairwise metrics
-def run_silhouettes(csv_list: Optional[Sequence[str]] = None,
+def mpase(csv_list: Optional[Sequence[str]] = None,
                     *,
                     points_list: Optional[Sequence[np.ndarray]] = None,
                     labels: Optional[Sequence[str]] = None,

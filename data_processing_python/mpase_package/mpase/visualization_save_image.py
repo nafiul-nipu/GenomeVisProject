@@ -70,7 +70,7 @@ def view(result: RunResult,
          cfg_hdr: Optional[CfgHDR] = None,
          cfg_pf: Optional[CfgPF] = None):
     """
-    Quick viewer for shapes produced by run_silhouettes() [N-set].
+    Quick viewer for shapes produced by mpase() [N-set].
     - kind: 'hdr' | 'point_fraction'
     - plane: 'XY' | 'YZ' | 'XZ'
     - levels: int | list[int] | 'all'
