@@ -1,4 +1,4 @@
-import os
+import os, json
 import itertools
 
 import numpy as np
@@ -102,9 +102,7 @@ def icp_rigid_robust(A_pts, B_pts, iters=30, sample=50000, trim_q=0.10, seed=11)
 def _save_aligned_points(aligned: List[np.ndarray], labels: List[str], out_dir: str):
     os.makedirs(out_dir, exist_ok=True)
     for lab, X in zip(labels, aligned):
-        # CSV
-        pd.DataFrame(X, columns=["x","y","z"]).to_csv(
-            os.path.join(out_dir, f"aligned_{lab}.csv"), index=False
-        )
-        # NPY
-        # np.save(os.path.join(out_dir, f"aligned_{lab}.npy"), X)
+        data = [{"x": float(x), "y": float(y), "z": float(z)} for x, y, z in X]
+        out_path = os.path.join(out_dir, f"{lab}_aligned.json")
+        with open(out_path, "w") as f:
+            json.dump(data, f, indent=2)
