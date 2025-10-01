@@ -1,0 +1,34 @@
+{
+  "sources": [
+    "data/green_monkey/all_structure_files/chr12/12hrs/untr/structure_12hrs_untr_with_id0.csv",
+    "data/green_monkey/all_structure_files/chr12/12hrs/vacv/structure_12hrs_vacv_with_id0.csv",
+    "data/green_monkey/all_structure_files/chr12/18hrs/untr/structure_18hrs_untr_with_id0.csv",
+    "data/green_monkey/all_structure_files/chr12/18hrs/vacv/structure_18hrs_vacv_with_id0.csv",
+    "data/green_monkey/all_structure_files/chr12/24hrs/untr/structure_24hrs_untr_with_id0.csv",
+    "data/green_monkey/all_structure_files/chr12/24hrs/vacv/structure_24hrs_vacv_with_id0.csv"
+  ],
+  "labels": [
+    "chr12_12hrs_UNTR",
+    "chr12_12hrs_VACV",
+    "chr12_18hrs_UNTR",
+    "chr12_18hrs_VACV",
+    "chr12_24hrs_UNTR",
+    "chr12_24hrs_VACV"
+  ],
+  "cfg_common": {
+    "grid_base": 160,
+    "pad_frac": 0.05,
+    "trim_q": 0.1,
+    "icp_iters": 30,
+    "sample_icp": 50000
+  },
+  "cfg_hdr": null,
+  "cfg_pf": null,
+  "planes": [
+    "YZ",
+    "XZ",
+    "XY"
+  ],
+  "align_mode": "auto",
+  "note": "Alignment-only run (no HDR/PF/metrics)."
+}
