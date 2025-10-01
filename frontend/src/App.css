@@ -1,0 +1,5 @@
+/* Tailwind @apply to make a reusable class */
+.dropdown-select {
+  @apply rounded-lg border border-gray-700 bg-gray-900 text-gray-100 text-sm px-3 py-2 
+         focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
