@@ -45,11 +45,11 @@
     ]
   },
   "labels":[
-    "chr20_12hrs_UNTR",
-    "chr20_12hrs_VACV",
-    "chr20_18hrs_UNTR",
-    "chr20_18hrs_VACV",
-    "chr20_24hrs_UNTR",
-    "chr20_24hrs_VACV"
+    "chr20_12hrs_untr",
+    "chr20_12hrs_vacv",
+    "chr20_18hrs_untr",
+    "chr20_18hrs_vacv",
+    "chr20_24hrs_untr",
+    "chr20_24hrs_vacv"
   ]
 }

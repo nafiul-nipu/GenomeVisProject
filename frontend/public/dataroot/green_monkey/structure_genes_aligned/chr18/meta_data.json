@@ -8,12 +8,12 @@
     "data/green_monkey/all_structure_files/chr18/24hrs/vacv/structure_24hrs_vacv_gene_info.csv"
   ],
   "labels": [
-    "chr18_12hrs_UNTR",
-    "chr18_12hrs_VACV",
-    "chr18_18hrs_UNTR",
-    "chr18_18hrs_VACV",
-    "chr18_24hrs_UNTR",
-    "chr18_24hrs_VACV"
+    "chr18_12hrs_untr",
+    "chr18_12hrs_vacv",
+    "chr18_18hrs_untr",
+    "chr18_18hrs_vacv",
+    "chr18_24hrs_untr",
+    "chr18_24hrs_vacv"
   ],
   "cfg_common": {
     "grid_base": 160,
