@@ -11,13 +11,6 @@ interface GeneData {
   dataInfo: DataInfoType;
 }
 
-const caseVariants = (s: string): string[] => {
-  const lower = s.toLowerCase();
-  const upper = s.toUpperCase();
-  const title = s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-  return Array.from(new Set([lower, upper, title]));
-};
-
 export const fetchAllGeneDataJson = async ({
   speciesName,
   chrName,
@@ -39,11 +32,7 @@ export const fetchAllGeneDataJson = async ({
     const fileNames: string[] = [];
     for (const tp of timepoints) {
       for (const cond of conditions) {
-        for (const condVariant of caseVariants(cond)) {
-          fileNames.push(
-            `${chrName}_${tp}_${condVariant}_${geneFileTail}.json`
-          );
-        }
+        fileNames.push(`${chrName}_${tp}_${cond}_${geneFileTail}.json`);
       }
     }
 
