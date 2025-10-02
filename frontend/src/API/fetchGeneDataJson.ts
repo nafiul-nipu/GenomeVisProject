@@ -19,7 +19,7 @@ export const fetchAllGeneDataJson = async ({
 }: GeneData): Promise<Record<string, unknown>> => {
   try {
     const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
-    console.log(basePath);
+    // console.log(basePath);
 
     const cfg: SpeciesInfoRaw = dataInfo[speciesName];
     if (!cfg) {
@@ -36,14 +36,14 @@ export const fetchAllGeneDataJson = async ({
       }
     }
 
-    console.log(fileNames[1]);
+    // console.log(fileNames[1]);
 
     // Create full URLs for each file
     const urls = fileNames.map(
       (file) =>
         `${basePath}${speciesName}/${gene_data_folder}/${chrName}/${file}`
     );
-    console.log(urls[1]);
+    // console.log(urls[1]);
 
     // Fetch all files in parallel; skip missing files silently
     const settled = await Promise.allSettled(
@@ -54,7 +54,9 @@ export const fetchAllGeneDataJson = async ({
     const out: Record<string, unknown> = {};
     settled.forEach((r, i) => {
       if (r.status === "fulfilled") {
-        out[fileNames[i]] = r.value;
+        // remove "_gene_aligned.json" (or whatever the tail is) from key
+        const cleanKey = fileNames[i].replace(`_${geneFileTail}.json`, "");
+        out[cleanKey] = r.value;
       }
     });
 
