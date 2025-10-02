@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { SpeciesDropdown } from "./components/SpeciesDropdown";
 import meta_data from "./data_info.json";
-import type { DataInfoType } from "./types/meta_data_types";
+import type { DataInfoType } from "./types/data_types_interfaces";
 import { ChromosomeDropdown } from "./components/ChromosomeDropdown";
 import { messageToClient } from "./worker/messageToClient";
 import { messageToWorker } from "./worker/messageToWorker";
@@ -13,7 +13,7 @@ export default function App() {
   const mount = useRef<boolean | null>(null);
   const workerRef = useRef<Worker | null>(null);
 
-  const [species, setSpecies] = useState<string>("monkey");
+  const [species, setSpecies] = useState<string>("green_monkey");
   const [chromosome, setChromosome] = useState<string>("chr1");
 
   const [test, setTest] = useState<unknown>(null);
@@ -34,13 +34,30 @@ export default function App() {
       messageToClient(evt.data, setTest);
     };
 
-    messageToWorker(workerRef.current, "Hello from main thread");
+    messageToWorker({
+      workerRef: workerRef.current,
+      data_info: meta_data_typed,
+      species: species,
+      chromosome: chromosome,
+    });
 
     return () => {
       workerRef.current?.terminate();
       mount.current = false;
     };
   }, []);
+
+  // on data change
+  useEffect(() => {
+    if (mount.current && species) {
+      messageToWorker({
+        workerRef: workerRef.current,
+        data_info: meta_data_typed,
+        species: species,
+        chromosome: chromosome,
+      });
+    }
+  }, [species, chromosome]);
 
   return (
     <div className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">

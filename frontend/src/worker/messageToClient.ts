@@ -1,11 +1,11 @@
-import type { workerToClientMessageType } from "../types/worker_types";
+import type { workerToClientMessageType } from "../types/data_types_interfaces";
 
 export const messageToClient = (
   message: workerToClientMessageType,
   stateSetter: (data: workerToClientMessageType["fromClient"]) => void
 ) => {
   try {
-    console.log(message);
+    console.log(message.message);
     if (message.fromClient !== undefined) {
       stateSetter(message.fromClient);
     }

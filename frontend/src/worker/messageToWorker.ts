@@ -1,6 +1,12 @@
-export const messageToWorker = (workerRef: Worker | null, message: string) => {
+import type { messageToWorkerType } from "../types/data_types_interfaces";
+export const messageToWorker = ({
+  workerRef,
+  data_info,
+  species,
+  chromosome,
+}: messageToWorkerType) => {
   try {
-    workerRef?.postMessage({ message });
+    workerRef?.postMessage({ data_info, species, chromosome });
   } catch (err) {
     console.error("Error in messageToWorker: ", err);
   }

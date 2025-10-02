@@ -1,5 +1,5 @@
 {
-  "monkey": {
+  "green_monkey": {
     "chromosomes": [
       "chr1",
       "chr2",
@@ -33,7 +33,9 @@
     ],
     "timepoints": ["12hrs", "18hrs", "24hrs"],
     "resolution": 100000,
-    "before-name": "untr",
-    "after-name": "vacv"
+    "before_name": "untr",
+    "after_name": "vacv",
+    "gene_folder_name": "structure_genes_aligned",
+    "gene_file_tail": "gene_aligned"
   }
 }
