@@ -1,12 +1,7 @@
 import React from "react";
-import type { DataInfoType } from "../types/meta_data_types";
-interface SpeciesDropdownProps {
-  selectedOption: string;
-  onSelectionChange: (option: string) => void;
-  data: string[];
-  setChromosome: (chr: string) => void;
-  meta_data: DataInfoType;
-}
+import "../App.css";
+import type { SpeciesDropdownProps } from "../types/navigation_types";
+
 export const SpeciesDropdown: React.FC<SpeciesDropdownProps> = ({
   selectedOption,
   onSelectionChange,
@@ -27,7 +22,7 @@ export const SpeciesDropdown: React.FC<SpeciesDropdownProps> = ({
       <select
         value={selectedOption}
         onChange={handleChange}
-        className="rounded-lg border border-gray-700 bg-gray-900 text-gray-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="dropdown-select"
       >
         {data.map((d) => (
           <option key={d} value={d}>

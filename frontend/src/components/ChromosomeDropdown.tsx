@@ -1,9 +1,6 @@
 import React from "react";
-interface ChromosomeDropdownProps {
-  selectedOption: string;
-  onSelectionChange: (option: string) => void;
-  data: string[];
-}
+import "../App.css";
+import type { ChromosomeDropdownProps } from "../types/navigation_types";
 
 export const ChromosomeDropdown: React.FC<ChromosomeDropdownProps> = ({
   selectedOption,
@@ -21,7 +18,7 @@ export const ChromosomeDropdown: React.FC<ChromosomeDropdownProps> = ({
       <select
         value={selectedOption}
         onChange={handleChange}
-        className="rounded-lg border border-gray-700 bg-gray-900 text-gray-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="dropdown-select"
       >
         {data.map((d) => (
           <option key={d} value={d}>

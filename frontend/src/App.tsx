@@ -1,15 +1,47 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { SpeciesDropdown } from "./components/SpeciesDropdown";
 import meta_data from "./data_info.json";
 import type { DataInfoType } from "./types/meta_data_types";
 import { ChromosomeDropdown } from "./components/ChromosomeDropdown";
+import { messageToClient } from "./worker/messageToClient";
+import { messageToWorker } from "./worker/messageToWorker";
 
 const meta_data_typed = meta_data as DataInfoType;
 
 export default function App() {
+  const mount = useRef<boolean | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+
   const [species, setSpecies] = useState<string>("monkey");
   const [chromosome, setChromosome] = useState<string>("chr1");
+
+  const [test, setTest] = useState<unknown>(null);
+
+  console.log(test);
+
+  useEffect(() => {
+    mount.current = true;
+
+    workerRef.current = new Worker(
+      new URL("./worker/data.worker.ts", import.meta.url),
+      {
+        type: "module",
+      }
+    );
+
+    workerRef.current.onmessage = (evt: MessageEvent) => {
+      messageToClient(evt.data, setTest);
+    };
+
+    messageToWorker(workerRef.current, "Hello from main thread");
+
+    return () => {
+      workerRef.current?.terminate();
+      mount.current = false;
+    };
+  }, []);
+
   return (
     <div className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">
       {/* NAV (top) */}
