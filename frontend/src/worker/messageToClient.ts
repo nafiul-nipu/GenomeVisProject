@@ -1,14 +1,17 @@
+// utils/messageToClient.ts
+import type React from "react";
 import type { workerToClientMessageType } from "../types/data_types_interfaces";
 
 export const messageToClient = (
-  message: workerToClientMessageType,
-  stateSetter: (data: workerToClientMessageType["fromClient"]) => void
+  msg: workerToClientMessageType,
+  setState: React.Dispatch<
+    React.SetStateAction<workerToClientMessageType | null>
+  >
 ) => {
   try {
-    console.log(message.message);
-    if (message.fromClient !== undefined) {
-      stateSetter(message.fromClient);
-    }
+    // optional sanity log
+    // console.log("Worker payload keys:", Object.keys(msg ?? {}));
+    setState(msg);
   } catch (err) {
     console.error("Error in messageToClient: ", err);
   }

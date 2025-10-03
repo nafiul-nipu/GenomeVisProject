@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { SpeciesDropdown } from "./components/SpeciesDropdown";
 import meta_data from "./data_info.json";
-import type { DataInfoType } from "./types/data_types_interfaces";
+import type {
+  DataInfoType,
+  workerToClientMessageType,
+} from "./types/data_types_interfaces";
 import { ChromosomeDropdown } from "./components/ChromosomeDropdown";
 import { messageToClient } from "./worker/messageToClient";
 import { messageToWorker } from "./worker/messageToWorker";
+import { GeneDropdown } from "./components/GeneDropdown";
 
 const meta_data_typed = meta_data as DataInfoType;
 
@@ -16,7 +20,9 @@ export default function App() {
   const [species, setSpecies] = useState<string>("green_monkey");
   const [chromosome, setChromosome] = useState<string>("chr1");
 
-  const [, setTest] = useState<unknown>(null);
+  const [selectedGenes, setSelectedGenes] = useState<string[]>([]); // array of selected gene names
+
+  const [data, setData] = useState<workerToClientMessageType | null>(null);
 
   // console.log(test);
 
@@ -31,7 +37,7 @@ export default function App() {
     );
 
     workerRef.current.onmessage = (evt: MessageEvent) => {
-      messageToClient(evt.data, setTest);
+      messageToClient(evt.data, setData);
     };
 
     messageToWorker({
@@ -59,6 +65,8 @@ export default function App() {
     }
   }, [species, chromosome]);
 
+  console.log("data from worker", data);
+
   return (
     <div className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">
       {/* NAV (top) */}
@@ -77,6 +85,15 @@ export default function App() {
             onSelectionChange={setChromosome}
             data={meta_data_typed[species].chromosomes ?? []}
           />
+          {data && (
+            <GeneDropdown
+              options={data?.gene_list ?? []}
+              selected={selectedGenes}
+              onChange={setSelectedGenes}
+              className="ml-2"
+              placeholder="Filter genes…"
+            />
+          )}
         </div>
       </header>
 

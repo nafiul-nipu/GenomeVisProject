@@ -22,8 +22,16 @@ export interface SpeciesDropdownProps {
   selectedOption: string;
   onSelectionChange: (option: string) => void;
   data: string[];
-  setChromosome: (chr: string) => void;
+  setChromosome: (option: string) => void;
   meta_data: DataInfoType;
+}
+
+export interface GeneDropdownProps {
+  options: string[]; // gene_list
+  selected: string[]; // selected genes
+  onChange: (option: string[]) => void;
+  placeholder?: string;
+  className?: string;
 }
 
 export interface workerPostMessageType {
@@ -33,8 +41,12 @@ export interface workerPostMessageType {
 }
 
 export interface workerToClientMessageType {
-  message: string;
-  fromClient?: unknown;
+  gene_data: Record<string, GeneRowDataType[]>;
+  gene_list: string[];
+  contour_data: Record<string, ContourWrapperType>;
+  density_data: Record<string, Density2DType>;
+  projectionData: ProjectionResult;
+  backgroundMaskData: BackgroundMask;
 }
 
 export interface messageToWorkerType {
