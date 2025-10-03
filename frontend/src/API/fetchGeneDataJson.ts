@@ -1,23 +1,21 @@
 import axios from "axios";
 import type {
-  DataInfoType,
   SpeciesInfoRaw,
+  FetchDataType,
+  GeneRowDataType,
 } from "../types/data_types_interfaces";
-
-interface GeneData {
-  speciesName: string;
-  chrName: string;
-  gene_data_folder: string;
-  dataInfo: DataInfoType;
-}
 
 export const fetchAllGeneDataJson = async ({
   speciesName,
   chrName,
   gene_data_folder,
   dataInfo,
-}: GeneData): Promise<Record<string, unknown>> => {
+}: FetchDataType): Promise<Record<string, GeneRowDataType[]>> => {
   try {
+    if (!dataInfo) {
+      throw new Error("dataInfo is required");
+    }
+
     const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
     // console.log(basePath);
 
@@ -47,16 +45,17 @@ export const fetchAllGeneDataJson = async ({
 
     // Fetch all files in parallel; skip missing files silently
     const settled = await Promise.allSettled(
-      urls.map((url) => axios.get(url).then((res) => res.data as unknown))
+      urls.map((url) =>
+        axios.get<GeneRowDataType[]>(url).then((res) => res.data)
+      )
     );
 
     // Return an object keyed by filename (only successes)
-    const out: Record<string, unknown> = {};
+    const out: Record<string, GeneRowDataType[]> = {};
     settled.forEach((r, i) => {
-      if (r.status === "fulfilled") {
-        // remove "_gene_aligned.json" (or whatever the tail is) from key
-        const cleanKey = fileNames[i].replace(`_${geneFileTail}.json`, "");
-        out[cleanKey] = r.value;
+      if (r.status === "fulfilled" && Array.isArray(r.value)) {
+        const cleanKey = fileNames[i].replace(`_${geneFileTail}.json`, ""); // e.g., chr1_12hrs_untr
+        out[cleanKey] = r.value; // typed as GeneRowDataType[]
       }
     });
 

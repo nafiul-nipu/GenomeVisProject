@@ -16,9 +16,9 @@ export default function App() {
   const [species, setSpecies] = useState<string>("green_monkey");
   const [chromosome, setChromosome] = useState<string>("chr1");
 
-  const [test, setTest] = useState<unknown>(null);
+  const [, setTest] = useState<unknown>(null);
 
-  console.log(test);
+  // console.log(test);
 
   useEffect(() => {
     mount.current = true;

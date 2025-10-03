@@ -159,7 +159,7 @@ def export_contours_d3(
     Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
     """
     written: List[str] = []
-    cont_dir = os.path.join(out_dir, "contours")
+    cont_dir = os.path.join(out_dir, "contour")
     _ensure_dir(cont_dir)
 
     # Build a map label -> list of contour entries

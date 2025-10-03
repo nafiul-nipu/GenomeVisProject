@@ -1,3 +1,5 @@
+import { fetch2DContoursOrDensity } from "../API/fetch2DContourOrDensity";
+import { fetch2DProjection } from "../API/fetch2DProjection";
 import { fetchAllGeneDataJson } from "../API/fetchGeneDataJson";
 import type { workerPostMessageType } from "../types/data_types_interfaces";
 
@@ -8,17 +10,20 @@ addEventListener(
     const species = event.data.species;
     const chromosome = event.data.chromosome;
 
+    // fetching gene data
     const gene_data = await fetchAllGeneDataJson({
       speciesName: species,
       chrName: chromosome,
       gene_data_folder: meta_data[species].gene_folder_name,
       dataInfo: meta_data,
     });
-    console.log(gene_data);
+    console.log("gene data", gene_data);
 
-    const gene_single_snapshopt = gene_data[
-      `${chromosome}_${meta_data[species].timepoints[0]}_${meta_data[species].before_name}`
-    ] as Array<{ gene_name: string }>;
+    // getting gene list
+    const gene_single_snapshopt =
+      gene_data[
+        `${chromosome}_${meta_data[species].timepoints[0]}_${meta_data[species].before_name}`
+      ];
 
     const gene_list = gene_single_snapshopt
       .map((d) => {
@@ -26,6 +31,31 @@ addEventListener(
       })
       .sort();
     console.log(gene_list);
+
+    const contour_data = await fetch2DContoursOrDensity({
+      speciesName: species,
+      chrName: chromosome,
+      dataInfo: meta_data,
+      which2D: "contour",
+    });
+
+    console.log("contour", contour_data);
+
+    const density_data = await fetch2DContoursOrDensity({
+      speciesName: species,
+      chrName: chromosome,
+      dataInfo: meta_data,
+      which2D: "density",
+    });
+
+    console.log("density", density_data);
+
+    const projectionData = await fetch2DProjection({
+      speciesName: species,
+      chrName: chromosome,
+    });
+
+    console.log("projection", projectionData);
 
     postMessage({
       message: "Worker received message",

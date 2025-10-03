@@ -16,12 +16,12 @@
       "data/green_monkey/shape_data/chr26/density/chr26_24hrs_vacv_density.json"
     ],
     "contours":[
-      "data/green_monkey/shape_data/chr26/contours/chr26_12hrs_untr_contour.json",
-      "data/green_monkey/shape_data/chr26/contours/chr26_12hrs_vacv_contour.json",
-      "data/green_monkey/shape_data/chr26/contours/chr26_18hrs_untr_contour.json",
-      "data/green_monkey/shape_data/chr26/contours/chr26_18hrs_vacv_contour.json",
-      "data/green_monkey/shape_data/chr26/contours/chr26_24hrs_untr_contour.json",
-      "data/green_monkey/shape_data/chr26/contours/chr26_24hrs_vacv_contour.json"
+      "data/green_monkey/shape_data/chr26/contour/chr26_12hrs_untr_contour.json",
+      "data/green_monkey/shape_data/chr26/contour/chr26_12hrs_vacv_contour.json",
+      "data/green_monkey/shape_data/chr26/contour/chr26_18hrs_untr_contour.json",
+      "data/green_monkey/shape_data/chr26/contour/chr26_18hrs_vacv_contour.json",
+      "data/green_monkey/shape_data/chr26/contour/chr26_24hrs_untr_contour.json",
+      "data/green_monkey/shape_data/chr26/contour/chr26_24hrs_vacv_contour.json"
     ],
     "projections":[
       "data/green_monkey/shape_data/chr26/projections/YZ_projections.json",
@@ -48,6 +48,6 @@
   },
   "summary":{
     "files":26,
-    "bytes":31358183
+    "bytes":31357035
   }
 }
