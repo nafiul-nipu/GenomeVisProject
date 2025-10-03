@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import pandas as pd
 from scipy.spatial import cKDTree
-from typing import List
+from typing import List, Optional
 
 ########################## Alignment ############################
 def pca_axes(pts: np.ndarray):
