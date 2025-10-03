@@ -106,3 +106,11 @@ export interface ProjectionResult {
   XZ: ProjectionDataMap;
   YZ: ProjectionDataMap;
 }
+
+export type MaskMatrix = number[][];
+
+export interface BackgroundMask {
+  XY: MaskMatrix;
+  XZ: MaskMatrix;
+  YZ: MaskMatrix;
+}

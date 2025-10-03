@@ -1,5 +1,6 @@
 import { fetch2DContoursOrDensity } from "../API/fetch2DContourOrDensity";
 import { fetch2DProjection } from "../API/fetch2DProjection";
+import { fetchBackgroundMask } from "../API/fetchBackgroundMask";
 import { fetchAllGeneDataJson } from "../API/fetchGeneDataJson";
 import type { workerPostMessageType } from "../types/data_types_interfaces";
 
@@ -56,6 +57,13 @@ addEventListener(
     });
 
     console.log("projection", projectionData);
+
+    const backgroundMaskData = await fetchBackgroundMask({
+      speciesName: species,
+      chrName: chromosome,
+    });
+
+    console.log("background mask", backgroundMaskData);
 
     postMessage({
       message: "Worker received message",
