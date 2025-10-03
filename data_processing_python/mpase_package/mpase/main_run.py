@@ -1,6 +1,6 @@
 import os
 import json
-from typing import List, Dict, Tuple, Optional, Sequence, Literal
+from typing import List, Dict, Tuple, Optional, Sequence, Literal, Any  # <-- added Any
 from dataclasses import asdict
 
 import numpy as np
@@ -75,6 +75,8 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
                     points_list: Optional[Sequence[np.ndarray]] = None,
                     labels: Optional[Sequence[str]] = None,
                     xyz_cols: Tuple[str,str,str] = ("middle_x","middle_y","middle_z"),
+                    id_col: Optional[str] = None,                    # <-- NEW (CSV mode IDs)
+                    ids_list: Optional[Sequence[Sequence[Any]]] = None,  # <-- NEW (points_list mode IDs)
                     align_mode: Literal["auto","skip"]="auto",
                     point_alignment_only: bool = False,
                     out_dir: Optional[str] = None,
@@ -106,14 +108,43 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
     cfg_pf  = cfg_pf  or CfgPF()
 
     ###################### Load & basic checks 
+    ids_per_set: List[List[str]] = []  # <-- NEW: carry per-point IDs in parallel with points
+
     if points_list is not None:
         raw_sets = [np.asarray(P, dtype=np.float32) for P in points_list]
         labels   = list(labels) if labels else [f"S{i}" for i in range(len(raw_sets))]
         sources  = labels[:]  # informational
+
+        # IDs for points_list mode
+        if ids_list is not None:
+            if len(ids_list) != len(raw_sets):
+                raise ValueError("ids_list length must match points_list length")
+            for ids, P in zip(ids_list, raw_sets):
+                if len(ids) != len(P):
+                    raise ValueError("Each ids_list[i] length must match points_list[i] rows")
+                ids_per_set.append([str(x) for x in ids])
+        else:
+            # default: stable row indices as strings
+            ids_per_set = [[str(i) for i in range(len(P))] for P in raw_sets]
+
     elif csv_list:
-        raw_sets = [load_points(p, cols=xyz_cols) for p in csv_list]
-        labels   = list(labels) if labels else [os.path.splitext(os.path.basename(p))[0] for p in csv_list]
-        sources  = list(csv_list)
+        # NOTE: to preserve ID--point alignment after dropna, we read CSVs here (not via load_points),
+        #       then select both coords and id_col on the same filtered index.
+        raw_sets, labels, sources = [], list(labels) if labels else [], list(csv_list)
+        for i, csv_path in enumerate(csv_list):
+            df = pd.read_csv(csv_path)
+            pts_df = df[list(xyz_cols)].dropna()
+            raw_sets.append(pts_df.values.astype(np.float32))
+            if not labels:
+                labels.append(os.path.splitext(os.path.basename(csv_path))[0])
+
+            if id_col is not None:
+                if id_col not in df.columns:
+                    raise ValueError(f"{id_col!r} not found in {csv_path}")
+                ids_per_set.append(df.loc[pts_df.index, id_col].astype(str).tolist())
+            else:
+                # default: use original CSV row indices (after dropna alignment)
+                ids_per_set.append([str(ix) for ix in pts_df.index])
     else:
         raise ValueError("Provide csv_list OR points_list.")
     if len(raw_sets) < 2:
@@ -164,7 +195,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
         effective_out_dir = out_dir or "mpase_output"
         os.makedirs(effective_out_dir, exist_ok=True)
         # Optional: save aligned coordinates for users who just want the transform outputs
-        _save_aligned_points(aligned, labels, effective_out_dir)
+        _save_aligned_points(aligned, labels, effective_out_dir, ids_per_set=ids_per_set)  # <-- pass IDs
 
         # Minimal meta receipt
         meta = dict(
@@ -175,7 +206,8 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
             cfg_pf=None,
             planes=list(per_plane.keys()),
             align_mode=align_mode,
-            note="Alignment-only run (no HDR/PF/metrics)."
+            note="Alignment-only run (no HDR/PF/metrics).",
+            id_col=id_col  # <-- record which column was used for IDs (if any)
         )
         with open(os.path.join(effective_out_dir, "meta_data.json"), "w") as f:
             json.dump(meta, f, indent=2)
@@ -190,6 +222,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
             background=background,
             densities=None,
             projections=per_plane,
+            ids_by_label={lab: ids for lab, ids in zip(labels, ids_per_set)}  # <-- expose IDs
         )
 
     # ############################ HDR density compute (optional) ############################
@@ -307,4 +340,5 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
         background=background,
         densities=densities,
         projections=per_plane,
+        ids_by_label={lab: ids for lab, ids in zip(labels, ids_per_set)}  # <-- expose IDs alongside points
     )

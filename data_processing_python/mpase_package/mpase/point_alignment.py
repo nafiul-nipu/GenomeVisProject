@@ -99,10 +99,15 @@ def icp_rigid_robust(A_pts, B_pts, iters=30, sample=50000, trim_q=0.10, seed=11)
         t = (t @ R_upd.T) + t_upd
     return R, t
 
-def _save_aligned_points(aligned: List[np.ndarray], labels: List[str], out_dir: str):
+# point_alignment.py
+def _save_aligned_points(aligned: List[np.ndarray], labels: List[str], out_dir: str,
+                         ids_per_set: Optional[List[List[str]]] = None):
     os.makedirs(out_dir, exist_ok=True)
-    for lab, X in zip(labels, aligned):
+    for idx, (lab, X) in enumerate(zip(labels, aligned)):
         payload = {"positions": np.asarray(X, dtype=float).tolist()}
+        if ids_per_set is not None:
+            payload["ids"] = [str(x) for x in ids_per_set[idx]]  # 1:1 with rows in X
         out_path = os.path.join(out_dir, f"{lab}_aligned.json")
         with open(out_path, "w") as f:
             json.dump(payload, f, indent=2)
+
