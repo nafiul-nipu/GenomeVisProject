@@ -1,6 +1,6 @@
 import React from "react";
-import "../App.css";
-import type { ChromosomeDropdownProps } from "../types/data_types_interfaces";
+import "../../App.css";
+import type { ChromosomeDropdownProps } from "../../types/data_types_interfaces";
 
 export const ChromosomeDropdown: React.FC<ChromosomeDropdownProps> = ({
   selectedOption,

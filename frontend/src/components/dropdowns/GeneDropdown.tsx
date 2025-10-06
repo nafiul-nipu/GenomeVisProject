@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { GeneDropdownProps } from "../types/data_types_interfaces";
+import type { GeneDropdownProps } from "../../types/data_types_interfaces";
 
 export const GeneDropdown = ({
   options,
@@ -118,13 +118,6 @@ export const GeneDropdown = ({
                   onClick={clearAll}
                 >
                   Clear
-                </button>
-                <button
-                  className="underline underline-offset-2 hover:text-gray-200"
-                  onClick={() => onChange(filtered)}
-                  title="Add all currently filtered"
-                >
-                  Add filtered
                 </button>
               </div>
             </div>

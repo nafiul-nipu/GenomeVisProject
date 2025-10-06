@@ -34,6 +34,15 @@ export interface GeneDropdownProps {
   className?: string;
 }
 
+export interface ConditionTabsProps {
+  setCondTab: React.Dispatch<React.SetStateAction<"before" | "after" | "diff">>;
+  condTab: "before" | "after" | "diff";
+  timeIdx: number;
+  setTimeIdx: React.Dispatch<React.SetStateAction<number>>;
+  meta_data_typed: DataInfoType;
+  species: string;
+}
+
 export interface workerPostMessageType {
   data_info: DataInfoType;
   species: string;
