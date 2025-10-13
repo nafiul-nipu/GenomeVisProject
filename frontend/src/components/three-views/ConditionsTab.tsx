@@ -1,3 +1,4 @@
+// components/ConditionTabs.tsx
 import type { ConditionTabsProps } from "../../types/data_types_interfaces";
 
 export const ConditionTabs = ({
@@ -18,41 +19,29 @@ export const ConditionTabs = ({
 
   return (
     <div className="flex items-center justify-between w-full">
-      {/* Left: Tabs */}
-      <div className="flex items-center gap-3">
+      {/* Left: Tabs (fixed width to prevent layout shift) */}
+      <div className="flex items-center gap-3 w-[18rem]">
         <h2 className="text-lg font-medium">3D View</h2>
 
-        <div className="inline-flex items-center rounded-xl border border-gray-800/70 bg-gray-900/60 overflow-hidden">
-          <button
-            onClick={() => setCondTab("before")}
-            className={`px-3 py-1.5 text-sm border-r border-gray-800/70 ${
-              condTab === "before"
-                ? "bg-gray-800/50 font-semibold"
-                : "text-gray-300"
-            }`}
-          >
-            {beforeLabel}
-          </button>
-          <button
-            onClick={() => setCondTab("after")}
-            className={`px-3 py-1.5 text-sm border-r border-gray-800/70 ${
-              condTab === "after"
-                ? "bg-gray-800/50 font-semibold"
-                : "text-gray-300"
-            }`}
-          >
-            {afterLabel}
-          </button>
-          <button
-            onClick={() => setCondTab("diff")}
-            className={`px-3 py-1.5 text-sm ${
-              condTab === "diff"
-                ? "bg-gray-800/50 font-semibold"
-                : "text-gray-300"
-            }`}
-          >
-            {diffLabel}
-          </button>
+        <div className="inline-flex items-center rounded-xl border border-gray-800/70 bg-gray-900/60 overflow-hidden divide-x divide-gray-800/70 whitespace-nowrap">
+          {[
+            { key: "before", label: beforeLabel },
+            { key: "after", label: afterLabel },
+            { key: "diff", label: diffLabel },
+          ].map(({ key, label }) => {
+            const active = condTab === (key as "before" | "after" | "diff");
+            return (
+              <button
+                key={key}
+                onClick={() => setCondTab(key as "before" | "after" | "diff")}
+                className={`w-28 px-3 py-1.5 text-sm font-semibold ${
+                  active ? "bg-gray-800/50" : "text-gray-300"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -72,9 +61,11 @@ export const ConditionTabs = ({
             />
           </div>
 
-          <div className="w-56 flex justify-between text-xs text-gray-400 select-none">
+          <div className="w-56 flex justify-between text-[11px] text-gray-400 select-none whitespace-nowrap">
             {timepoints.map((tp, i) => (
-              <span key={i}>{tp}</span>
+              <span key={i} className="tabular-nums">
+                {tp}
+              </span>
             ))}
           </div>
         </div>
