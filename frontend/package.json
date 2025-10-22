@@ -13,7 +13,9 @@
   "dependencies": {
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.3.0",
+    "@reduxjs/toolkit": "^2.9.1",
     "@tailwindcss/vite": "^4.1.13",
+    "@types/react-redux": "^7.1.34",
     "@types/three": "^0.180.0",
     "antd": "^5.27.4",
     "axios": "^1.12.2",
@@ -21,6 +23,7 @@
     "leva": "^0.10.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-redux": "^9.2.0",
     "simple-statistics": "^7.8.8",
     "tailwindcss": "^4.1.13",
     "three": "^0.180.0"
