@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GeneDropdownProps } from "../../types/data_types_interfaces";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setSelectedGenes } from "../../store/uiSlice";
+
+// for fallback,a empty list
+const EMPTY_GENES: readonly string[] = [];
 
 export const GeneDropdown = ({
-  options,
-  selected,
-  onChange,
   placeholder = "Select genes...",
   className = "",
 }: GeneDropdownProps) => {
+  const dispatch = useAppDispatch();
+  const selected = useAppSelector((s) => s.ui.selectedGenes);
+  const options = useAppSelector((s) => s.data.data?.gene_list ?? EMPTY_GENES);
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -31,17 +37,17 @@ export const GeneDropdown = ({
 
   const toggle = (gene: string) => {
     if (selected.includes(gene)) {
-      onChange(selected.filter((s) => s !== gene));
+      dispatch(setSelectedGenes(selected.filter((s) => s !== gene)));
     } else {
-      onChange([...selected, gene]);
+      dispatch(setSelectedGenes([...selected, gene]));
     }
   };
 
   const removeChip = (gene: string) => {
-    onChange(selected.filter((s) => s !== gene));
+    dispatch(setSelectedGenes(selected.filter((s) => s !== gene)));
   };
 
-  const clearAll = () => onChange([]);
+  const clearAll = () => dispatch(setSelectedGenes([]));
 
   const openAndFocus = () => {
     setOpen((o) => !o);

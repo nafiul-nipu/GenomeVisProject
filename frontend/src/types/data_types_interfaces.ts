@@ -13,34 +13,20 @@ export type DataInfoType = {
 };
 
 export interface ChromosomeDropdownProps {
-  selectedOption: string;
-  onSelectionChange: (option: string) => void;
-  data: string[];
+  meta_data: DataInfoType;
 }
 
 export interface SpeciesDropdownProps {
-  selectedOption: string;
-  onSelectionChange: (option: string) => void;
-  data: string[];
-  setChromosome: (option: string) => void;
   meta_data: DataInfoType;
 }
 
 export interface GeneDropdownProps {
-  options: string[]; // gene_list
-  selected: string[]; // selected genes
-  onChange: (option: string[]) => void;
   placeholder?: string;
   className?: string;
 }
 
 export interface ConditionTabsProps {
-  setCondTab: React.Dispatch<React.SetStateAction<"before" | "after" | "diff">>;
-  condTab: "before" | "after" | "diff";
-  timeIdx: number;
-  setTimeIdx: React.Dispatch<React.SetStateAction<number>>;
   meta_data_typed: DataInfoType;
-  species: string;
 }
 
 export interface workerPostMessageType {

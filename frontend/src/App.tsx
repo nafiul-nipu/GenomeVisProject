@@ -1,76 +1,40 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "./App.css";
 import { SpeciesDropdown } from "./components/dropdowns/SpeciesDropdown";
 import meta_data from "./data_info.json";
-import type {
-  DataInfoType,
-  workerToClientMessageType,
-} from "./types/data_types_interfaces";
+import type { DataInfoType } from "./types/data_types_interfaces";
 import { ChromosomeDropdown } from "./components/dropdowns/ChromosomeDropdown";
-import { messageToClient } from "./worker/messageToClient";
-import { messageToWorker } from "./worker/messageToWorker";
 import { GeneDropdown } from "./components/dropdowns/GeneDropdown";
 import { ConditionTabs } from "./components/three-views/ConditionsTab";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { fetchWorkerData } from "./store/dataSlice";
+import { terminateWorker } from "./worker/workerService";
 
 const meta_data_typed = meta_data as DataInfoType;
 
 export default function App() {
   const mount = useRef<boolean | null>(null);
-  const workerRef = useRef<Worker | null>(null);
-
-  const [species, setSpecies] = useState<string>("green_monkey");
-  const [chromosome, setChromosome] = useState<string>("chr1");
-
-  const [selectedGenes, setSelectedGenes] = useState<string[]>([]); // array of selected gene names
-
-  const [data, setData] = useState<workerToClientMessageType | null>(null);
-
-  // two states
-  const [condTab, setCondTab] = useState<"before" | "after" | "diff">("before");
-  const [timeIdx, setTimeIdx] = useState(0);
-
-  // console.log(test);
+  const dispatch = useAppDispatch();
+  const { species, chromosome, condTab, timeIdx } = useAppSelector((s) => s.ui);
+  const status = useAppSelector((s) => s.data.status);
 
   useEffect(() => {
     mount.current = true;
 
-    workerRef.current = new Worker(
-      new URL("./worker/data.worker.ts", import.meta.url),
-      {
-        type: "module",
-      }
+    dispatch(
+      fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
     );
 
-    workerRef.current.onmessage = (evt: MessageEvent) => {
-      messageToClient(evt.data, setData);
-    };
-
-    messageToWorker({
-      workerRef: workerRef.current,
-      data_info: meta_data_typed,
-      species: species,
-      chromosome: chromosome,
-    });
-
-    return () => {
-      workerRef.current?.terminate();
-      mount.current = false;
-    };
+    return () => terminateWorker();
   }, []);
 
-  // on data change
   useEffect(() => {
-    if (mount.current && species) {
-      messageToWorker({
-        workerRef: workerRef.current,
-        data_info: meta_data_typed,
-        species: species,
-        chromosome: chromosome,
-      });
-    }
-  }, [species, chromosome]);
+    if (!mount.current) return;
 
-  console.log("data from worker", data);
+    dispatch(
+      fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
+    );
+  }, [dispatch, species, chromosome]);
 
   return (
     <div className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">
@@ -79,29 +43,9 @@ export default function App() {
         <div className="w-full px-4 h-full flex items-center gap-3">
           <h1 className="text-xl font-semibold tracking-tight">GenomeVis</h1>
 
-          <SpeciesDropdown
-            selectedOption={species}
-            onSelectionChange={setSpecies}
-            data={Object.keys(meta_data)}
-            setChromosome={setChromosome}
-            meta_data={meta_data_typed}
-          />
-
-          <ChromosomeDropdown
-            selectedOption={chromosome}
-            onSelectionChange={setChromosome}
-            data={meta_data_typed[species].chromosomes ?? []}
-          />
-
-          {data && (
-            <GeneDropdown
-              options={data?.gene_list ?? []}
-              selected={selectedGenes}
-              onChange={setSelectedGenes}
-              className="ml-2"
-              placeholder="Filter genes…"
-            />
-          )}
+          <SpeciesDropdown meta_data={meta_data_typed} />
+          <ChromosomeDropdown meta_data={meta_data_typed} />
+          <GeneDropdown />
         </div>
       </header>
 
@@ -109,22 +53,32 @@ export default function App() {
       <section className="flex-grow px-1 py-2 overflow-hidden">
         <div className="h-full rounded-2xl border border-gray-800 bg-gray-900/40 p-3 shadow-inner flex flex-col">
           <div className="mb-2">
-            <ConditionTabs
-              setCondTab={setCondTab}
-              condTab={condTab}
-              timeIdx={timeIdx}
-              setTimeIdx={setTimeIdx}
-              meta_data_typed={meta_data_typed}
-              species={species}
-            />
+            <ConditionTabs meta_data_typed={meta_data_typed} />
           </div>
 
-          <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
+          {/* <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
             <span className="text-sm text-gray-400">
               {condTab}
               {condTab === "diff" ? ` ${timeIdx} ` : " "}
               React Three Fiber will mount here
             </span>
+          </div> */}
+          <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
+            {status === "loading" ? (
+              <span className="text-sm text-sky-400 animate-pulse">
+                Loading 3D data…
+              </span>
+            ) : status === "failed" ? (
+              <span className="text-sm text-red-400">
+                Worker error loading data
+              </span>
+            ) : (
+              <span className="text-sm text-gray-400">
+                {condTab}
+                {condTab === "diff" ? ` ${timeIdx} ` : " "}React Three Fiber
+                will mount here
+              </span>
+            )}
           </div>
         </div>
       </section>
@@ -136,11 +90,23 @@ export default function App() {
             <h2 className="text-lg font-medium">2D View</h2>
           </div>
 
-          <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
+          {/* <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
             <span className="text-sm text-gray-400">
               [Silhouettes • Projections • Densities — {condTab}
               {condTab === "diff" ? `${timeIdx}` : ""}]
             </span>
+          </div> */}
+          <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
+            {status === "loading" ? (
+              <span className="text-sm text-sky-400 animate-pulse">
+                Loading silhouettes / densities…
+              </span>
+            ) : (
+              <span className="text-sm text-gray-400">
+                [Silhouettes • Projections • Densities — {condTab}
+                {condTab === "diff" ? ` ${timeIdx}` : ""}]
+              </span>
+            )}
           </div>
         </div>
       </section>

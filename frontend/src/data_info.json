@@ -37,5 +37,24 @@
     "after_name": "vacv",
     "gene_folder_name": "structure_genes_aligned",
     "gene_file_tail": "gene_aligned"
+  },
+  "another": {
+    "chromosomes": [
+      "chr1",
+      "chr2",
+      "chr3",
+      "chr4",
+      "chr5",
+      "chr6",
+      "chr7",
+      "chr8",
+      "chr9"
+    ],
+    "timepoints": ["12hrs", "18hrs"],
+    "resolution": 100000,
+    "before_name": "untr",
+    "after_name": "vacv",
+    "gene_folder_name": "structure_genes_aligned",
+    "gene_file_tail": "gene_aligned"
   }
 }

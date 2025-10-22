@@ -1,14 +1,12 @@
 // components/ConditionTabs.tsx
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setCondTabstate, setTimeIdx } from "../../store/uiSlice";
 import type { ConditionTabsProps } from "../../types/data_types_interfaces";
 
-export const ConditionTabs = ({
-  setCondTab,
-  condTab,
-  timeIdx,
-  setTimeIdx,
-  meta_data_typed,
-  species,
-}: ConditionTabsProps) => {
+export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
+  const dispatch = useAppDispatch();
+  const { condTab, timeIdx, species } = useAppSelector((s) => s.ui);
+
   // species-specific info
   const beforeLabel =
     meta_data_typed[species]?.before_name?.toLowerCase() || "untr";
@@ -33,7 +31,9 @@ export const ConditionTabs = ({
             return (
               <button
                 key={key}
-                onClick={() => setCondTab(key as "before" | "after" | "diff")}
+                onClick={() =>
+                  dispatch(setCondTabstate(key as "before" | "after" | "diff"))
+                }
                 className={`w-28 px-3 py-1.5 text-sm font-semibold ${
                   active ? "bg-gray-800/50" : "text-gray-300"
                 }`}
@@ -56,7 +56,7 @@ export const ConditionTabs = ({
               max={timepoints.length - 1}
               step={1}
               value={timeIdx}
-              onChange={(e) => setTimeIdx(Number(e.target.value))}
+              onChange={(e) => dispatch(setTimeIdx(Number(e.target.value)))}
               className="w-56 accent-sky-400 cursor-pointer"
             />
           </div>
