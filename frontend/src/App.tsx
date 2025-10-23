@@ -9,6 +9,7 @@ import { ConditionTabs } from "./components/three-views/ConditionsTab";
 import { useAppDispatch, useAppSelector } from "./redux-store/hooks";
 import { fetchWorkerData } from "./redux-store/dataSlice";
 import { terminateWorker } from "./worker/workerService";
+import { ThreeDViewContainer } from "./components/three-views/ThreeDViewContainer";
 
 const meta_data_typed = meta_data as DataInfoType;
 
@@ -89,11 +90,7 @@ export default function App() {
                 Worker error loading data
               </span>
             ) : (
-              <span className="text-sm text-gray-400">
-                {condTab}
-                {condTab === "diff" ? ` ${timeIdx} ` : " "}React Three Fiber
-                will mount here
-              </span>
+              <ThreeDViewContainer />
             )}
           </div>
         </div>
