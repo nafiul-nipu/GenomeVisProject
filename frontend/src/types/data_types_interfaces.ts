@@ -123,3 +123,60 @@ export interface BackgroundMask {
   XZ: MaskMatrix;
   YZ: MaskMatrix;
 }
+
+export type Vec3 = [number, number, number];
+export interface LightSettings {
+  ambient: { visible: boolean; intensity: number };
+  dirFront: {
+    visible: boolean;
+    position: Vec3;
+    intensity: number;
+    castShadow: boolean;
+  };
+  dirBack: {
+    visible: boolean;
+    position: Vec3;
+    intensity: number;
+    castShadow: boolean;
+  };
+  dirLeft: {
+    visible: boolean;
+    position: Vec3;
+    intensity: number;
+    castShadow: boolean;
+  };
+  dirRight: {
+    visible: boolean;
+    position: Vec3;
+    intensity: number;
+    castShadow: boolean;
+  };
+}
+
+export const defaultLightSettings: LightSettings = {
+  ambient: { visible: true, intensity: 0.5 },
+  dirFront: {
+    visible: true,
+    position: [3.3, 1.0, 4.4],
+    intensity: 0.4,
+    castShadow: true,
+  },
+  dirBack: {
+    visible: true,
+    position: [-3.3, -1.0, -4.4],
+    intensity: 0.4,
+    castShadow: true,
+  },
+  dirLeft: {
+    visible: true,
+    position: [-5.0, 5.0, 5.0],
+    intensity: 0.4,
+    castShadow: true,
+  },
+  dirRight: {
+    visible: true,
+    position: [5.0, 5.0, 5.0],
+    intensity: 0.4,
+    castShadow: true,
+  },
+};

@@ -73,13 +73,6 @@ export default function App() {
             <ConditionTabs meta_data_typed={meta_data_typed} />
           </div>
 
-          {/* <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
-            <span className="text-sm text-gray-400">
-              {condTab}
-              {condTab === "diff" ? ` ${timeIdx} ` : " "}
-              React Three Fiber will mount here
-            </span>
-          </div> */}
           <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
             {status === "loading" ? (
               <span className="text-sm text-sky-400 animate-pulse">
@@ -90,7 +83,7 @@ export default function App() {
                 Worker error loading data
               </span>
             ) : (
-              <ThreeDViewContainer />
+              <ThreeDViewContainer meta_data_typed={meta_data_typed} />
             )}
           </div>
         </div>
