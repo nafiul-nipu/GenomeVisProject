@@ -1,8 +1,8 @@
 import React from "react";
 import "../../App.css";
 import type { SpeciesDropdownProps } from "../../types/data_types_interfaces";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { setChromosome, setSpecies } from "../../store/uiSlice";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
+import { setChromosome, setSpecies } from "../../redux-store/uiSlice";
 
 export const SpeciesDropdown: React.FC<SpeciesDropdownProps> = ({
   meta_data,

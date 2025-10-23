@@ -1,8 +1,8 @@
 import React from "react";
 import "../../App.css";
 import type { ChromosomeDropdownProps } from "../../types/data_types_interfaces";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { setChromosome } from "../../store/uiSlice";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
+import { setChromosome } from "../../redux-store/uiSlice";
 
 export const ChromosomeDropdown: React.FC<ChromosomeDropdownProps> = ({
   meta_data,

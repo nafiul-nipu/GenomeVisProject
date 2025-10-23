@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GeneDropdownProps } from "../../types/data_types_interfaces";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { setSelectedGenes } from "../../store/uiSlice";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
+import { setSelectedGenes } from "../../redux-store/uiSlice";
 
 // for fallback,a empty list
 const EMPTY_GENES: readonly string[] = [];

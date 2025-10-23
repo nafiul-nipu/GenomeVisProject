@@ -6,8 +6,8 @@ import type { DataInfoType } from "./types/data_types_interfaces";
 import { ChromosomeDropdown } from "./components/dropdowns/ChromosomeDropdown";
 import { GeneDropdown } from "./components/dropdowns/GeneDropdown";
 import { ConditionTabs } from "./components/three-views/ConditionsTab";
-import { useAppDispatch, useAppSelector } from "./store/hooks";
-import { fetchWorkerData } from "./store/dataSlice";
+import { useAppDispatch, useAppSelector } from "./redux-store/hooks";
+import { fetchWorkerData } from "./redux-store/dataSlice";
 import { terminateWorker } from "./worker/workerService";
 
 const meta_data_typed = meta_data as DataInfoType;
@@ -21,9 +21,17 @@ export default function App() {
   useEffect(() => {
     mount.current = true;
 
+    console.log("[component] Dispatching fetchWorkerData...");
     dispatch(
       fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
-    );
+    )
+      .unwrap()
+      .then((res) => console.log("[component] Worker success:", res))
+      .catch((err) => console.error("[component] Worker failed:", err));
+
+    // dispatch(
+    //   fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
+    // );
 
     return () => terminateWorker();
   }, []);
@@ -31,9 +39,17 @@ export default function App() {
   useEffect(() => {
     if (!mount.current) return;
 
+    console.log("[component] Dispatching fetchWorkerData...");
     dispatch(
       fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
-    );
+    )
+      .unwrap()
+      .then((res) => console.log("[component] Worker success:", res))
+      .catch((err) => console.error("[component] Worker failed:", err));
+
+    // dispatch(
+    //   fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
+    // );
   }, [dispatch, species, chromosome]);
 
   return (

@@ -1,6 +1,6 @@
 // components/ConditionTabs.tsx
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { setCondTabstate, setTimeIdx } from "../../store/uiSlice";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
+import { setCondTabstate, setTimeIdx } from "../../redux-store/uiSlice";
 import type { ConditionTabsProps } from "../../types/data_types_interfaces";
 
 export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {

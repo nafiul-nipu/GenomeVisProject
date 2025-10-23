@@ -33,6 +33,8 @@ export interface workerPostMessageType {
   data_info: DataInfoType;
   species: string;
   chromosome: string;
+  requestId?: string;
+  op?: string;
 }
 
 export interface workerToClientMessageType {

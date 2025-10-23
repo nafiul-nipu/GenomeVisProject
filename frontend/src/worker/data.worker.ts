@@ -14,9 +14,16 @@ import type {
 addEventListener(
   "message",
   async (event: MessageEvent<workerPostMessageType>) => {
+    const requestId = event.data.requestId;
     const meta_data = event.data.data_info;
     const species = event.data.species;
     const chromosome = event.data.chromosome;
+
+    // console.log("[worker] Received message:", {
+    //   requestId,
+    //   species,
+    //   chromosome,
+    // });
 
     // fetching gene data
     const gene_data: Record<string, GeneRowDataType[]> =
@@ -32,7 +39,7 @@ addEventListener(
     const gene_single_snapshopt: GeneRowDataType[] =
       gene_data[
         `${chromosome}_${meta_data[species].timepoints[0]}_${meta_data[species].before_name}`
-      ];
+      ] ?? [];
 
     const gene_list: string[] = gene_single_snapshopt
       .map((d) => {
@@ -76,6 +83,7 @@ addEventListener(
     // console.log("background mask", backgroundMaskData);
 
     postMessage({
+      requestId,
       gene_data: gene_data,
       gene_list: gene_list,
       contour_data: contour_data,

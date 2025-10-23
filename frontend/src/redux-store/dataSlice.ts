@@ -28,6 +28,7 @@ export const fetchWorkerData = createAsyncThunk<
   // post a request to the worker and await a response
   // via a promise
   const result = await requestData(data_info, species, chromosome);
+  // console.log("[workerService] Received response:", result);
 
   return result;
 });
@@ -55,6 +56,7 @@ const dataSlice = createSlice({
       .addCase(fetchWorkerData.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error?.message || "Worker request failed";
+        // console.error("[redux] Worker rejected:", action.error);
       });
   },
 });
