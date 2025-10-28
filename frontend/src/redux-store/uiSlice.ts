@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import {
+  defaultLightSettings,
+  type LightSettings,
+} from "../types/data_types_interfaces";
 
 type CondTab = "before" | "after" | "diff";
 
@@ -9,6 +13,8 @@ interface UIState {
   selectedGenes: string[];
   condTab: CondTab;
   timeIdx: number;
+  toggleLightGear: boolean;
+  lightSettings: LightSettings;
 }
 
 const initialState: UIState = {
@@ -17,6 +23,8 @@ const initialState: UIState = {
   selectedGenes: [],
   condTab: "before",
   timeIdx: 0,
+  toggleLightGear: false,
+  lightSettings: defaultLightSettings,
 };
 
 // creating slices
@@ -39,6 +47,12 @@ const uiSlice = createSlice({
     setTimeIdx(state, action: PayloadAction<number>) {
       state.timeIdx = action.payload;
     },
+    setLightSettingsOpen(state, action: PayloadAction<boolean>) {
+      state.toggleLightGear = action.payload;
+    },
+    setLightSettings(state, action: PayloadAction<LightSettings>) {
+      state.lightSettings = action.payload;
+    },
   },
 });
 
@@ -48,6 +62,8 @@ export const {
   setSelectedGenes,
   setCondTabstate,
   setTimeIdx,
+  setLightSettingsOpen,
+  setLightSettings,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

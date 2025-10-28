@@ -1,11 +1,18 @@
 // components/ConditionTabs.tsx
 import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
-import { setCondTabstate, setTimeIdx } from "../../redux-store/uiSlice";
+import {
+  setCondTabstate,
+  setLightSettings,
+  setLightSettingsOpen,
+  setTimeIdx,
+} from "../../redux-store/uiSlice";
 import type { ConditionTabsProps } from "../../types/data_types_interfaces";
+import LightsPanel from "./LightsPanel";
 
 export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
   const dispatch = useAppDispatch();
-  const { condTab, timeIdx, species } = useAppSelector((s) => s.ui);
+  const { condTab, timeIdx, species, toggleLightGear, lightSettings } =
+    useAppSelector((s) => s.ui);
 
   // species-specific info
   const beforeLabel =
@@ -42,6 +49,50 @@ export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
               </button>
             );
           })}
+        </div>
+
+        {/* ⚙️ Gear icon */}
+        <div className="relative">
+          <button
+            onClick={() => dispatch(setLightSettingsOpen(!toggleLightGear))}
+            title={
+              toggleLightGear ? "Hide light settings" : "Show light settings"
+            }
+            className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-800/70 bg-gray-900/60 hover:bg-gray-800/60"
+            aria-pressed={toggleLightGear}
+          >
+            {/* Gear SVG */}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+              <path
+                d="M19.4 13.5a7.45 7.45 0 0 0 .05-3l2.04-1.18-2-3.46-2.36.62a7.52 7.52 0 0 0-2.6-1.5L14 2h-4l-.53 2.98a7.52 7.52 0 0 0-2.6 1.5l-2.36-.62-2 3.46 2.04 1.18a7.45 7.45 0 0 0 .05 3L.51 14.68l2 3.46 2.36-.62a7.52 7.52 0 0 0 2.6 1.5L10 22h4l.53-2.98a7.52 7.52 0 0 0 2.6-1.5l2.36.62 2-3.46-2.09-1.18Z"
+                stroke="currentColor"
+                strokeWidth="1.2"
+              />
+            </svg>
+          </button>
+
+          {/* 🔽 Dropdown LightsPanel */}
+          {toggleLightGear && (
+            <div className="absolute left-0 top-[2.6rem] z-30">
+              <LightsPanel
+                settings={lightSettings} // use your actual settings source
+                onChange={(next) => dispatch(setLightSettings(next))}
+                onClose={() => dispatch(setLightSettingsOpen(false))}
+                className="shadow-lg"
+              />
+            </div>
+          )}
         </div>
       </div>
 

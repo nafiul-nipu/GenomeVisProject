@@ -3,7 +3,6 @@ import React from "react";
 import type { LightSettings, Vec3 } from "../../types/data_types_interfaces";
 
 type NumInputProps = React.InputHTMLAttributes<HTMLInputElement>;
-
 const Num = (props: NumInputProps) => (
   <input
     {...props}
@@ -30,10 +29,12 @@ export default function LightsPanel({
   settings,
   onChange,
   className = "",
+  onClose,
 }: {
   settings: LightSettings;
   onChange: (next: LightSettings) => void;
   className?: string;
+  onClose?: () => void;
 }) {
   const updateAll = (next: LightSettings) => onChange(next);
 
@@ -64,7 +65,6 @@ export default function LightsPanel({
     idx: 0 | 1 | 2,
     v: number
   ) => {
-    // clone the Vec3 safely
     const nextPos: Vec3 = [
       settings[key].position[0],
       settings[key].position[1],
@@ -78,7 +78,35 @@ export default function LightsPanel({
     <div
       className={`rounded-lg border border-gray-800 bg-gray-900/60 p-2 text-xs text-gray-200 ${className}`}
     >
-      <div className="font-semibold text-[11px] mb-1">Lights</div>
+      {/* Header row with optional minimize button */}
+      <div className="flex items-center mb-1">
+        <div className="font-semibold text-[11px]">Lights</div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            title="Minimize"
+            className="ml-auto px-1.5 py-0.5 rounded bg-gray-800/70 hover:bg-gray-700/70 border border-gray-700 text-gray-300"
+          >
+            {/* minus icon */}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <rect
+                x="5"
+                y="11"
+                width="14"
+                height="2"
+                rx="1"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
+      </div>
 
       {/* Ambient */}
       <div className="flex items-center gap-2 mb-2">

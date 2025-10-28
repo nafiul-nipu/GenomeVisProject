@@ -1,5 +1,11 @@
 // components/three-d/ThreeDViewContainer.tsx
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, {
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   AdaptiveDpr,
@@ -10,12 +16,7 @@ import {
 } from "@react-three/drei";
 import { useAppSelector } from "../../redux-store/hooks";
 import { Lights } from "./Lights";
-import LightsPanel from "./LightsPanel";
-import {
-  defaultLightSettings,
-  type DataInfoType,
-  type LightSettings,
-} from "../../types/data_types_interfaces";
+import { type DataInfoType } from "../../types/data_types_interfaces";
 
 import * as THREE from "three";
 
@@ -46,7 +47,9 @@ function SpinningCube() {
 type Props = { meta_data_typed: DataInfoType };
 
 export function ThreeDViewContainer({ meta_data_typed }: Props) {
-  const { condTab, timeIdx, species } = useAppSelector((s) => s.ui);
+  const { condTab, timeIdx, species, lightSettings } = useAppSelector(
+    (s) => s.ui
+  );
   const meta = meta_data_typed;
 
   // Host element for events and for layout
@@ -56,15 +59,34 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     if (hostRef.current) setEventSource(hostRef.current);
   }, []);
 
+  // to update sizes on resize
+  const tracksWrapRef = useRef<HTMLDivElement>(null);
+  const [wrapSize, setWrapSize] = useState({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    if (!tracksWrapRef.current) return;
+    const el = tracksWrapRef.current;
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setWrapSize({ w: rect.width, h: rect.height });
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
   // Timepoints from metadata
   const timepoints: string[] = useMemo(
     () => meta?.[species]?.timepoints ?? [],
     [meta, species]
   );
-
-  // Lights state
-  const [lightSettings, setLightSettings] =
-    useState<LightSettings>(defaultLightSettings);
 
   // View keys & titles
   const viewKeys = useMemo(() => {
@@ -88,28 +110,30 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   );
 
   // Sizes
-  const viewHeight = Math.round((60 * window.innerHeight) / 100);
+  const titlesRow = 18; // label line-height
+  const gapX = 8; // matches gap-2
+  const columns = Math.max(1, viewKeys.length);
+
+  const viewHeight = Math.max(120, Math.floor(wrapSize.h - titlesRow));
   const viewWidth = Math.max(
     220,
-    Math.floor(window.innerWidth / Math.max(1, viewKeys.length)) - 16
+    Math.floor((wrapSize.w - gapX * (columns - 1)) / columns) - 2
   );
 
   return (
-    <div ref={hostRef} className="relative w-full h-full">
-      {/* Floating settings panel */}
-      <div className="absolute right-3 top-3 z-20 pointer-events-auto">
-        <LightsPanel settings={lightSettings} onChange={setLightSettings} />
-      </div>
-
+    <div ref={hostRef} className="relative w-full h-full overflow-hidden">
       {/* Titles + target divs */}
-      <div className="absolute left-3 top-3 z-10 flex gap-2 pointer-events-none">
+      <div
+        ref={tracksWrapRef}
+        className="absolute left-3 top-3 right-3 bottom-3 z-10 flex gap-2 pointer-events-none overflow-hidden"
+      >
         {viewRefs.map((ref, i) => (
           <div key={i} className="flex flex-col pointer-events-auto">
             <div className="text-xs text-gray-300 mb-1">{titles[i]}</div>
             <div
               ref={ref}
               style={{ width: viewWidth, height: viewHeight }}
-              className="inline-block rounded-md border border-gray-800 bg-gray-900/40"
+              className="inline-block rounded-md border border-gray-800 bg-gray-900/40 box-border"
             />
           </div>
         ))}
