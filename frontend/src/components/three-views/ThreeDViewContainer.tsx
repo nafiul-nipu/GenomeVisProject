@@ -6,43 +6,17 @@ import React, {
   useEffect,
   useLayoutEffect,
 } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import {
   AdaptiveDpr,
   AdaptiveEvents,
   OrbitControls,
   View,
-  Center,
 } from "@react-three/drei";
 import { useAppSelector } from "../../redux-store/hooks";
 import { Lights } from "./Lights";
 import { type DataInfoType } from "../../types/data_types_interfaces";
-
-import * as THREE from "three";
-
-// Simple visible thing: rotating cube + axes + ground
-function SpinningCube() {
-  const ref = useRef<THREE.Mesh>(null!);
-  useFrame((_, dt) => {
-    if (ref.current) {
-      ref.current.rotation.x += dt * 0.5;
-      ref.current.rotation.y += dt * 0.7;
-    }
-  });
-  return (
-    <Center>
-      <mesh ref={ref}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial />
-      </mesh>
-      <axesHelper args={[5]} />
-      <mesh position={[0, -1.6, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial />
-      </mesh>
-    </Center>
-  );
-}
+import { GeneSphereView } from "./GeneSphereView";
 
 type Props = { meta_data_typed: DataInfoType };
 
@@ -143,9 +117,9 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
       <Canvas
         eventSource={eventSource}
         className="absolute inset-0 z-0"
-        frameloop="always" // ensure the cube spins; change to "demand" later
+        frameloop="demand" // ensure the cube spins; change to "demand" later
         performance={{ min: 0.4 }}
-        camera={{ position: [8, 6, 18], near: 0.1 }}
+        camera={{ position: [10, 5, 75], near: 0.1 }}
       >
         {viewRefs.map((ref, i) => (
           <View
@@ -155,12 +129,13 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
           >
             <color attach="background" args={["#0b0f16"]} />
             <Lights settings={lightSettings} />
-            <SpinningCube />
+            <GeneSphereView meta_data={meta_data_typed} />
             <OrbitControls
               makeDefault
               enableDamping={false}
-              enablePan
-              enableZoom
+              regress
+              enablePan={true}
+              enableZoom={true}
             />
             <AdaptiveDpr pixelated />
             <AdaptiveEvents />
