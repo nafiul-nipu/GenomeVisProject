@@ -57,7 +57,10 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   }, []);
 
   // Timepoints from metadata
-  const timepoints: string[] = meta?.[species]?.timepoints ?? [];
+  const timepoints: string[] = useMemo(
+    () => meta?.[species]?.timepoints ?? [],
+    [meta, species]
+  );
 
   // Lights state
   const [lightSettings, setLightSettings] =
@@ -78,15 +81,11 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   }, [condTab, timeIdx, timepoints]);
 
   // HTMLElement refs for <View track={…}>
-  const viewRefs = useMemo<React.RefObject<HTMLElement>[]>(
-    () => viewKeys.map(() => React.createRef<HTMLElement>()),
+  // NOTE: No manual assignment, no callback ref — just normal refs used directly.
+  const viewRefs = useMemo(
+    () => viewKeys.map(() => React.createRef<HTMLDivElement>()),
     [viewKeys]
   );
-
-  // Callback ref to attach divs → HTMLElement refs (no casts)
-  const setViewRef = (i: number) => (el: HTMLDivElement | null) => {
-    viewRefs[i].current = el ?? undefined;
-  };
 
   // Sizes
   const viewHeight = Math.round((60 * window.innerHeight) / 100);
@@ -104,11 +103,11 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
 
       {/* Titles + target divs */}
       <div className="absolute left-3 top-3 z-10 flex gap-2 pointer-events-none">
-        {viewRefs.map((_, i) => (
+        {viewRefs.map((ref, i) => (
           <div key={i} className="flex flex-col pointer-events-auto">
             <div className="text-xs text-gray-300 mb-1">{titles[i]}</div>
             <div
-              ref={setViewRef(i)}
+              ref={ref}
               style={{ width: viewWidth, height: viewHeight }}
               className="inline-block rounded-md border border-gray-800 bg-gray-900/40"
             />
@@ -125,7 +124,11 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
         camera={{ position: [8, 6, 18], near: 0.1 }}
       >
         {viewRefs.map((ref, i) => (
-          <View key={i} track={ref} index={i}>
+          <View
+            key={i}
+            track={ref as unknown as React.RefObject<HTMLElement>}
+            index={i}
+          >
             <color attach="background" args={["#0b0f16"]} />
             <Lights settings={lightSettings} />
             <SpinningCube />
