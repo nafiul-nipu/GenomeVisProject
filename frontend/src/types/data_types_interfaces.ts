@@ -189,3 +189,5 @@ export const defaultLightSettings: LightSettings = {
     castShadow: true,
   },
 };
+
+export type Edge = { source: number; target: number };

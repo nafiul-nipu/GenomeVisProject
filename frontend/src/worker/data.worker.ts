@@ -9,7 +9,10 @@ import type {
   Density2DType,
   BackgroundMask,
   ProjectionResult,
+  Edge,
 } from "../types/data_types_interfaces";
+import { createEdges } from "../utilFunctions/createEdges";
+import { createPathsBetweenEdges } from "../utilFunctions/createPathsBetweenEdges";
 
 addEventListener(
   "message",
@@ -33,7 +36,21 @@ addEventListener(
         gene_data_folder: meta_data[species].gene_folder_name,
         dataInfo: meta_data,
       });
-    // console.log("gene data", gene_data);
+
+    const gene_edges: Record<string, Edge[]> = {};
+    const gene_paths: Record<string, number[][]> = {};
+
+    for (const key of Object.keys(gene_data)) {
+      const length: number = gene_data[key].length;
+      const edges = await createEdges(length);
+      const paths = await createPathsBetweenEdges(edges);
+      gene_edges[key] = edges;
+      gene_paths[key] = paths;
+    }
+
+    // console.log(Object.entries(gene_data));
+    // console.log(gene_edges);
+    // console.log(gene_paths);
 
     // getting gene list
     const gene_single_snapshopt: GeneRowDataType[] =
@@ -85,6 +102,8 @@ addEventListener(
     postMessage({
       requestId,
       gene_data: gene_data,
+      gene_edges: gene_edges,
+      gene_paths: gene_list,
       gene_list: gene_list,
       contour_data: contour_data,
       density_data: density_data,

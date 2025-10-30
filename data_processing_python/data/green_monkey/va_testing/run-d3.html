@@ -113,29 +113,114 @@
           return;
         }
 
-        // --- fetch data ---
-        const ROOT = "./web_data";
-        const meta = await (await fetch(`${ROOT}/meta.json`)).json();
-        const bgmask = await (
-          await fetch(`${ROOT}/background_mask.json`)
-        ).json();
-        const contoursAll = await (
-          await fetch(`${ROOT}/contours_d3.json`)
-        ).json();
-        const projections = await (
-          await fetch(`${ROOT}/projections.json`)
-        ).json();
-        const metrics = await (await fetch(`${ROOT}/metrics.json`)).json();
-        let densityA = null,
-          densityB = null;
-        try {
-          densityA = await (await fetch(`${ROOT}/density_A.json`)).json();
-        } catch {}
-        try {
-          densityB = await (await fetch(`${ROOT}/density_B.json`)).json();
-        } catch {}
+        // --- helpers ---
+        async function loadJson(url, { optional = false } = {}) {
+          const res = await fetch(url);
+          if (!res.ok) {
+            const msg = `[fetch] ${res.status} ${res.statusText} for ${url}`;
+            if (optional) {
+              console.warn(msg);
+              return null;
+            }
+            throw new Error(msg);
+          }
+          return res.json();
+        }
+
+        // Resolve ROOT robustly
+        const ROOT = new URL("./web_data/", window.location.href)
+          .toString()
+          .replace(/\/$/, "");
+
+        // 1) meta / metrics (renamed)
+        const meta = await loadJson(`${ROOT}/meta_data.json`);
+        const metricsRaw = await loadJson(`${ROOT}/metrics_data.json`);
+
+        // Some old code expects meta.levels.hdr / meta.levels.pf; if your meta has a flat "levels",
+        // mirror it so the UI still works.
+        if (!meta.levels?.hdr && meta.levels) {
+          meta.levels = { hdr: meta.levels, pf: meta.levels };
+        }
+
+        // 2) background mask (same name)
+        const bgmask = await loadJson(`${ROOT}/background_mask.json`);
+
+        // 3) projections (now split per plane file)
+        const projXY = await loadJson(
+          `${ROOT}/projections/XY_projections.json`
+        );
+        const projXZ = await loadJson(
+          `${ROOT}/projections/XZ_projections.json`
+        );
+        const projYZ = await loadJson(
+          `${ROOT}/projections/YZ_projections.json`
+        );
+
+        // Normalized shape the rest of the code expects: projections[plane] = { A: [[x,y]...], B: [[x,y]...] }
+        const projections = {
+          XY: projXY ?? { A: [], B: [] },
+          XZ: projXZ ?? { A: [], B: [] },
+          YZ: projYZ ?? { A: [], B: [] },
+        };
+
+        // 4) contours (two files, UNTR → A, VACV → B). We’ll merge into the legacy "contoursAll.contours" array.
+        const ctrA = await loadJson(`${ROOT}/contours/12h_UNTR_contour.json`);
+        const ctrB = await loadJson(`${ROOT}/contours/12h_VACV_contour.json`);
+
+        // Your contour JSON likely looks like { XY: [[x,y]...], XZ: [...], YZ: [...] } or similar.
+        // Build rows like: { plane:'XY', variant:'hdr', level:<first meta level>, label:'A'|'B', points:[[x,y]...] }
+        function toRows(obj, label) {
+          if (!obj) return [];
+          const defaultLevel = meta.levels?.hdr?.[0] ?? meta.levels?.[0] ?? 100;
+          const planes = Object.keys(obj); // expect XY/XZ/YZ
+          const rows = [];
+          for (const plane of planes) {
+            const value = obj[plane];
+            // value may be a **single polygon** or an **array of polygons** per plane; normalize to array of arrays
+            const polys = Array.isArray(value?.[0]?.[0]) ? value : [value];
+            for (const poly of polys) {
+              rows.push({
+                plane,
+                variant: "hdr", // if you also have PF, you can duplicate rows with variant:'pf'
+                level: +defaultLevel,
+                label, // 'A' or 'B'
+                points: poly, // [[x,y], ...]
+              });
+            }
+          }
+          return rows;
+        }
+
+        const contoursAll = {
+          contours: [...toRows(ctrA, "A"), ...toRows(ctrB, "B")],
+        };
+
+        // 5) densities (two files; UNTR→A, VACV→B). Normalize as densityA[plane][y][x]
+        const densityA = await loadJson(
+          `${ROOT}/density/12h_UNTR_density.json`,
+          { optional: true }
+        );
+        const densityB = await loadJson(
+          `${ROOT}/density/12h_VACV_density.json`,
+          { optional: true }
+        );
+
+        // 6) metrics: normalize from metrics_data.json to array of rows the legend code expects
+        // Expect something like per-plane metrics; if your keys differ, tweak mapping below.
+        const metrics = Array.isArray(metricsRaw)
+          ? metricsRaw.map((m) => ({
+              plane: m.plane ?? m.Plane ?? "XY",
+              variant: m.variant ?? m.Variant ?? "hdr",
+              level: +(m.level ?? m.Level ?? meta.levels?.hdr?.[0] ?? 100),
+              IoU: +(m.IoU ?? m.IuO ?? m.iou ?? 0),
+              meanNN: +(m.meanNN ?? m.mean_nn ?? 0),
+              Hausdorff: +(m.Hausdorff ?? m.hausdorff ?? 0),
+            }))
+          : [];
+
+        const planes = meta.planes ?? Object.keys(projections);
         console.log("[data] ok", {
-          planes: meta.planes,
+          planes,
           contours: contoursAll?.contours?.length || 0,
         });
 
@@ -161,11 +246,11 @@
         // Populate planes and levels
         planeSel
           .selectAll("option")
-          .data(meta.planes)
+          .data(planes)
           .join("option")
           .attr("value", (d) => d)
           .text((d) => d);
-        planeSel.property("value", meta.planes[0]);
+        planeSel.property("value", planes[0]);
 
         function setLevels() {
           const v = variantSel.property("value");

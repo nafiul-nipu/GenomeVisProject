@@ -10,13 +10,14 @@ import { useAppDispatch, useAppSelector } from "./redux-store/hooks";
 import { fetchWorkerData } from "./redux-store/dataSlice";
 import { terminateWorker } from "./worker/workerService";
 import { ThreeDViewContainer } from "./components/three-views/ThreeDViewContainer";
+import { TwoDContainer } from "./components/twoD-views/TwoDContainer";
 
 const meta_data_typed = meta_data as DataInfoType;
 
 export default function App() {
   const mount = useRef<boolean | null>(null);
   const dispatch = useAppDispatch();
-  const { species, chromosome, condTab, timeIdx } = useAppSelector((s) => s.ui);
+  const { species, chromosome } = useAppSelector((s) => s.ui);
   const status = useAppSelector((s) => s.data.status);
 
   useEffect(() => {
@@ -109,8 +110,7 @@ export default function App() {
               </span>
             ) : (
               <span className="text-sm text-gray-400">
-                [Silhouettes • Projections • Densities — {condTab}
-                {condTab === "diff" ? ` ${timeIdx}` : ""}]
+                <TwoDContainer />
               </span>
             )}
           </div>
