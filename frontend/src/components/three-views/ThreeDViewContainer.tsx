@@ -130,7 +130,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     Math.floor((wrapSize.w - gapX * (columns - 1)) / columns) - 2
   );
 
-  console.log(viewKeys);
+  // console.log(viewKeys);
 
   return (
     <div ref={hostRef} className="relative w-full h-full overflow-hidden">
