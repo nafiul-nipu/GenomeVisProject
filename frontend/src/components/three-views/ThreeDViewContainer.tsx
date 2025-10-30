@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useLayoutEffect,
 } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, invalidate } from "@react-three/fiber";
 import {
   AdaptiveDpr,
   AdaptiveEvents,
@@ -15,16 +15,25 @@ import {
 } from "@react-three/drei";
 import { useAppSelector } from "../../redux-store/hooks";
 import { Lights } from "./Lights";
-import { type DataInfoType } from "../../types/data_types_interfaces";
-import { GeneSphereView } from "./GeneSphereView";
+import {
+  type DataInfoType,
+  type PositionMode,
+} from "../../types/data_types_interfaces";
+import { DrawObject } from "./DrawObjects";
 
 type Props = { meta_data_typed: DataInfoType };
 
+const titlesRow = 18; // label line-height
+const gapX = 8; // matches gap-2
+
 export function ThreeDViewContainer({ meta_data_typed }: Props) {
-  const { condTab, timeIdx, species, lightSettings } = useAppSelector(
-    (s) => s.ui
-  );
-  const meta = meta_data_typed;
+  const { condTab, timeIdx, species, lightSettings, chromosome } =
+    useAppSelector((s) => s.ui);
+
+  // which position to use for genes
+  const [positionMode] = useState<PositionMode>("aligned");
+
+  const geneData = useAppSelector((s) => s.data.data?.gene_data) || {};
 
   // Host element for events and for layout
   const hostRef = useRef<HTMLDivElement>(null);
@@ -56,12 +65,12 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     };
   }, []);
 
-  // Timepoints from metadata
-  const timepoints: string[] = useMemo(
-    () => meta?.[species]?.timepoints ?? [],
-    [meta, species]
-  );
+  const meta = meta_data_typed?.[species];
+  const timepoints: string[] = meta?.timepoints ?? [];
+  const beforecode = (meta?.before_name ?? "before").toLowerCase();
+  const aftercode = (meta?.after_name ?? "after").toLowerCase();
 
+  const makeKey = (tp: string, code: string) => `${chromosome}_${tp}_${code}`;
   // View keys & titles
   const viewKeys = useMemo(() => {
     if (condTab === "diff") return ["before", "after"] as const;
@@ -71,10 +80,39 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   const titles = useMemo(() => {
     if (condTab === "diff") {
       const tp = timepoints[timeIdx] ?? "";
-      return [`before • ${tp}`, `after • ${tp}`];
+      return [
+        `${chromosome}_${beforecode}_${tp}`,
+        `${chromosome}_${aftercode}_${tp}`,
+      ];
     }
-    return timepoints.map((tp) => `${condTab} • ${tp}`);
-  }, [condTab, timeIdx, timepoints]);
+
+    const condName = condTab === "before" ? beforecode : aftercode;
+    return timepoints.map((tp) => `${chromosome}_${condName}_${tp}`);
+  }, [chromosome, condTab, timeIdx, species, timepoints]);
+
+  const viewItems = useMemo(() => {
+    if (condTab === "diff") {
+      const tp = timepoints[timeIdx] ?? "";
+      return [
+        geneData[makeKey(tp, beforecode)] ?? [],
+        geneData[makeKey(tp, aftercode)] ?? [],
+      ];
+    }
+    const code = condTab === "before" ? beforecode : aftercode;
+    return timepoints.map((tp) => geneData[makeKey(tp, code)] ?? []);
+  }, [
+    geneData,
+    condTab,
+    timeIdx,
+    timepoints,
+    beforecode,
+    aftercode,
+    chromosome,
+  ]);
+
+  useEffect(() => {
+    invalidate();
+  }, [viewItems, positionMode]);
 
   // HTMLElement refs for <View track={…}>
   // NOTE: No manual assignment, no callback ref — just normal refs used directly.
@@ -84,8 +122,6 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   );
 
   // Sizes
-  const titlesRow = 18; // label line-height
-  const gapX = 8; // matches gap-2
   const columns = Math.max(1, viewKeys.length);
 
   const viewHeight = Math.max(120, Math.floor(wrapSize.h - titlesRow));
@@ -93,6 +129,8 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     220,
     Math.floor((wrapSize.w - gapX * (columns - 1)) / columns) - 2
   );
+
+  console.log(viewKeys);
 
   return (
     <div ref={hostRef} className="relative w-full h-full overflow-hidden">
@@ -117,7 +155,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
       <Canvas
         eventSource={eventSource}
         className="absolute inset-0 z-0"
-        frameloop="demand" // ensure the cube spins; change to "demand" later
+        frameloop="demand"
         performance={{ min: 0.4 }}
         camera={{ position: [10, 5, 75], near: 0.1 }}
       >
@@ -129,7 +167,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
           >
             <color attach="background" args={["#0b0f16"]} />
             <Lights settings={lightSettings} />
-            <GeneSphereView meta_data={meta_data_typed} />
+            <DrawObject data={viewItems[i] ?? []} positionMode={positionMode} />
             <OrbitControls
               makeDefault
               enableDamping={false}

@@ -88,6 +88,15 @@ export interface GeneRowDataType {
   structure_start_id: number;
 }
 
+export interface GeneSphereViewProps {
+  data: GeneRowDataType[];
+  positionMode: PositionMode;
+}
+export type PositionMode = "aligned" | "middle" | "start" | "end";
+export interface PositionPicker {
+  (item: GeneRowDataType, mode: PositionMode): [number, number, number];
+}
+
 export type Point2D = [number, number];
 export interface Contour2DType {
   label: string; // e.g., "chr1_12hrs_untr"
