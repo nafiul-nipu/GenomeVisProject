@@ -57,10 +57,10 @@ export default function App() {
   return (
     <div className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">
       {/* NAV (top) */}
-      <header className="h-14 flex-shrink-0 border-b border-gray-800/60 bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:bg-gray-900/40">
+      {/* <header className="h-14 flex-shrink-0 border-b border-gray-800/60 bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:bg-gray-900/40"> */}
+      <header className="relative z-50 h-14 flex-shrink-0 border-b border-gray-800/60 bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:bg-gray-900/40 overflow-visible">
         <div className="w-full px-4 h-full flex items-center gap-3">
           <h1 className="text-xl font-semibold tracking-tight">GenomeVis</h1>
-
           <SpeciesDropdown meta_data={meta_data_typed} />
           <ChromosomeDropdown meta_data={meta_data_typed} />
           <GeneDropdown />
