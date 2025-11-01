@@ -34,6 +34,8 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   const [positionMode] = useState<PositionMode>("aligned");
 
   const geneData = useAppSelector((s) => s.data.data?.gene_data) || {};
+  const geneEdges = useAppSelector((s) => s.data.data?.gene_edges) || {};
+  const genePaths = useAppSelector((s) => s.data.data?.gene_paths) || {};
 
   // Host element for events and for layout
   const hostRef = useRef<HTMLDivElement>(null);
@@ -91,17 +93,23 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   }, [chromosome, condTab, timeIdx, species, timepoints]);
 
   const viewItems = useMemo(() => {
+    const makeViews = (tp: string, code: string) => ({
+      geneData: geneData[makeKey(tp, code)] ?? [],
+      geneEdges: geneEdges[makeKey(tp, code)] ?? [],
+      genePaths: genePaths[makeKey(tp, code)] ?? [],
+    });
+
     if (condTab === "diff") {
       const tp = timepoints[timeIdx] ?? "";
-      return [
-        geneData[makeKey(tp, beforecode)] ?? [],
-        geneData[makeKey(tp, aftercode)] ?? [],
-      ];
+      return [makeViews(tp, beforecode), makeViews(tp, aftercode)];
     }
+
     const code = condTab === "before" ? beforecode : aftercode;
-    return timepoints.map((tp) => geneData[makeKey(tp, code)] ?? []);
+    return timepoints.map((tp) => makeViews(tp, code));
   }, [
     geneData,
+    geneEdges,
+    genePaths,
     condTab,
     timeIdx,
     timepoints,
@@ -130,7 +138,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     Math.floor((wrapSize.w - gapX * (columns - 1)) / columns) - 2
   );
 
-  // console.log(viewKeys);
+  // console.log(viewItems);
 
   return (
     <div ref={hostRef} className="relative w-full h-full overflow-hidden">
@@ -167,7 +175,12 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
           >
             <color attach="background" args={["#0b0f16"]} />
             <Lights settings={lightSettings} />
-            <DrawObject data={viewItems[i] ?? []} positionMode={positionMode} />
+            <DrawObject
+              geneData={viewItems[i].geneData ?? []}
+              geneEdges={viewItems[i].geneEdges ?? []}
+              genePaths={viewItems[i].genePaths ?? []}
+              positionMode={positionMode}
+            />
             <OrbitControls
               makeDefault
               enableDamping={false}

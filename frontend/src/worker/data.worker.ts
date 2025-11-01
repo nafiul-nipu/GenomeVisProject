@@ -48,7 +48,7 @@ addEventListener(
       gene_paths[key] = paths;
     }
 
-    // console.log(Object.entries(gene_data));
+    // console.log(gene_data);
     // console.log(gene_edges);
     // console.log(gene_paths);
 
@@ -103,7 +103,7 @@ addEventListener(
       requestId,
       gene_data: gene_data,
       gene_edges: gene_edges,
-      gene_paths: gene_list,
+      gene_paths: gene_paths,
       gene_list: gene_list,
       contour_data: contour_data,
       density_data: density_data,

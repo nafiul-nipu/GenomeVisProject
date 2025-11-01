@@ -37,9 +37,15 @@ export interface workerPostMessageType {
   op?: string;
 }
 
+export interface Gene_Edges_Path_Row_Type {
+  source: number;
+  target: number;
+}
 export interface workerToClientMessageType {
   gene_data: Record<string, GeneRowDataType[]>;
   gene_list: string[];
+  gene_edges: Record<string, Gene_Edges_Path_Row_Type[]>;
+  gene_paths: Record<string, number[][]>;
   contour_data: Record<string, ContourWrapperType>;
   density_data: Record<string, Density2DType>;
   projectionData: ProjectionResult;
@@ -90,6 +96,20 @@ export interface GeneRowDataType {
 
 export interface GeneSphereViewProps {
   data: GeneRowDataType[];
+  positionMode: PositionMode;
+}
+
+export interface GeneTubeViewProps {
+  geneData: GeneRowDataType[];
+  geneEdges: Gene_Edges_Path_Row_Type[];
+  genePaths: number[][];
+  positionMode: PositionMode;
+}
+
+export interface DrawObjectProps {
+  geneData: GeneRowDataType[];
+  geneEdges: Gene_Edges_Path_Row_Type[];
+  genePaths: number[][];
   positionMode: PositionMode;
 }
 export type PositionMode = "aligned" | "middle" | "start" | "end";

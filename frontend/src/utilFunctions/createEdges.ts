@@ -13,7 +13,7 @@ import type { Edge } from "../types/data_types_interfaces";
 
 export async function createEdges(length: number): Promise<Edge[]> {
   return Array.from({ length: length - 1 }, (_, index) => ({
-    source: index + 1,
-    target: index + 2,
+    source: index,
+    target: index + 1,
   }));
 }

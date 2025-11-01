@@ -1,12 +1,15 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { GeneSphereViewProps } from "../../types/data_types_interfaces";
+import type { DrawObjectProps } from "../../types/data_types_interfaces";
 import { GeneSphereView } from "./GeneSphereView";
 import { positionPicker } from "../../utilFunctions/positionPicker";
+import { GeneTubeView } from "./GeneTubeView";
 
-export const DrawObject: React.FC<GeneSphereViewProps> = ({
-  data,
+export const DrawObject: React.FC<DrawObjectProps> = ({
+  geneData,
+  geneEdges,
+  genePaths,
   positionMode,
 }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -15,12 +18,12 @@ export const DrawObject: React.FC<GeneSphereViewProps> = ({
   // compute bounding box of all points
   const bbox = useMemo(() => {
     const box = new THREE.Box3();
-    for (const item of data) {
+    for (const item of geneData) {
       const [x, y, z] = positionPicker(item, positionMode);
       box.expandByPoint(new THREE.Vector3(x, y, z));
     }
     return box;
-  }, [data, positionMode]);
+  }, [geneData, positionMode]);
 
   // center + zoom camera
   useEffect(() => {
@@ -57,7 +60,13 @@ export const DrawObject: React.FC<GeneSphereViewProps> = ({
 
   return (
     <group ref={groupRef}>
-      <GeneSphereView data={data} positionMode={positionMode} />
+      <GeneSphereView data={geneData} positionMode={positionMode} />
+      <GeneTubeView
+        geneData={geneData}
+        geneEdges={geneEdges}
+        genePaths={genePaths}
+        positionMode={positionMode}
+      />
     </group>
   );
 };

@@ -18,7 +18,7 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 
   //on mount
   useLayoutEffect(() => {
-    console.log("gene sphere renderer mounted");
+    // console.log("gene sphere renderer mounted");
     geneSphereViewMount.current = true;
     if (!meshRef.current) return;
     meshRef.current.setColorAt(0, new Color());
@@ -34,7 +34,7 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     if (!meshRef.current) return;
 
     const mesh = meshRef.current;
-    console.log("gene sphere rendering started");
+    // console.log("gene sphere rendering started");
 
     // const extent = d3.extent(data, (item) => item.cluster);
     // const domain: [number, number] = [extent?.[0] ?? 0, extent?.[1] ?? 0];
@@ -56,7 +56,7 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     mesh.instanceMatrix.needsUpdate = true;
     mesh.instanceColor!.needsUpdate = true;
 
-    console.log("gene sphere rendering finished");
+    // console.log("gene sphere rendering finished");
   }, [data, positionMode]);
 
   // useEffect(() => {}, []);
