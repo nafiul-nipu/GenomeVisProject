@@ -20,6 +20,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
   geneEdges,
   genePaths,
   positionMode,
+  tubeCtl,
 }) => {
   // console.log(data);
   // console.log(positionMode);
@@ -86,7 +87,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
       const tubeGeometry = new TubeGeometry(
         curve,
         numberSegments * 4,
-        0.001, //radius,
+        tubeCtl.tubeRadius, //radius,
         8,
         false
       );
@@ -134,16 +135,10 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
     instanceMatrix.needsUpdate = true;
 
     return { bufferPositions, tubeGeometries };
-  }, [geneEdges, geneData, genePaths, positionMode]);
+  }, [geneEdges, geneData, genePaths, positionMode, tubeCtl.tubeRadius]);
 
   useLayoutEffect(() => {
     if (!tubesRef.current) return;
-    const edgectl = {
-      color: 0xffffff,
-      emissive: 0x000000,
-      specular: 0x111111,
-      shininess: 30,
-    };
     const tubes = tubesRef.current;
 
     // if (toggleGene === true) {
@@ -167,10 +162,10 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
 
     const material = new MeshPhongMaterial({
       vertexColors: true,
-      color: edgectl.color,
-      emissive: edgectl.emissive,
-      specular: edgectl.specular,
-      shininess: edgectl.shininess,
+      color: tubeCtl.tubeColor,
+      emissive: tubeCtl.tubeEmissive,
+      specular: tubeCtl.tubeEmissive,
+      shininess: tubeCtl.tubeShininess,
     });
 
     const tubesMesh = new Mesh(combinedGeometry, material);
@@ -179,7 +174,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
     tubesMeshRef.current = tubesMesh;
 
     // console.log("tube created");
-  }, [tubeData]);
+  }, [tubeData, tubeCtl]);
 
   return <group ref={tubesRef} frustumCulled />;
 };

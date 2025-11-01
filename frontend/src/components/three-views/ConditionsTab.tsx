@@ -1,20 +1,11 @@
 // components/ConditionTabs.tsx
 import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
-import {
-  setCondTabstate,
-  setLightSettings,
-  setLightSettingsOpen,
-  setTimeIdx,
-} from "../../redux-store/uiSlice";
+import { setCondTabstate, setTimeIdx } from "../../redux-store/uiSlice";
 import type { ConditionTabsProps } from "../../types/data_types_interfaces";
-import LightsPanel from "./LightsPanel";
-
-import { IoSettingsOutline } from "react-icons/io5";
 
 export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
   const dispatch = useAppDispatch();
-  const { condTab, timeIdx, species, toggleLightGear, lightSettings } =
-    useAppSelector((s) => s.ui);
+  const { condTab, timeIdx, species } = useAppSelector((s) => s.ui);
 
   // species-specific info
   const beforeLabel =
@@ -51,32 +42,6 @@ export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
               </button>
             );
           })}
-        </div>
-
-        {/* Gear icon */}
-        <div className="relative">
-          <button
-            onClick={() => dispatch(setLightSettingsOpen(!toggleLightGear))}
-            title={
-              toggleLightGear ? "Hide light settings" : "Show light settings"
-            }
-            className="ml-2 inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-800/70 bg-gray-900/60 hover:bg-gray-800/60"
-            aria-pressed={toggleLightGear}
-          >
-            <IoSettingsOutline />
-          </button>
-
-          {/* Dropdown LightsPanel */}
-          {toggleLightGear && (
-            <div className="absolute left-0 top-[2.6rem] z-30">
-              <LightsPanel
-                settings={lightSettings} // use your actual settings source
-                onChange={(next) => dispatch(setLightSettings(next))}
-                onClose={() => dispatch(setLightSettingsOpen(false))}
-                className="shadow-lg"
-              />
-            </div>
-          )}
         </div>
       </div>
 

@@ -20,6 +20,7 @@ import {
   type PositionMode,
 } from "../../types/data_types_interfaces";
 import { DrawObject } from "./DrawObjects";
+import { useLevaUIControls } from "./useLevaUIControls";
 
 type Props = { meta_data_typed: DataInfoType };
 
@@ -27,8 +28,7 @@ const titlesRow = 18; // label line-height
 const gapX = 8; // matches gap-2
 
 export function ThreeDViewContainer({ meta_data_typed }: Props) {
-  const { condTab, timeIdx, species, lightSettings, chromosome } =
-    useAppSelector((s) => s.ui);
+  const { condTab, timeIdx, species, chromosome } = useAppSelector((s) => s.ui);
 
   // which position to use for genes
   const [positionMode] = useState<PositionMode>("aligned");
@@ -140,6 +140,29 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
 
   // console.log(viewItems);
 
+  // leva controls
+  const {
+    // Lights
+    ambientVisible,
+    ambientIntensity,
+    dirFrontVisible,
+    dirFrontPos,
+    dirFrontIntensity,
+    dirFrontShadow,
+    // Genes
+    geneColor,
+    geneEmissive,
+    geneSpecular,
+    geneShininess,
+    geneRadius,
+    // Tubes
+    tubeColor,
+    tubeEmissive,
+    tubeSpecular,
+    tubeShininess,
+    tubeRadius,
+  } = useLevaUIControls();
+
   return (
     <div ref={hostRef} className="relative w-full h-full overflow-hidden">
       {/* Titles + target divs */}
@@ -174,12 +197,55 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
             index={i}
           >
             <color attach="background" args={["#0b0f16"]} />
-            <Lights settings={lightSettings} />
+            <Lights
+              ambientCtl={{
+                visible: ambientVisible,
+                intensity: ambientIntensity,
+              }}
+              directionalCtl={{
+                visible: dirFrontVisible,
+                position: dirFrontPos,
+                intensity: dirFrontIntensity,
+                castShadow: dirFrontShadow,
+              }}
+              directionalCtl2={{
+                visible: false,
+                position: { x: 0, y: 0, z: 0 },
+                intensity: 0,
+                castShadow: false,
+              }}
+              directionalLeftCtl={{
+                visible: false,
+                position: { x: 0, y: 0, z: 0 },
+                intensity: 0,
+                castShadow: false,
+              }}
+              directionalRightCtl={{
+                visible: false,
+                position: { x: 0, y: 0, z: 0 },
+                intensity: 0,
+                castShadow: false,
+              }}
+            />
             <DrawObject
               geneData={viewItems[i].geneData ?? []}
               geneEdges={viewItems[i].geneEdges ?? []}
               genePaths={viewItems[i].genePaths ?? []}
               positionMode={positionMode}
+              nodeCtl={{
+                geneColor: geneColor,
+                geneEmissive: geneEmissive,
+                geneSpecular: geneSpecular,
+                geneShininess: geneShininess,
+                geneRadius: geneRadius,
+              }}
+              tubeCtl={{
+                tubeColor: tubeColor,
+                tubeEmissive: tubeEmissive,
+                tubeSpecular: tubeSpecular,
+                tubeShininess: tubeShininess,
+                tubeRadius: tubeRadius,
+              }}
             />
             <OrbitControls
               makeDefault

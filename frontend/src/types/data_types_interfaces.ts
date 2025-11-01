@@ -94,9 +94,26 @@ export interface GeneRowDataType {
   structure_start_id: number;
 }
 
+export interface NodeControl {
+  geneColor: string;
+  geneEmissive: string;
+  geneSpecular: string;
+  geneShininess: number;
+  geneRadius: number;
+}
+
+export interface TubeControl {
+  tubeColor: string;
+  tubeEmissive: string;
+  tubeSpecular: string;
+  tubeShininess: number;
+  tubeRadius: number;
+}
+
 export interface GeneSphereViewProps {
   data: GeneRowDataType[];
   positionMode: PositionMode;
+  nodeCtl: NodeControl;
 }
 
 export interface GeneTubeViewProps {
@@ -104,6 +121,7 @@ export interface GeneTubeViewProps {
   geneEdges: Gene_Edges_Path_Row_Type[];
   genePaths: number[][];
   positionMode: PositionMode;
+  tubeCtl: TubeControl;
 }
 
 export interface DrawObjectProps {
@@ -111,6 +129,8 @@ export interface DrawObjectProps {
   geneEdges: Gene_Edges_Path_Row_Type[];
   genePaths: number[][];
   positionMode: PositionMode;
+  nodeCtl: NodeControl;
+  tubeCtl: TubeControl;
 }
 export type PositionMode = "aligned" | "middle" | "start" | "end";
 export interface PositionPicker {

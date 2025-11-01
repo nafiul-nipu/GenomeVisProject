@@ -11,6 +11,8 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
   geneEdges,
   genePaths,
   positionMode,
+  nodeCtl,
+  tubeCtl,
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const { camera, controls } = useThree(); // you get the current camera & OrbitControls
@@ -60,12 +62,17 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
 
   return (
     <group ref={groupRef}>
-      <GeneSphereView data={geneData} positionMode={positionMode} />
+      <GeneSphereView
+        data={geneData}
+        positionMode={positionMode}
+        nodeCtl={nodeCtl}
+      />
       <GeneTubeView
         geneData={geneData}
         geneEdges={geneEdges}
         genePaths={genePaths}
         positionMode={positionMode}
+        tubeCtl={tubeCtl}
       />
     </group>
   );

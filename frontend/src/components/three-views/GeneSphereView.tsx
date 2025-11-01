@@ -11,6 +11,7 @@ const object = new Object3D();
 export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   data,
   positionMode,
+  nodeCtl,
 }) => {
   // console.log(data);
   const geneSphereViewMount = useRef<boolean>(false);
@@ -41,7 +42,11 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     // colorScale.domain([domain[1], domain[0]]);
 
     data.forEach((item, i) => {
-      object.scale.set(0.05, 0.05, 0.05);
+      object.scale.set(
+        nodeCtl.geneRadius,
+        nodeCtl.geneRadius,
+        nodeCtl.geneRadius
+      );
       const [x, y, z] = positionPicker(item, positionMode);
       object.position.set(x, y, z);
 
@@ -57,7 +62,7 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     mesh.instanceColor!.needsUpdate = true;
 
     // console.log("gene sphere rendering finished");
-  }, [data, positionMode]);
+  }, [data, positionMode, nodeCtl.geneRadius]);
 
   // useEffect(() => {}, []);
   return (
@@ -69,7 +74,12 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
       {/* if needed to lower the resolution to handle many points */}
       {/* <sphereGeometry args={[0.25, 12, 12]} /> */}
       <sphereGeometry args={[0.25, 32, 32]} />
-      <meshPhongMaterial />
+      <meshPhongMaterial
+        color={nodeCtl.geneColor}
+        emissive={nodeCtl.geneEmissive}
+        specular={nodeCtl.geneSpecular}
+        shininess={nodeCtl.geneShininess}
+      />
     </instancedMesh>
   );
 };
