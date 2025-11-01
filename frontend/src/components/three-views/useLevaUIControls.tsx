@@ -8,30 +8,30 @@ export function useLevaUIControls() {
       {
         // Ambient
         ambientVisible: { value: true },
-        ambientIntensity: { value: 0.5, min: 0, max: 1, step: 0.1 },
+        ambientIntensity: { value: 0.7, min: 0, max: 1, step: 0.1 },
 
         // Directional Front
         dirFrontVisible: { value: true },
         dirFrontPos: { x: 3.3, y: 1.0, z: 4.4 },
-        dirFrontIntensity: { value: 0.4, min: 0, max: 1, step: 0.1 },
+        dirFrontIntensity: { value: 0.5, min: 0, max: 1, step: 0.1 },
         dirFrontShadow: { value: true },
 
         // Directional Back
         dirBackVisible: { value: true },
         dirBackPos: { x: -3.3, y: -1.0, z: -4.4 },
-        dirBackIntensity: { value: 0.4, min: 0, max: 1, step: 0.1 },
+        dirBackIntensity: { value: 0.5, min: 0, max: 1, step: 0.1 },
         dirBackShadow: { value: true },
 
         // Directional Left
         dirLeftVisible: { value: true },
         dirLeftPos: { x: -5.0, y: 5.0, z: 5.0 },
-        dirLeftIntensity: { value: 0.4, min: 0, max: 1, step: 0.1 },
+        dirLeftIntensity: { value: 0.5, min: 0, max: 1, step: 0.1 },
         dirLeftShadow: { value: true },
 
         // Directional Right
         dirRightVisible: { value: true },
         dirRightPos: { x: 5.0, y: 5.0, z: 5.0 },
-        dirRightIntensity: { value: 0.4, min: 0, max: 1, step: 0.1 },
+        dirRightIntensity: { value: 0.5, min: 0, max: 1, step: 0.1 },
         dirRightShadow: { value: true },
       },
       { collapsed: true }
