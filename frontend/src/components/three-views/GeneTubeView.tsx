@@ -30,9 +30,9 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
   const tubeData = useMemo(() => {
     const numTubes: number = genePaths.length;
 
-    const bufferPositions = [];
-    const pathsPositions = [];
-    const colorValues = []; // To store centromere values for each tube
+    const bufferPositions: number[] = [];
+    const pathsPositions: Vector3[][] = [];
+    const colorValues: number[][] = []; // To store centromere values for each tube
 
     for (const path of genePaths) {
       const [x0, y0, z0] = positionPicker(geneData[path[0]], positionMode);
@@ -42,7 +42,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
         positionMode
       );
       bufferPositions.push(x1, y1, z1);
-      const pathPosition = [];
+      const pathPosition: Vector3[] = [];
       for (let i = 0; i < path.length; i++) {
         const [x, y, z] = positionPicker(geneData[path[i]], positionMode);
         const pos = new Vector3(x, y, z);
@@ -59,32 +59,30 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
       //   // add value 0 to all nodes
       //   values = path.map((nodeId) => 0);
       // }
-      colorValues.push(genePaths.map(() => 0));
+      colorValues.push(path.map(() => 0));
     }
 
-    const geometry = new InstancedBufferGeometry();
-    const positionAttribute = new BufferAttribute(
+    const geometry: InstancedBufferGeometry = new InstancedBufferGeometry();
+    const positionAttribute: BufferAttribute = new BufferAttribute(
       new Float32Array(bufferPositions),
       3
     );
     geometry.setAttribute("position", positionAttribute);
 
-    const numInstances = numTubes;
-    const instanceMatrix = new InstancedBufferAttribute(
-      new Float32Array(numInstances * 16),
-      16
-    );
+    const numInstances: number = numTubes;
+    const instanceMatrix: InstancedBufferAttribute =
+      new InstancedBufferAttribute(new Float32Array(numInstances * 16), 16);
     geometry.setAttribute("instanceMatrix", instanceMatrix);
 
-    const matrix = new Matrix4();
+    const matrix: Matrix4 = new Matrix4();
 
-    const tubeGeometries = [];
+    const tubeGeometries: TubeGeometry[] = [];
 
     // console.log(pathsPositions);
 
     for (let i = 0; i < pathsPositions.length; i++) {
-      const numberSegments = pathsPositions[i].length - 1;
-      const curve = new CatmullRomCurve3(pathsPositions[i]);
+      const numberSegments: number = pathsPositions[i].length - 1;
+      const curve: CatmullRomCurve3 = new CatmullRomCurve3(pathsPositions[i]);
       const tubeGeometry = new TubeGeometry(
         curve,
         numberSegments * 4,
@@ -94,7 +92,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
       );
 
       // Create colors based on centromere values
-      const colorsArray = [];
+      const colorsArray: number[] = [];
       //iterates through each vertex of the tube geometry
       for (let j = 0; j < tubeGeometry.attributes.position.count; j++) {
         // Average centromere value for the segment
@@ -105,7 +103,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
         // );
         // const colorValue = colorValues[i][segmentIndex];
         // const color = tubeColorMap[colorValue] || new Vector3(0.5, 0.5, 0.5); // Default color if not found
-        const color = new Vector3(0.5, 0.5, 0.5);
+        const color: Vector3 = new Vector3(0.5, 0.5, 0.5);
         // console.log(color);
         colorsArray.push(...color.toArray());
       }
