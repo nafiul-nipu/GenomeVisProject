@@ -2,7 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   defaultLightSettings,
+  type BgMode,
   type LightSettings,
+  type Variant,
 } from "../types/data_types_interfaces";
 
 type CondTab = "before" | "after" | "diff";
@@ -15,6 +17,9 @@ interface UIState {
   timeIdx: number;
   toggleLightGear: boolean;
   lightSettings: LightSettings;
+  twoDVariant: Variant; // "hdr" | "pf"
+  twoDBgMode: BgMode; // "none" | "density-*" | "mask"
+  twoDLevel: number; // 100, 99, ...
 }
 
 const initialState: UIState = {
@@ -25,6 +30,9 @@ const initialState: UIState = {
   timeIdx: 0,
   toggleLightGear: false,
   lightSettings: defaultLightSettings,
+  twoDVariant: "hdr",
+  twoDBgMode: "density-combined",
+  twoDLevel: 100,
 };
 
 // creating slices
@@ -53,6 +61,15 @@ const uiSlice = createSlice({
     setLightSettings(state, action: PayloadAction<LightSettings>) {
       state.lightSettings = action.payload;
     },
+    setTwoDVariant(state, action: PayloadAction<Variant>) {
+      state.twoDVariant = action.payload;
+    },
+    setTwoDBgMode(state, action: PayloadAction<BgMode>) {
+      state.twoDBgMode = action.payload;
+    },
+    setTwoDLevel(state, action: PayloadAction<number>) {
+      state.twoDLevel = action.payload;
+    },
   },
 });
 
@@ -64,6 +81,9 @@ export const {
   setTimeIdx,
   setLightSettingsOpen,
   setLightSettings,
+  setTwoDVariant,
+  setTwoDBgMode,
+  setTwoDLevel,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

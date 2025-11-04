@@ -231,3 +231,12 @@ export const defaultLightSettings: LightSettings = {
 };
 
 export type Edge = { source: number; target: number };
+
+export type Variant = "hdr" | "pf";
+export type BgMode =
+  | "none"
+  | "density-12"
+  | "density-18"
+  | "density-24"
+  | "density-combined"
+  | "mask";
