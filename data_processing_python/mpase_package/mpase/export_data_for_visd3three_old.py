@@ -90,12 +90,6 @@ def export_meta(result: RunResult, out_dir: str, *, progress_report: bool = Fals
             "pf": sorted([int(x) for x in levels_pf], reverse=True),
         },
         labels=labels,
-        # NEW: Explicitly declare coordinate semantics for downstream tools.
-        # Everything we write for 2D overlays (contours, projections) is in pixel space,
-        # top-left origin, y-down to match SVG and skimage marching squares rasterization.
-        coord_space="pixel",
-        origin="top_left",
-        y_down=True,
     )
     path = _write_json(os.path.join(out_dir, "meta_data.json"), meta)
     _notify(progress_report, "write", kind="meta", path=path)
@@ -165,8 +159,7 @@ def export_contours_d3(
     Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
     """
     written: List[str] = []
-    # NEW: fix directory name to match the viewer and docstring ("contours", plural).
-    cont_dir = os.path.join(out_dir, "contours")
+    cont_dir = os.path.join(out_dir, "contour")
     _ensure_dir(cont_dir)
 
     # Build a map label -> list of contour entries
@@ -189,11 +182,7 @@ def export_contours_d3(
                     if C is None:
                         continue
                     # skimage contours are [row(y), col(x)] — convert to [x,y]
-                    # pts = [[float(c[1]), float(c[0])] for c in C]
-                    # Align contour coordinates to pixel centers
-                    # Skimage find_contours returns coordinates in (row, col) with half-pixel offset.
-                    # We subtract 0.5 so contours align with the same pixel centers used by projections.
-                    pts = [[float(c[1]) - 0.5, float(c[0]) - 0.5] for c in C]
+                    pts = [[float(c[1]), float(c[0])] for c in C]
                     entry = dict(
                         plane=plane,
                         variant="hdr" if kind == "hdr" else "pf",
@@ -205,17 +194,8 @@ def export_contours_d3(
 
     # Write one file per label
     for label, entries in per_label.items():
-        # NEW: include lightweight meta for clarity (kept out of "contours" array to avoid breaking readers).
-        payload = {
-            "meta": {
-                "coord_space": "pixel",
-                "origin": "top_left",
-                "y_down": True
-            },
-            "contours": entries
-        }
         fname = f"{_safe_name(label)}_contour.json"
-        path = _write_json(os.path.join(cont_dir, fname), payload)
+        path = _write_json(os.path.join(cont_dir, fname), {"contours": entries})
         written.append(path)
         _notify(progress_report, "write", kind="contours", label=str(label), path=path, entries=len(entries))
 
@@ -244,72 +224,24 @@ def export_projections_json(result: RunResult, out_dir: str, *, progress_report:
             continue
         nx, ny = grid[plane]
         sets2d = d.get("sets", {})
-        if not sets2d:
-            continue
+        plane_out = {}
 
-        # -------------------- NEW: Collect all points for a single, plane-wide bbox --------------------
-        # We MUST map every label on this plane with the SAME bbox + padding so projections line up with
-        # the density raster (which was built from a padded global bbox).
-        all_xy = []
-        for P2 in sets2d.values():
-            if P2 is None:
-                continue
-            A = np.asarray(P2, dtype=float)
-            if A.size == 0:
-                continue
-            all_xy.append(A)
-        if not all_xy:
-            continue
-        ALL = np.vstack(all_xy)
-
-        raw_xmin, raw_xmax = float(np.min(ALL[:, 0])), float(np.max(ALL[:, 0]))
-        raw_ymin, raw_ymax = float(np.min(ALL[:, 1])), float(np.max(ALL[:, 1]))
-        xrng = max(1e-9, raw_xmax - raw_xmin)
-        yrng = max(1e-9, raw_ymax - raw_ymin)
-
-        # -------------------- NEW: padding to emulate density raster padding --------------------
-        # If your density code padded by a fraction (e.g., 5%), we mirror that here.
-        # If a canonical padding is stored in result, use it; otherwise default to 5%.
-        pad_frac = float(d.get("pad_frac", 0.05))  # NEW: read from result if present; else 5%
-        xmin = raw_xmin - pad_frac * xrng
-        xmax = raw_xmax + pad_frac * xrng
-        ymin = raw_ymin - pad_frac * yrng
-        ymax = raw_ymax + pad_frac * yrng
-
-        # Optional: if a canonical bbox was saved during density creation, prefer that.
-        # e.g., result.get("bbox_world", {}).get(plane) with keys xmin/xmax/ymin/ymax
-        bbox_from_result = (result.get("bbox_world", {}) or {}).get(plane)
-        if bbox_from_result and all(k in bbox_from_result for k in ("xmin","xmax","ymin","ymax")):
-            xmin = float(bbox_from_result["xmin"])
-            xmax = float(bbox_from_result["xmax"])
-            ymin = float(bbox_from_result["ymin"])
-            ymax = float(bbox_from_result["ymax"])
-
-        # Guard against degenerate bbox
-        if xmax <= xmin:
-            xmax = xmin + 1.0
-        if ymax <= ymin:
-            ymax = ymin + 1.0
-
-        # Debug print to verify
-        print(f"[export_projections_json] plane={plane} bbox (padded/global): "
-              f"x[{xmin:.3f},{xmax:.3f}] y[{ymin:.3f},{ymax:.3f}] -> grid ({nx},{ny}), pad_frac={pad_frac:.3f}")
-
-        # -------------------- NEW: map with the padded/global bbox and flip Y to y-down --------------------
-        def to_pixel_global(points: np.ndarray):
+        def to_pixel(points: np.ndarray):
             if points.size == 0:
                 return points.tolist()
-            P = np.asarray(points, dtype=float).copy()
-            P[:, 0] = (P[:, 0] - xmin) / (xmax - xmin) * (nx - 1)                   # x right
-            P[:, 1] = (1.0 - (P[:, 1] - ymin) / (ymax - ymin)) * (ny - 1)           # y-down
-            # Clamp to grid bounds
-            P[:, 0] = np.clip(P[:, 0], 0.0, nx - 1.0)
-            P[:, 1] = np.clip(P[:, 1], 0.0, ny - 1.0)
+            P = points.astype(float).copy()
+
+            # If normalized 0..1 → scale to pixel grid
+            if np.all((P >= 0) & (P <= 1)):
+                P[:, 0] *= (nx - 1)
+                P[:, 1] *= (ny - 1)
+
+            # Flip Y to image coordinates (origin top-left)
+            P[:, 1] = (ny - 1) - P[:, 1]
             return P.tolist()
 
-        plane_out = {}
         for lab, P2 in sets2d.items():
-            plane_out[str(lab)] = to_pixel_global(np.asarray(P2, dtype=float))
+            plane_out[str(lab)] = to_pixel(np.asarray(P2))
 
         fname = f"{_safe_name(plane)}_projections.json"
         path = _write_json(os.path.join(proj_dir, fname), plane_out)
@@ -460,3 +392,4 @@ def export_all(
     _notify(progress_report, "write", kind="manifest", path=mpath)
 
     _notify(progress_report, "done", files=manifest["summary"]["files"], bytes=manifest["summary"]["bytes"])
+    

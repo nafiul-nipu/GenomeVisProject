@@ -47,5 +47,8 @@
   "labels":[
     "12h_UNTR",
     "12h_VACV"
-  ]
+  ],
+  "coord_space":"pixel",
+  "origin":"top_left",
+  "y_down":true
 }

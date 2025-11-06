@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MPASE 2D SVG (Points + Wrapping Contours)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0b0b0c;
+        color: #eaeaea;
+        font: 14px/1.4 system-ui, sans-serif;
+      }
+      header {
+        padding: 10px 14px;
+        border-bottom: 1px solid #222;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      header code {
+        background: #111;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      #wrap {
+        padding: 12px;
+      }
+      svg {
+        width: min(92vw, 92vh);
+        height: auto;
+        border: 1px solid #222;
+        background: #0e0e11;
+        display: block;
+      }
+      .contours .A {
+        stroke: #1f77b4;
+      }
+      .contours .B {
+        stroke: #d62728;
+      }
+      .contours path {
+        fill: none;
+        stroke-width: 1.8;
+        stroke-opacity: 0.95;
+      }
+      .points circle {
+        r: 1.5;
+      }
+      .points .A {
+        fill: #1f77b4;
+        fill-opacity: 0.7;
+      }
+      .points .B {
+        fill: #d62728;
+        fill-opacity: 0.7;
+      }
+      .note {
+        opacity: 0.75;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  </head>
+  <body>
+    <header>
+      <strong>MPASE 2D SVG</strong>
+      <span class="note"
+        >Only points + outermost contours from <code>web_data/</code></span
+      >
+    </header>
+    <div id="wrap">
+      <svg id="view"></svg>
+      <div id="info"></div>
+    </div>
+
+    <script>
+      // ---------------------- Config ----------------------
+      const ROOT = "web_data"; // export folder
+      const PLANE = "XZ"; // "XY" | "YZ" | "XZ"
+      const VARIANT = "hdr"; // "hdr" | "point_fraction"
+      const LEVEL = 100; // 100, 95, 80, ...
+      const Y_FLIP = false; // set true if vertical inversion is needed
+
+      // Pin labels (or leave null to auto-pick first two from meta)
+      let LABEL_A = null; // e.g., "12h_UNTR"
+      let LABEL_B = null; // e.g., "12h_VACV"
+
+      // ---------------------- Setup ----------------------
+      const svg = d3.select("#view");
+      const gPts = svg.append("g").attr("class", "points");
+      const gCtr = svg.append("g").attr("class", "contours");
+      const writeInfo = (html) => d3.select("#info").html(html);
+      const safeJSON = async (p) => {
+        try {
+          return await d3.json(p);
+        } catch {
+          return null;
+        }
+      };
+
+      const polylineToPath = (pts) =>
+        pts && pts.length
+          ? "M" + pts.map((p) => `${p[0]},${p[1]}`).join("L") + "Z"
+          : "";
+
+      // shoelace area (positive magnitude)
+      function ringArea(pts) {
+        let a = 0;
+        for (let i = 0, n = pts.length; i < n; i++) {
+          const [x1, y1] = pts[i];
+          const [x2, y2] = pts[(i + 1) % n];
+          a += x1 * y2 - x2 * y1;
+        }
+        return Math.abs(a) / 2;
+      }
+
+      function scaleIfUnit(points, nx, ny) {
+        if (!points || !points.length) return [];
+        const mx = d3.max(points, (p) => p[0]);
+        const my = d3.max(points, (p) => p[1]);
+        if (mx <= 1.01 && my <= 1.01) {
+          return points.map(([x, y]) => [x * (nx - 1), y * (ny - 1)]);
+        }
+        return points;
+      }
+
+      function maybeFlipY(points, ny) {
+        if (!Y_FLIP) return points;
+        return points.map(([x, y]) => [x, ny - 1 - y]);
+      }
+
+      (async function init() {
+        // -------- meta/grid/labels --------
+        const meta = await safeJSON(`${ROOT}/meta_data.json`);
+        if (!meta) {
+          writeInfo("<b>meta_data.json</b> not found.");
+          return;
+        }
+
+        const grid = meta.grid || {};
+        if (!grid[PLANE]) {
+          writeInfo(`Plane <b>${PLANE}</b> not in meta.grid.`);
+          return;
+        }
+        const [nx, ny] = grid[PLANE];
+
+        const labels = meta.labels || [];
+        if (!labels.length) {
+          writeInfo("No labels in meta.");
+          return;
+        }
+
+        if (!LABEL_A || !labels.includes(LABEL_A)) LABEL_A = labels[0];
+        if (!LABEL_B || !labels.includes(LABEL_B))
+          LABEL_B = labels[1] || labels[0];
+        if (LABEL_A === LABEL_B && labels.length >= 2) LABEL_B = labels[1];
+
+        console.log(nx, ny);
+
+        svg
+          .attr("viewBox", `0 0 ${300} ${300}`)
+          .attr("preserveAspectRatio", "xMidYMid meet");
+        writeInfo(
+          `Plane: <b>${PLANE}</b> · Variant: <b>${VARIANT}</b> · Level: <b>${LEVEL}%</b> · ` +
+            `A: <b>${LABEL_A}</b> vs B: <b>${LABEL_B}</b> · Grid: <b>${nx}×${ny}</b>`
+        );
+
+        // -------- projected points --------
+        const proj = await safeJSON(
+          `${ROOT}/projections/${PLANE}_projections.json`
+        );
+        if (proj) {
+          function getPts(obj, label) {
+            const direct = obj[label];
+            const nested = obj[PLANE] && obj[PLANE][label];
+            return nested || direct || [];
+          }
+          function drawPts(label, cssClass) {
+            let pts = getPts(proj, label);
+            pts = scaleIfUnit(pts, nx, ny);
+            pts = maybeFlipY(pts, ny);
+            gPts
+              .selectAll(`circle.${cssClass}`)
+              .data(pts)
+              .join("circle")
+              .attr("class", cssClass)
+              .attr("cx", (d) => d[0])
+              .attr("cy", (d) => d[1])
+              .attr("r", 1.5);
+          }
+          drawPts(LABEL_A, "A");
+          drawPts(LABEL_B, "B");
+        }
+
+        // -------- contours (only outermost per label) --------
+        async function drawWrappingContour(label, cssClass) {
+          const safe = label.replace(/[^A-Za-z0-9._-]+/g, "_");
+          const obj = await safeJSON(`${ROOT}/contours/${safe}_contour.json`);
+          if (!obj || !obj.contours) return;
+
+          const items = obj.contours.filter(
+            (d) =>
+              d.plane === PLANE &&
+              d.variant === (VARIANT === "point_fraction" ? "pf" : "hdr") &&
+              +d.level === +LEVEL
+          );
+
+          if (!items.length) return;
+
+          // pick outermost by area
+          const enriched = items.map((d) => {
+            let pts = scaleIfUnit(d.points, nx, ny);
+            pts = maybeFlipY(pts, ny);
+            return { ...d, _pts: pts, _area: ringArea(pts) };
+          });
+
+          const outer = enriched.reduce(
+            (best, cur) => (cur._area > best._area ? cur : best),
+            enriched[0]
+          );
+
+          gCtr
+            .selectAll(`path.${cssClass}`)
+            .data([outer])
+            .join("path")
+            .attr("class", cssClass)
+            .attr("d", (d) => polylineToPath(d._pts))
+            .attr("vector-effect", "non-scaling-stroke");
+        }
+
+        await drawWrappingContour(LABEL_A, "A");
+        await drawWrappingContour(LABEL_B, "B");
+        gCtr.raise();
+      })();
+    </script>
+  </body>
+</html>
