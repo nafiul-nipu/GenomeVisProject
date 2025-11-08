@@ -2,20 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>MPASE 2D SVG (Points + Wrapping Contours)</title>
+    <title>MPASE 2D SVG · Red Contour + Blue Scatter</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
+      :root {
+        --bg: #0b0b0c;
+        --panel: #0e0e11;
+        --fg: #eaeaea;
+        --grid: #222;
+        --scatter: #1f77b4; /* blue points */
+        --contour: #d62728; /* red contour */
+      }
       html,
       body {
         margin: 0;
         padding: 0;
-        background: #0b0b0c;
-        color: #eaeaea;
-        font: 14px/1.4 system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       }
       header {
         padding: 10px 14px;
-        border-bottom: 1px solid #222;
+        border-bottom: 1px solid var(--grid);
         display: flex;
         align-items: center;
         gap: 12px;
@@ -28,37 +36,54 @@
       #wrap {
         padding: 12px;
       }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--grid);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .panel header {
+        border: 0;
+        padding: 8px 10px;
+        font-weight: 600;
+        background: #111214;
+      }
+      .panel .body {
+        padding: 8px;
+      }
       svg {
-        width: min(92vw, 92vh);
-        height: auto;
-        border: 1px solid #222;
-        background: #0e0e11;
         display: block;
+        width: 100%;
+        height: auto;
+        background: #0f1013;
+        border-radius: 4px;
       }
-      .contours .A {
-        stroke: #1f77b4;
-      }
-      .contours .B {
-        stroke: #d62728;
-      }
+
+      /* Contour red */
       .contours path {
         fill: none;
+        stroke: var(--contour);
         stroke-width: 1.8;
         stroke-opacity: 0.95;
+        vector-effect: non-scaling-stroke;
       }
+
+      /* Scatter blue */
       .points circle {
-        r: 1.5;
+        fill: var(--scatter);
+        fill-opacity: 0.8;
+        r: 1.6;
       }
-      .points .A {
-        fill: #1f77b4;
-        fill-opacity: 0.7;
-      }
-      .points .B {
-        fill: #d62728;
-        fill-opacity: 0.7;
-      }
-      .note {
+
+      .footnote {
         opacity: 0.75;
+        margin-top: 8px;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -66,32 +91,26 @@
   <body>
     <header>
       <strong>MPASE 2D SVG</strong>
-      <span class="note"
-        >Only points + outermost contours from <code>web_data/</code></span
+      <span
+        >Red contour + blue scatter · all planes from
+        <code>web_data/</code></span
       >
     </header>
+
     <div id="wrap">
-      <svg id="view"></svg>
-      <div id="info"></div>
+      <div id="metaLine" class="footnote"></div>
+      <div class="row" id="row"></div>
     </div>
 
     <script>
-      // ---------------------- Config ----------------------
-      const ROOT = "web_data"; // export folder
-      const PLANE = "XZ"; // "XY" | "YZ" | "XZ"
+      // ------------ Config ------------
+      const ROOT = "web_data";
+      const PLANES = ["XY", "YZ", "XZ"];
       const VARIANT = "hdr"; // "hdr" | "point_fraction"
-      const LEVEL = 100; // 100, 95, 80, ...
-      const Y_FLIP = false; // set true if vertical inversion is needed
+      const LEVEL = 100;
+      const LABEL = null; // or set explicitly, e.g. "12h_UNTR"
 
-      // Pin labels (or leave null to auto-pick first two from meta)
-      let LABEL_A = null; // e.g., "12h_UNTR"
-      let LABEL_B = null; // e.g., "12h_VACV"
-
-      // ---------------------- Setup ----------------------
-      const svg = d3.select("#view");
-      const gPts = svg.append("g").attr("class", "points");
-      const gCtr = svg.append("g").attr("class", "contours");
-      const writeInfo = (html) => d3.select("#info").html(html);
+      // ------------ Utils ------------
       const safeJSON = async (p) => {
         try {
           return await d3.json(p);
@@ -105,134 +124,230 @@
           ? "M" + pts.map((p) => `${p[0]},${p[1]}`).join("L") + "Z"
           : "";
 
-      // shoelace area (positive magnitude)
-      function ringArea(pts) {
-        let a = 0;
-        for (let i = 0, n = pts.length; i < n; i++) {
-          const [x1, y1] = pts[i];
-          const [x2, y2] = pts[(i + 1) % n];
-          a += x1 * y2 - x2 * y1;
+      const extent2D = (pts) => {
+        let xmin = Infinity,
+          xmax = -Infinity,
+          ymin = Infinity,
+          ymax = -Infinity;
+        for (const [x, y] of pts) {
+          if (x < xmin) xmin = x;
+          if (x > xmax) xmax = x;
+          if (y < ymin) ymin = y;
+          if (y > ymax) ymax = y;
         }
-        return Math.abs(a) / 2;
+        return { xmin, xmax, ymin, ymax };
+      };
+
+      const bboxIoU = (a, b) => {
+        const ix = Math.max(
+          0,
+          Math.min(a.xmax, b.xmax) - Math.max(a.xmin, b.xmin)
+        );
+        const iy = Math.max(
+          0,
+          Math.min(a.ymax, b.ymax) - Math.max(a.ymin, b.ymin)
+        );
+        const inter = ix * iy;
+        const areaA =
+          Math.max(0, a.xmax - a.xmin) * Math.max(0, a.ymax - a.ymin);
+        const areaB =
+          Math.max(0, b.xmax - b.xmin) * Math.max(0, b.ymax - b.ymin);
+        const uni = areaA + areaB - inter;
+        return uni > 0 ? inter / uni : 0;
+      };
+
+      const looksRaster = (pts, nx, ny) => {
+        if (!pts || !pts.length) return false;
+        const bx = extent2D(pts);
+        return (
+          bx.xmax <= nx + 1 &&
+          bx.ymax <= ny + 1 &&
+          bx.xmin >= -1 &&
+          bx.ymin >= -1
+        );
+      };
+
+      // If unit [0..1], scale to raster
+      const scaleIfUnit = (pts, nx, ny) => {
+        if (!pts || !pts.length) return [];
+        const mx = d3.max(pts, (p) => p[0]);
+        const my = d3.max(pts, (p) => p[1]);
+        if (mx <= 1.01 && my <= 1.01)
+          return pts.map(([x, y]) => [x * (nx - 1), y * (ny - 1)]);
+        return pts;
+      };
+
+      // 8 orientation candidates for contour alignment in raster space
+      function orientCandidates(pts, nx, ny) {
+        return [
+          { name: "id", fn: ([x, y]) => [x, y] },
+          { name: "flipX", fn: ([x, y]) => [nx - 1 - x, y] },
+          { name: "flipY", fn: ([x, y]) => [x, ny - 1 - y] },
+          { name: "flipXY", fn: ([x, y]) => [nx - 1 - x, ny - 1 - y] },
+          { name: "swap", fn: ([x, y]) => [y, x] },
+          { name: "swapFX", fn: ([x, y]) => [ny - 1 - y, x] },
+          { name: "swapFY", fn: ([x, y]) => [y, nx - 1 - x] },
+          { name: "swapFXY", fn: ([x, y]) => [ny - 1 - y, nx - 1 - x] },
+        ].map((c) => ({ name: c.name, pts: pts.map(c.fn) }));
       }
 
-      function scaleIfUnit(points, nx, ny) {
-        if (!points || !points.length) return [];
-        const mx = d3.max(points, (p) => p[0]);
-        const my = d3.max(points, (p) => p[1]);
-        if (mx <= 1.01 && my <= 1.01) {
-          return points.map(([x, y]) => [x * (nx - 1), y * (ny - 1)]);
-        }
-        return points;
-      }
+      const pickPts = (proj, plane, label) => {
+        if (!proj || !label) return [];
+        const direct = proj[label];
+        const nested = proj[plane] && proj[plane][label];
+        return nested || direct || [];
+      };
 
-      function maybeFlipY(points, ny) {
-        if (!Y_FLIP) return points;
-        return points.map(([x, y]) => [x, ny - 1 - y]);
-      }
-
+      // ------------ Main ------------
       (async function init() {
-        // -------- meta/grid/labels --------
+        // Ensure containers exist
+        if (!document.getElementById("metaLine")) {
+          const wrap = document.getElementById("wrap") || document.body;
+          const metaDiv = document.createElement("div");
+          metaDiv.id = "metaLine";
+          metaDiv.className = "footnote";
+          wrap.prepend(metaDiv);
+        }
+        if (!document.getElementById("row")) {
+          const wrap = document.getElementById("wrap") || document.body;
+          const rowDiv = document.createElement("div");
+          rowDiv.id = "row";
+          rowDiv.className = "row";
+          wrap.appendChild(rowDiv);
+        }
+
         const meta = await safeJSON(`${ROOT}/meta_data.json`);
         if (!meta) {
-          writeInfo("<b>meta_data.json</b> not found.");
+          d3.select("#metaLine").html("<b>meta_data.json</b> not found.");
           return;
         }
 
         const grid = meta.grid || {};
-        if (!grid[PLANE]) {
-          writeInfo(`Plane <b>${PLANE}</b> not in meta.grid.`);
-          return;
-        }
-        const [nx, ny] = grid[PLANE];
-
         const labels = meta.labels || [];
-        if (!labels.length) {
-          writeInfo("No labels in meta.");
-          return;
-        }
-
-        if (!LABEL_A || !labels.includes(LABEL_A)) LABEL_A = labels[0];
-        if (!LABEL_B || !labels.includes(LABEL_B))
-          LABEL_B = labels[1] || labels[0];
-        if (LABEL_A === LABEL_B && labels.length >= 2) LABEL_B = labels[1];
-
-        console.log(nx, ny);
-
-        svg
-          .attr("viewBox", `0 0 ${300} ${300}`)
-          .attr("preserveAspectRatio", "xMidYMid meet");
-        writeInfo(
-          `Plane: <b>${PLANE}</b> · Variant: <b>${VARIANT}</b> · Level: <b>${LEVEL}%</b> · ` +
-            `A: <b>${LABEL_A}</b> vs B: <b>${LABEL_B}</b> · Grid: <b>${nx}×${ny}</b>`
+        const chosen = LABEL || labels[0] || "";
+        d3.select("#metaLine").html(
+          `Variant: <b>${VARIANT}</b> · Level: <b>${LEVEL}%</b> · Label: <b>${chosen}</b> · Planes: <b>${PLANES.join(
+            " · "
+          )}</b>`
         );
 
-        // -------- projected points --------
-        const proj = await safeJSON(
-          `${ROOT}/projections/${PLANE}_projections.json`
-        );
-        if (proj) {
-          function getPts(obj, label) {
-            const direct = obj[label];
-            const nested = obj[PLANE] && obj[PLANE][label];
-            return nested || direct || [];
-          }
-          function drawPts(label, cssClass) {
-            let pts = getPts(proj, label);
-            pts = scaleIfUnit(pts, nx, ny);
-            pts = maybeFlipY(pts, ny);
-            gPts
-              .selectAll(`circle.${cssClass}`)
-              .data(pts)
-              .join("circle")
-              .attr("class", cssClass)
-              .attr("cx", (d) => d[0])
-              .attr("cy", (d) => d[1])
-              .attr("r", 1.5);
-          }
-          drawPts(LABEL_A, "A");
-          drawPts(LABEL_B, "B");
-        }
+        const row = d3.select("#row");
 
-        // -------- contours (only outermost per label) --------
-        async function drawWrappingContour(label, cssClass) {
-          const safe = label.replace(/[^A-Za-z0-9._-]+/g, "_");
-          const obj = await safeJSON(`${ROOT}/contours/${safe}_contour.json`);
-          if (!obj || !obj.contours) return;
+        for (const plane of PLANES) {
+          if (!grid[plane]) continue;
+          const [nx, ny] = grid[plane];
 
-          const items = obj.contours.filter(
+          const panel = row.append("div").attr("class", "panel");
+          panel.append("header").text(plane);
+          const body = panel.append("div").attr("class", "body");
+
+          const svg = body
+            .append("svg")
+            .attr("viewBox", `0 0 ${nx} ${ny}`)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+          const gPts = svg.append("g").attr("class", "points");
+          const gCtr = svg.append("g").attr("class", "contours");
+
+          // Load
+          const proj = await safeJSON(
+            `${ROOT}/projections/${plane}_projections.json`
+          );
+          const cname = chosen.replace(/[^A-Za-z0-9._-]+/g, "_");
+          const contourObj = await safeJSON(
+            `${ROOT}/contours/${cname}_contour.json`
+          );
+
+          // Points → raster-ish
+          let ptsRaw = proj ? pickPts(proj, plane, chosen) : [];
+          if (!looksRaster(ptsRaw, nx, ny)) {
+            // If world coords slipped in, normalize by their own bbox to raster
+            const b = extent2D(ptsRaw);
+            const toRaster = ([x, y]) => [
+              ((x - b.xmin) * (nx - 1)) / Math.max(1e-9, b.xmax - b.xmin),
+              ((y - b.ymin) * (ny - 1)) / Math.max(1e-9, b.ymax - b.ymin),
+            ];
+            ptsRaw = ptsRaw.map(toRaster);
+          }
+          const pts = scaleIfUnit(ptsRaw, nx, ny);
+
+          // Draw points (blue)
+          gPts
+            .selectAll("circle")
+            .data(pts)
+            .join("circle")
+            .attr("cx", (d) => d[0])
+            .attr("cy", (d) => d[1])
+            .attr("r", 1.6);
+
+          // Contours
+          const items = (contourObj?.contours || []).filter(
             (d) =>
-              d.plane === PLANE &&
+              d.plane === plane &&
               d.variant === (VARIANT === "point_fraction" ? "pf" : "hdr") &&
               +d.level === +LEVEL
           );
+          if (items.length) {
+            // Take outermost by area after orientation search
+            const ptsBox = extent2D(pts);
+            const orientedCandidates = items.map((d) => {
+              // First bring contour roughly to raster scale if looks unit
+              let base = scaleIfUnit(d.points || [], nx, ny);
+              if (!looksRaster(base, nx, ny)) {
+                // Normalize by its own bbox to raster for fair orientation test
+                const b = extent2D(base);
+                const toRaster = ([x, y]) => [
+                  ((x - b.xmin) * (nx - 1)) / Math.max(1e-9, b.xmax - b.xmin),
+                  ((y - b.ymin) * (ny - 1)) / Math.max(1e-9, b.ymax - b.ymin),
+                ];
+                base = base.map(toRaster);
+              }
 
-          if (!items.length) return;
+              // Try 8 transforms, pick best IoU to points bbox
+              const candidates = orientCandidates(base, nx, ny);
+              let best = candidates[0],
+                bestIoU = -1;
+              for (const c of candidates) {
+                const cb = extent2D(c.pts);
+                const iou = bboxIoU(cb, ptsBox);
+                if (iou > bestIoU) {
+                  bestIoU = iou;
+                  best = c;
+                }
+              }
+              return { ...d, _pts: best.pts, _iou: bestIoU, _name: best.name };
+            });
 
-          // pick outermost by area
-          const enriched = items.map((d) => {
-            let pts = scaleIfUnit(d.points, nx, ny);
-            pts = maybeFlipY(pts, ny);
-            return { ...d, _pts: pts, _area: ringArea(pts) };
-          });
+            // Now pick outermost by area among oriented
+            const enriched = orientedCandidates.map((d) => ({
+              ...d,
+              _area: (() => {
+                const p = d._pts;
+                let a = 0;
+                for (let i = 0; i < p.length; i++) {
+                  const [x1, y1] = p[i];
+                  const [x2, y2] = p[(i + 1) % p.length];
+                  a += x1 * y2 - x2 * y1;
+                }
+                return Math.abs(a) / 2;
+              })(),
+            }));
 
-          const outer = enriched.reduce(
-            (best, cur) => (cur._area > best._area ? cur : best),
-            enriched[0]
-          );
+            const outer = enriched.reduce(
+              (a, b) => (b._area > a._area ? b : a),
+              enriched[0]
+            );
 
-          gCtr
-            .selectAll(`path.${cssClass}`)
-            .data([outer])
-            .join("path")
-            .attr("class", cssClass)
-            .attr("d", (d) => polylineToPath(d._pts))
-            .attr("vector-effect", "non-scaling-stroke");
+            // Draw contour (red)
+            gCtr
+              .selectAll("path")
+              .data([outer])
+              .join("path")
+              .attr("d", (d) => polylineToPath(d._pts));
+          }
+
+          gCtr.raise();
         }
-
-        await drawWrappingContour(LABEL_A, "A");
-        await drawWrappingContour(LABEL_B, "B");
-        gCtr.raise();
       })();
     </script>
   </body>
