@@ -21,16 +21,26 @@ def make_grid_from_bounds(P: np.ndarray, base=160, pad_frac=0.05):
     edges = [np.linspace(mn[i], mx[i], dims[i] + 1, dtype=np.float32) for i in range(3)]
     return edges, dims
 
+# def grid_centers_from_edges(ex, ey):
+#     # Number of pixels along X and Y for this plane.
+#     # Convert bin edges into number of bins (pixels). If edges have length N+1, there are N bins.
+#     # The raster mask needs exact dimensions
+#     nx = len(ex) - 1; ny = len(ey) - 1
+#     # Create arrays of pixel center coordinates along X and Y.
+#     # When rasterizing points, we need to know where pixel centers are to place each point in the right bin.
+#     xs = np.linspace(ex[0], ex[-1], nx)
+#     ys = np.linspace(ey[0], ey[-1], ny)
+#     return xs, ys
+
 def grid_centers_from_edges(ex, ey):
-    # Number of pixels along X and Y for this plane.
-    # Convert bin edges into number of bins (pixels). If edges have length N+1, there are N bins.
-    # The raster mask needs exact dimensions
-    nx = len(ex) - 1; ny = len(ey) - 1
-    # Create arrays of pixel center coordinates along X and Y.
-    # When rasterizing points, we need to know where pixel centers are to place each point in the right bin.
-    xs = np.linspace(ex[0], ex[-1], nx)
-    ys = np.linspace(ey[0], ey[-1], ny)
+    """
+    Return true bin centers given edges ex (len nx+1) and ey (len ny+1).
+    Centers are midpoints between consecutive edges.
+    """
+    xs = 0.5 * (ex[:-1] + ex[1:])
+    ys = 0.5 * (ey[:-1] + ey[1:])
     return xs, ys
+
 
 # Projects a 3D point set P onto a 2D plane by dropping one axis.
 def project_plane(P: np.ndarray, axis: str) -> np.ndarray:
@@ -39,7 +49,7 @@ def project_plane(P: np.ndarray, axis: str) -> np.ndarray:
     # P[:, d] slices columns to keep just those two coordinates.
     return P[:, d]
 
-def rasterize_points(points2d: np.ndarray, xs, ys, disk_px=2) -> np.ndarray:
+def rasterize_points(points2d: np.ndarray, xs, ys, disk_px=2, ex=None, ey=None) -> np.ndarray:
     """Rasterize points to a binary mask with small disks (radius=disk_px pixels).
     Takes 2D points and turns them into a pixel grid (mask).
     """
@@ -57,12 +67,19 @@ def rasterize_points(points2d: np.ndarray, xs, ys, disk_px=2) -> np.ndarray:
     disk = (XX**2 + YY**2) <= (disk_px**2)
     # half-height and half-width of the disk
     dh, dw = disk.shape[0]//2, disk.shape[1]//2
-    # convert each point's (x,y) coordinates to pixel indices
-    # np.searchsorted finds the index where each point would fit in the sorted xs/ys
-    # subtract 1 to get the pixel to the left/below the point
-    # clip to ensure indices are within image bounds [0, nx-1] or [0, ny-1]
-    x_idx = np.clip(np.searchsorted(xs, points2d[:,0]) - 1, 0, nx-1)
-    y_idx = np.clip(np.searchsorted(ys, points2d[:,1]) - 1, 0, ny-1)
+    
+    if ex is not None and ey is not None:
+        # --- FIX 3: bin by EDGES (right-exclusive except last bin), matches HDR binning ---
+        x_idx = np.clip(np.searchsorted(ex, points2d[:,0], side="right") - 1, 0, nx-1)
+        y_idx = np.clip(np.searchsorted(ey, points2d[:,1], side="right") - 1, 0, ny-1)
+    else:
+        # convert each point's (x,y) coordinates to pixel indices
+        # np.searchsorted finds the index where each point would fit in the sorted xs/ys
+        # subtract 1 to get the pixel to the left/below the point
+        # clip to ensure indices are within image bounds [0, nx-1] or [0, ny-1]
+        x_idx = np.clip(np.searchsorted(xs, points2d[:,0]) - 1, 0, nx-1)
+        y_idx = np.clip(np.searchsorted(ys, points2d[:,1]) - 1, 0, ny-1)
+    
     # loop over each point's pixel index
     for y, x in zip(y_idx, x_idx):
         # compute the bounding box of the disk, clipped to image boundaries

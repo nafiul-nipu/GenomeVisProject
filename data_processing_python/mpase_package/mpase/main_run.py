@@ -51,7 +51,8 @@ def _per_plane_sets(aligned: List[np.ndarray], edges3d, labels: List[str],
 
         # 2D projections per set
         sets2d: Dict[str, np.ndarray] = {lab: X[:, [i, j]] for lab, X in zip(labels, aligned)}  # type: ignore
-        per_plane[plane] = dict(xs=xs, ys=ys, sets=sets2d)
+        # per_plane[plane] = dict(xs=xs, ys=ys, sets=sets2d)
+        per_plane[plane] = dict(xs=xs, ys=ys, ex=ex, ey=ey, sets=sets2d)  # keep edges for PF raster
 
         # union-of-presence background
         # Background masks (for plotting if needed)
@@ -189,6 +190,29 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
     # Typical contents: {plane: {"xs","ys","sets":{label->points2d}}}
     # Background is union-of-presence per plane (for light gray plot layer)
     per_plane, background = _per_plane_sets(aligned, edges3d, labels, planes)
+    
+    # --- FIX 2: persist world bbox + dims for each plane, derived from the same edges used for HDR/PF ---
+    bbox_world = {}
+    dims_by_plane = {}
+    for a in ('x','y','z'):
+        plane = PLANE_FROM_AXIS[a]  # e.g., 'z'->"XY"
+        if plane not in planes:
+            continue
+        i, j = AXPAIR[a]
+        ex, ey = edges3d[i], edges3d[j]
+        bbox_world[plane] = {
+            "xmin": float(ex[0]),
+            "xmax": float(ex[-1]),
+            "ymin": float(ey[0]),
+            "ymax": float(ey[-1]),
+        }
+        dims_by_plane[plane] = {"nx": int(len(ex) - 1), "ny": int(len(ey) - 1)}
+
+    # Optional: mirror padding config so the viewer can know it (exporter already checks bbox_world first)
+    pad_frac_by_plane = {p: float(getattr(cfg_common, "pad_frac", 0.0)) for p in bbox_world.keys()}
+    # --- END FIX 2 ---
+    
+    print("[DEBUG bbox_world]", bbox_world, dims_by_plane)
 
     ############################ Alignment-only early return ############################
     if point_alignment_only or (not run_hdr and not run_pf):
@@ -294,8 +318,10 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
 
                 # Per-set PF shape for this plane/level
                 for lab, P2 in sets2d.items():
-                    sp = make_pf_shape(P2, xs, ys, plane, frac,
-                                       cfg_pf.bandwidth, cfg_pf.disk_px, morph=cfg_pf.morph)
+                    ex = d["ex"]; ey = d["ey"]
+                    sp = make_pf_shape(P2, xs, ys, ex, ey, plane, frac,
+                                    cfg_pf.bandwidth, cfg_pf.disk_px, morph=cfg_pf.morph)
+
                     shapes["point_fraction"][plane][level][lab] = sp
 
                 # Pairwise metrics between all sets
@@ -340,5 +366,8 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
         background=background,
         densities=densities,
         projections=per_plane,
-        ids_by_label={lab: ids for lab, ids in zip(labels, ids_per_set)}  # <-- expose IDs alongside points
+        ids_by_label={lab: ids for lab, ids in zip(labels, ids_per_set)},  # <-- expose IDs alongside points
+        bbox_world=bbox_world,                   # --- FIX 2 added ---
+        dims_by_plane=dims_by_plane,             # --- FIX 2 added ---
+        pad_frac_by_plane={k: float(getattr(cfg_common, "pad_frac", 0.0)) for k in bbox_world.keys()},     # --- FIX 2 added (optional)
     )

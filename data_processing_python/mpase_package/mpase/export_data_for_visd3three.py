@@ -227,96 +227,97 @@ def export_contours_d3(
 def export_projections_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     Writes one file per plane under <out_dir>/projections/ in *pixel* grid coords that match contours:
-    projections/<PLANE>_projections.json
+      projections/<PLANE>_projections.json
       {"UNTR": [[x,y], ...], "VACV": [[x,y], ...], ...}
 
     Uses result["projections"][plane]["sets"][label] as 2D points.
+    Pixel grid must match HDR/PF lattice: dims_by_plane + bbox_world.
     """
     written: List[str] = []
     proj_dir = os.path.join(out_dir, "projections")
     _ensure_dir(proj_dir)
 
-    # grid sizes from background (to align with contour pixel space)
-    grid = {plane: (bg.shape[1], bg.shape[0]) for plane, bg in result["background"].items()}  # (nx, ny)
+    # Fallback grid sizes from background (nx, ny) = (width, height)
+    grid = {plane: (bg.shape[1], bg.shape[0]) for plane, bg in result["background"].items()}
 
     for plane, d in result.get("projections", {}).items():
         if plane not in grid:
             continue
-        nx, ny = grid[plane]
+
+        # --- grid dims: prefer canonical dims saved with HDR/PF ---
+        if "dims_by_plane" in result and plane in result["dims_by_plane"]:
+            nx = int(result["dims_by_plane"][plane]["nx"])
+            ny = int(result["dims_by_plane"][plane]["ny"])
+        else:
+            nx, ny = grid[plane]  # fallback from background masks
+
         sets2d = d.get("sets", {})
         if not sets2d:
             continue
 
-        # -------------------- NEW: Collect all points for a single, plane-wide bbox --------------------
-        # We MUST map every label on this plane with the SAME bbox + padding so projections line up with
-        # the density raster (which was built from a padded global bbox).
-        all_xy = []
-        for P2 in sets2d.values():
-            if P2 is None:
+        # --- canonical bbox from HDR/PF; no per-plane re-minmaxing when available ---
+        bbox = (result.get("bbox_world", {}) or {}).get(plane)
+        if bbox and all(k in bbox for k in ("xmin", "xmax", "ymin", "ymax")):
+            xmin = float(bbox["xmin"]); xmax = float(bbox["xmax"])
+            ymin = float(bbox["ymin"]); ymax = float(bbox["ymax"])
+        else:
+            # Fallback (should not happen if FIX 2 ran): derive bbox from all points + padding
+            all_xy = []
+            for P2 in sets2d.values():
+                if P2 is None:
+                    continue
+                A = np.asarray(P2, dtype=float)
+                if A.size == 0:
+                    continue
+                all_xy.append(A)
+            if not all_xy:
                 continue
-            A = np.asarray(P2, dtype=float)
-            if A.size == 0:
-                continue
-            all_xy.append(A)
-        if not all_xy:
-            continue
-        ALL = np.vstack(all_xy)
+            ALL = np.vstack(all_xy)
+            raw_xmin, raw_xmax = float(np.min(ALL[:, 0])), float(np.max(ALL[:, 0]))
+            raw_ymin, raw_ymax = float(np.min(ALL[:, 1])), float(np.max(ALL[:, 1]))
+            xrng = max(1e-9, raw_xmax - raw_xmin)
+            yrng = max(1e-9, raw_ymax - raw_ymin)
+            pad_frac = float((result.get("pad_frac_by_plane", {}) or {}).get(plane, 0.05))
+            xmin = raw_xmin - pad_frac * xrng; xmax = raw_xmax + pad_frac * xrng
+            ymin = raw_ymin - pad_frac * yrng; ymax = raw_ymax + pad_frac * yrng
 
-        raw_xmin, raw_xmax = float(np.min(ALL[:, 0])), float(np.max(ALL[:, 0]))
-        raw_ymin, raw_ymax = float(np.min(ALL[:, 1])), float(np.max(ALL[:, 1]))
-        xrng = max(1e-9, raw_xmax - raw_xmin)
-        yrng = max(1e-9, raw_ymax - raw_ymin)
+        # --- pad_frac for debug print: pull from result regardless of bbox path ---
+        pad_frac = float((result.get("pad_frac_by_plane", {}) or {}).get(plane, 0.05))
 
-        # -------------------- NEW: padding to emulate density raster padding --------------------
-        # If your density code padded by a fraction (e.g., 5%), we mirror that here.
-        # If a canonical padding is stored in result, use it; otherwise default to 5%.
-        pad_frac = float(d.get("pad_frac", 0.05))  # NEW: read from result if present; else 5%
-        xmin = raw_xmin - pad_frac * xrng
-        xmax = raw_xmax + pad_frac * xrng
-        ymin = raw_ymin - pad_frac * yrng
-        ymax = raw_ymax + pad_frac * yrng
-
-        # Optional: if a canonical bbox was saved during density creation, prefer that.
-        # e.g., result.get("bbox_world", {}).get(plane) with keys xmin/xmax/ymin/ymax
-        bbox_from_result = (result.get("bbox_world", {}) or {}).get(plane)
-        if bbox_from_result and all(k in bbox_from_result for k in ("xmin","xmax","ymin","ymax")):
-            xmin = float(bbox_from_result["xmin"])
-            xmax = float(bbox_from_result["xmax"])
-            ymin = float(bbox_from_result["ymin"])
-            ymax = float(bbox_from_result["ymax"])
-
-        # Guard against degenerate bbox
+        # guard against degenerate bbox
         if xmax <= xmin:
             xmax = xmin + 1.0
         if ymax <= ymin:
             ymax = ymin + 1.0
 
-        # Debug print to verify
-        print(f"[export_projections_json] plane={plane} bbox (padded/global): "
-              f"x[{xmin:.3f},{xmax:.3f}] y[{ymin:.3f},{ymax:.3f}] -> grid ({nx},{ny}), pad_frac={pad_frac:.3f}")
+        print(
+            f"[export_projections_json] plane={plane} "
+            f"bbox (padded/global): x[{xmin:.3f},{xmax:.3f}] y[{ymin:.3f},{ymax:.3f}] "
+            f"-> grid ({nx},{ny}), pad_frac={pad_frac:.3f}"
+        )
 
-        # -------------------- NEW: map with the padded/global bbox and flip Y to y-down --------------------
+        # map world -> pixel centers [0..nx-1],[0..ny-1] with y-down
         def to_pixel_global(points: np.ndarray):
             if points.size == 0:
                 return points.tolist()
             P = np.asarray(points, dtype=float).copy()
-            P[:, 0] = (P[:, 0] - xmin) / (xmax - xmin) * (nx - 1)                   # x right
-            P[:, 1] = (1.0 - (P[:, 1] - ymin) / (ymax - ymin)) * (ny - 1)           # y-down
-            # Clamp to grid bounds
+            P[:, 0] = (P[:, 0] - xmin) / (xmax - xmin) * (nx - 1)                # x right
+            P[:, 1] = (1.0 - (P[:, 1] - ymin) / (ymax - ymin)) * (ny - 1)        # y-down
             P[:, 0] = np.clip(P[:, 0], 0.0, nx - 1.0)
             P[:, 1] = np.clip(P[:, 1], 0.0, ny - 1.0)
             return P.tolist()
 
-        plane_out = {}
-        for lab, P2 in sets2d.items():
-            plane_out[str(lab)] = to_pixel_global(np.asarray(P2, dtype=float))
+        plane_out = {str(lab): to_pixel_global(np.asarray(P2, dtype=float))
+                     for lab, P2 in sets2d.items()}
 
         fname = f"{_safe_name(plane)}_projections.json"
         path = _write_json(os.path.join(proj_dir, fname), plane_out)
         written.append(path)
-        _notify(progress_report, "write", kind="projections", plane=str(plane), path=path, labels=len(plane_out))
+        _notify(progress_report, "write", kind="projections", plane=str(plane),
+                path=path, labels=len(plane_out))
 
     return written
+
 
 
 ############## Metrics ################

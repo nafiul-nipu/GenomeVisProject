@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>MPASE 2D SVG · Red Contour + Blue Scatter</title>
+    <title>MPASE 2D SVG · Minimal Test (Aligned)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       :root {
@@ -10,8 +10,8 @@
         --panel: #0e0e11;
         --fg: #eaeaea;
         --grid: #222;
-        --scatter: #1f77b4; /* blue points */
-        --contour: #d62728; /* red contour */
+        --scatter: #1f77b4; /* blue */
+        --contour: #d62728; /* red */
       }
       html,
       body {
@@ -24,23 +24,12 @@
       header {
         padding: 10px 14px;
         border-bottom: 1px solid var(--grid);
-        display: flex;
-        align-items: center;
-        gap: 12px;
       }
-      header code {
-        background: #111;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-      #wrap {
-        padding: 12px;
-      }
-      .row {
+      #row {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
-        align-items: start;
+        padding: 12px;
       }
       .panel {
         background: var(--panel);
@@ -48,11 +37,11 @@
         border-radius: 6px;
         overflow: hidden;
       }
-      .panel header {
-        border: 0;
+      .panel h3 {
+        margin: 0;
         padding: 8px 10px;
-        font-weight: 600;
         background: #111214;
+        font-weight: 600;
       }
       .panel .body {
         padding: 8px;
@@ -64,8 +53,11 @@
         background: #0f1013;
         border-radius: 4px;
       }
-
-      /* Contour red */
+      .points circle {
+        fill: var(--scatter);
+        fill-opacity: 0.85;
+        r: 1.6;
+      }
       .contours path {
         fill: none;
         stroke: var(--contour);
@@ -73,281 +65,273 @@
         stroke-opacity: 0.95;
         vector-effect: non-scaling-stroke;
       }
-
-      /* Scatter blue */
-      .points circle {
-        fill: var(--scatter);
-        fill-opacity: 0.8;
-        r: 1.6;
-      }
-
-      .footnote {
+      .foot {
         opacity: 0.75;
-        margin-top: 8px;
+        padding: 8px 12px;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   </head>
   <body>
     <header>
-      <strong>MPASE 2D SVG</strong>
-      <span
-        >Red contour + blue scatter · all planes from
-        <code>web_data/</code></span
-      >
+      <select id="labSel"></select>
+      <strong>MPASE 2D SVG · Minimal Test</strong>
+      <div class="foot">
+        Assumes pixel-aligned outputs. Toggle variant/level to test containment.
+      </div>
+      <div class="foot">
+        Variant:
+        <select id="variant">
+          <option value="hdr">hdr</option>
+          <option value="pf">pf</option>
+        </select>
+        Level:
+        <input
+          id="level"
+          type="number"
+          value="95"
+          min="50"
+          max="100"
+          step="1"
+          style="width: 64px"
+        />
+      </div>
     </header>
 
-    <div id="wrap">
-      <div id="metaLine" class="footnote"></div>
-      <div class="row" id="row"></div>
-    </div>
+    <div id="row"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-      // ------------ Config ------------
-      const ROOT = "web_data";
-      const PLANES = ["XY", "YZ", "XZ"];
-      const VARIANT = "hdr"; // "hdr" | "point_fraction"
-      const LEVEL = 100;
-      const LABEL = null; // or set explicitly, e.g. "12h_UNTR"
+      (async function () {
+        const ROOT = "web_data";
+        const PLANES = ["XY", "XZ", "YZ"];
+        const PROJ = (p) => `${ROOT}/projections/${p}_projections.json`;
+        const CNT = (lab) =>
+          `${ROOT}/contours/${lab.replace(
+            /[^A-Za-z0-9._-]+/g,
+            "_"
+          )}_contour.json`;
+        const BG = `${ROOT}/background_mask.json`;
 
-      // ------------ Utils ------------
-      const safeJSON = async (p) => {
-        try {
-          return await d3.json(p);
-        } catch {
-          return null;
-        }
-      };
-
-      const polylineToPath = (pts) =>
-        pts && pts.length
-          ? "M" + pts.map((p) => `${p[0]},${p[1]}`).join("L") + "Z"
-          : "";
-
-      const extent2D = (pts) => {
-        let xmin = Infinity,
-          xmax = -Infinity,
-          ymin = Infinity,
-          ymax = -Infinity;
-        for (const [x, y] of pts) {
-          if (x < xmin) xmin = x;
-          if (x > xmax) xmax = x;
-          if (y < ymin) ymin = y;
-          if (y > ymax) ymax = y;
-        }
-        return { xmin, xmax, ymin, ymax };
-      };
-
-      const bboxIoU = (a, b) => {
-        const ix = Math.max(
-          0,
-          Math.min(a.xmax, b.xmax) - Math.max(a.xmin, b.xmin)
-        );
-        const iy = Math.max(
-          0,
-          Math.min(a.ymax, b.ymax) - Math.max(a.ymin, b.ymin)
-        );
-        const inter = ix * iy;
-        const areaA =
-          Math.max(0, a.xmax - a.xmin) * Math.max(0, a.ymax - a.ymin);
-        const areaB =
-          Math.max(0, b.xmax - b.xmin) * Math.max(0, b.ymax - b.ymin);
-        const uni = areaA + areaB - inter;
-        return uni > 0 ? inter / uni : 0;
-      };
-
-      const looksRaster = (pts, nx, ny) => {
-        if (!pts || !pts.length) return false;
-        const bx = extent2D(pts);
-        return (
-          bx.xmax <= nx + 1 &&
-          bx.ymax <= ny + 1 &&
-          bx.xmin >= -1 &&
-          bx.ymin >= -1
-        );
-      };
-
-      // If unit [0..1], scale to raster
-      const scaleIfUnit = (pts, nx, ny) => {
-        if (!pts || !pts.length) return [];
-        const mx = d3.max(pts, (p) => p[0]);
-        const my = d3.max(pts, (p) => p[1]);
-        if (mx <= 1.01 && my <= 1.01)
-          return pts.map(([x, y]) => [x * (nx - 1), y * (ny - 1)]);
-        return pts;
-      };
-
-      // 8 orientation candidates for contour alignment in raster space
-      function orientCandidates(pts, nx, ny) {
-        return [
-          { name: "id", fn: ([x, y]) => [x, y] },
-          { name: "flipX", fn: ([x, y]) => [nx - 1 - x, y] },
-          { name: "flipY", fn: ([x, y]) => [x, ny - 1 - y] },
-          { name: "flipXY", fn: ([x, y]) => [nx - 1 - x, ny - 1 - y] },
-          { name: "swap", fn: ([x, y]) => [y, x] },
-          { name: "swapFX", fn: ([x, y]) => [ny - 1 - y, x] },
-          { name: "swapFY", fn: ([x, y]) => [y, nx - 1 - x] },
-          { name: "swapFXY", fn: ([x, y]) => [ny - 1 - y, nx - 1 - x] },
-        ].map((c) => ({ name: c.name, pts: pts.map(c.fn) }));
-      }
-
-      const pickPts = (proj, plane, label) => {
-        if (!proj || !label) return [];
-        const direct = proj[label];
-        const nested = proj[plane] && proj[plane][label];
-        return nested || direct || [];
-      };
-
-      // ------------ Main ------------
-      (async function init() {
-        // Ensure containers exist
-        if (!document.getElementById("metaLine")) {
-          const wrap = document.getElementById("wrap") || document.body;
-          const metaDiv = document.createElement("div");
-          metaDiv.id = "metaLine";
-          metaDiv.className = "footnote";
-          wrap.prepend(metaDiv);
-        }
-        if (!document.getElementById("row")) {
-          const wrap = document.getElementById("wrap") || document.body;
-          const rowDiv = document.createElement("div");
-          rowDiv.id = "row";
-          rowDiv.className = "row";
-          wrap.appendChild(rowDiv);
-        }
-
-        const meta = await safeJSON(`${ROOT}/meta_data.json`);
-        if (!meta) {
-          d3.select("#metaLine").html("<b>meta_data.json</b> not found.");
-          return;
-        }
-
-        const grid = meta.grid || {};
-        const labels = meta.labels || [];
-        const chosen = LABEL || labels[0] || "";
-        d3.select("#metaLine").html(
-          `Variant: <b>${VARIANT}</b> · Level: <b>${LEVEL}%</b> · Label: <b>${chosen}</b> · Planes: <b>${PLANES.join(
-            " · "
-          )}</b>`
-        );
-
+        const selLab = document.getElementById("labSel");
+        const selVar = document.getElementById("variant");
+        const inpLvl = document.getElementById("level");
         const row = d3.select("#row");
 
+        // dims from background so our SVG lattice matches contours exactly
+        const bg = await fetch(BG).then((r) => r.json());
+        const dims = {};
         for (const plane of PLANES) {
-          if (!grid[plane]) continue;
-          const [nx, ny] = grid[plane];
-
-          const panel = row.append("div").attr("class", "panel");
-          panel.append("header").text(plane);
-          const body = panel.append("div").attr("class", "body");
-
-          const svg = body
-            .append("svg")
-            .attr("viewBox", `0 0 ${nx} ${ny}`)
-            .attr("preserveAspectRatio", "xMidYMid meet");
-
-          const gPts = svg.append("g").attr("class", "points");
-          const gCtr = svg.append("g").attr("class", "contours");
-
-          // Load
-          const proj = await safeJSON(
-            `${ROOT}/projections/${plane}_projections.json`
-          );
-          const cname = chosen.replace(/[^A-Za-z0-9._-]+/g, "_");
-          const contourObj = await safeJSON(
-            `${ROOT}/contours/${cname}_contour.json`
-          );
-
-          // Points → raster-ish
-          let ptsRaw = proj ? pickPts(proj, plane, chosen) : [];
-          if (!looksRaster(ptsRaw, nx, ny)) {
-            // If world coords slipped in, normalize by their own bbox to raster
-            const b = extent2D(ptsRaw);
-            const toRaster = ([x, y]) => [
-              ((x - b.xmin) * (nx - 1)) / Math.max(1e-9, b.xmax - b.xmin),
-              ((y - b.ymin) * (ny - 1)) / Math.max(1e-9, b.ymax - b.ymin),
-            ];
-            ptsRaw = ptsRaw.map(toRaster);
+          const arr = bg[plane];
+          if (Array.isArray(arr) && arr.length) {
+            dims[plane] = { nx: arr[0].length, ny: arr.length };
           }
-          const pts = scaleIfUnit(ptsRaw, nx, ny);
+        }
 
-          // Draw points (blue)
-          gPts
-            .selectAll("circle")
-            .data(pts)
-            .join("circle")
-            .attr("cx", (d) => d[0])
-            .attr("cy", (d) => d[1])
-            .attr("r", 1.6);
+        // load projections for one plane to get labels
+        const firstProj = await fetch(PROJ(PLANES[0])).then((r) => r.json());
+        const labels = Object.keys(firstProj || {});
+        labels.forEach((l) => {
+          const o = document.createElement("option");
+          o.value = l;
+          o.textContent = l;
+          selLab.appendChild(o);
+        });
+        selLab.value = labels[0] || "";
 
-          // Contours
-          const items = (contourObj?.contours || []).filter(
-            (d) =>
-              d.plane === plane &&
-              d.variant === (VARIANT === "point_fraction" ? "pf" : "hdr") &&
-              +d.level === +LEVEL
+        // point-in-polygon (ray casting)
+        function insidePoly(pt, poly) {
+          const x = pt[0],
+            y = pt[1];
+          let inside = false;
+          for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+            const xi = poly[i][0],
+              yi = poly[i][1];
+            const xj = poly[j][0],
+              yj = poly[j][1];
+            const intersect =
+              yi > y !== yj > y &&
+              x < ((xj - xi) * (y - yi)) / Math.max(1e-9, yj - yi) + xi;
+            if (intersect) inside = !inside;
+          }
+          return inside;
+        }
+
+        async function render() {
+          row.selectAll("*").remove();
+          const label = selLab.value;
+          const variant = selVar.value; // "hdr" or "pf"
+          const level = +inpLvl.value; // integer level key in contour json
+
+          // load all contours for this label once
+          let cJson = null;
+          try {
+            cJson = await fetch(CNT(label)).then((r) => r.json());
+          } catch {}
+          const byPlaneMode = d3.group(
+            cJson?.contours || [],
+            (d) => d.plane,
+            (d) => d.variant,
+            (d) => +d.level
           );
-          if (items.length) {
-            // Take outermost by area after orientation search
-            const ptsBox = extent2D(pts);
-            const orientedCandidates = items.map((d) => {
-              // First bring contour roughly to raster scale if looks unit
-              let base = scaleIfUnit(d.points || [], nx, ny);
-              if (!looksRaster(base, nx, ny)) {
-                // Normalize by its own bbox to raster for fair orientation test
-                const b = extent2D(base);
-                const toRaster = ([x, y]) => [
-                  ((x - b.xmin) * (nx - 1)) / Math.max(1e-9, b.xmax - b.xmin),
-                  ((y - b.ymin) * (ny - 1)) / Math.max(1e-9, b.ymax - b.ymin),
-                ];
-                base = base.map(toRaster);
-              }
 
-              // Try 8 transforms, pick best IoU to points bbox
-              const candidates = orientCandidates(base, nx, ny);
-              let best = candidates[0],
-                bestIoU = -1;
-              for (const c of candidates) {
-                const cb = extent2D(c.pts);
-                const iou = bboxIoU(cb, ptsBox);
-                if (iou > bestIoU) {
-                  bestIoU = iou;
-                  best = c;
+          for (const plane of PLANES) {
+            if (!dims[plane]) continue;
+            const { nx, ny } = dims[plane];
+
+            // panel
+            const div = row.append("div").attr("class", "panel");
+            div.append("h3").text(plane);
+            const body = div.append("div").attr("class", "body");
+            const svg = body
+              .append("svg")
+              .attr("viewBox", `0 0 ${nx} ${ny}`)
+              .attr("preserveAspectRatio", "xMidYMid meet");
+            const gOut = svg.append("g").attr("class", "points outside");
+            const gPts = svg.append("g").attr("class", "points");
+            const gCtr = svg.append("g").attr("class", "contours");
+
+            // projections for this plane/label (already pixel coords)
+            const proj = await fetch(PROJ(plane)).then((r) => r.json());
+            const pts = proj && proj[label] ? proj[label] : [];
+
+            // pick contour for (plane, variant, level)
+            const vkey = variant === "pf" ? "pf" : "hdr";
+            const items = byPlaneMode.get(plane)?.get(vkey)?.get(level) || [];
+            // if missing exact level, pick nearest available for this mode
+            let pick = items;
+            if (!items.length) {
+              const lvls = Array.from(
+                (byPlaneMode.get(plane)?.get(vkey) || new Map()).keys()
+              );
+              if (lvls.length) {
+                let best = lvls[0],
+                  bestd = Math.abs(lvls[0] - level);
+                for (const L of lvls) {
+                  const d = Math.abs(L - level);
+                  if (d < bestd) {
+                    best = L;
+                    bestd = d;
+                  }
                 }
+                pick = byPlaneMode.get(plane).get(vkey).get(best) || [];
               }
-              return { ...d, _pts: best.pts, _iou: bestIoU, _name: best.name };
-            });
+            }
 
-            // Now pick outermost by area among oriented
-            const enriched = orientedCandidates.map((d) => ({
-              ...d,
-              _area: (() => {
-                const p = d._pts;
-                let a = 0;
-                for (let i = 0; i < p.length; i++) {
-                  const [x1, y1] = p[i];
-                  const [x2, y2] = p[(i + 1) % p.length];
-                  a += x1 * y2 - x2 * y1;
-                }
-                return Math.abs(a) / 2;
-              })(),
-            }));
-
-            const outer = enriched.reduce(
-              (a, b) => (b._area > a._area ? b : a),
-              enriched[0]
-            );
-
-            // Draw contour (red)
+            // draw contour(s)
             gCtr
               .selectAll("path")
-              .data([outer])
+              .data(pick)
               .join("path")
-              .attr("d", (d) => polylineToPath(d._pts));
-          }
+              .attr(
+                "d",
+                (d) =>
+                  "M" +
+                  (d.points || []).map((p) => `${p[0]},${p[1]}`).join("L") +
+                  "Z"
+              );
 
-          gCtr.raise();
+            // classify points against outermost polygon (largest area)
+            let poly = [];
+            if (pick.length) {
+              let maxA = -1;
+              for (const it of pick) {
+                const p = it.points || [];
+                let area = 0; // polygon area
+                for (let i = 0; i < p.length; i++) {
+                  const [x1, y1] = p[i],
+                    [x2, y2] = p[(i + 1) % p.length];
+                  area += x1 * y2 - x2 * y1;
+                }
+                area = Math.abs(area) / 2;
+                if (area > maxA) {
+                  maxA = area;
+                  poly = p;
+                }
+              }
+            }
+
+            // split points: inside vs outside
+            const outside = poly.length
+              ? pts.filter((pt) => !insidePoly(pt, poly))
+              : [];
+            const inside = poly.length
+              ? pts.filter((pt) => insidePoly(pt, poly))
+              : pts;
+
+            // draw points (inside = blue, outside = magenta)
+            // --- DRAW POINTS AS RASTER BITMAPS ON THE SAME nx×ny LATTICE ---
+            // Helper to paint a list of [x,y] (float) onto an ImageData as single pixels
+            function paintPixels(nx, ny, pts, rgba) {
+              const cvs = document.createElement("canvas");
+              cvs.width = nx;
+              cvs.height = ny;
+              const ctx = cvs.getContext("2d", { willReadFrequently: true });
+              const img = ctx.createImageData(nx, ny);
+              const data = img.data;
+
+              for (const [xf, yf] of pts) {
+                const x = Math.max(0, Math.min(nx - 1, Math.round(xf)));
+                const y = Math.max(0, Math.min(ny - 1, Math.round(yf)));
+                const i = (y * nx + x) * 4;
+                data[i + 0] = rgba[0]; // R
+                data[i + 1] = rgba[1]; // G
+                data[i + 2] = rgba[2]; // B
+                data[i + 3] = rgba[3]; // A
+              }
+              ctx.putImageData(img, 0, 0);
+              return cvs.toDataURL("image/png");
+            }
+
+            // Inside = blue, Outside = magenta
+            const urlInside = paintPixels(nx, ny, inside, [31, 119, 180, 255]); // #1f77b4
+            const urlOutside = paintPixels(
+              nx,
+              ny,
+              outside,
+              [255, 47, 213, 255]
+            ); // #ff2fd5
+
+            // Add as SVG <image> layers (outside on top so misses pop visually)
+            svg
+              .append("image")
+              .attr("href", urlInside)
+              .attr("x", 0)
+              .attr("y", 0)
+              .attr("width", nx)
+              .attr("height", ny)
+              .attr("opacity", 0.95);
+
+            svg
+              .append("image")
+              .attr("href", urlOutside)
+              .attr("x", 0)
+              .attr("y", 0)
+              .attr("width", nx)
+              .attr("height", ny)
+              .attr("opacity", 1.0);
+
+            // footer: count outside
+            body
+              .append("div")
+              .attr("class", "foot")
+              .text(
+                () =>
+                  `points: ${pts.length} • outside contour: ${
+                    outside.length
+                  } (${(
+                    (outside.length / Math.max(1, pts.length)) *
+                    100
+                  ).toFixed(1)}%)  • variant=${vkey} level=${level}`
+              );
+          }
         }
+
+        selLab.addEventListener("change", render);
+        selVar.addEventListener("change", render);
+        inpLvl.addEventListener("change", render);
+
+        await render();
       })();
     </script>
   </body>
