@@ -7,13 +7,17 @@
     "background":[
       "data/green_monkey/va_testing/web_data/background_mask.json"
     ],
+    "background_by_label":[
+      "data/green_monkey/va_testing/web_data/background_by_label/12h_UNTR_background.json",
+      "data/green_monkey/va_testing/web_data/background_by_label/12h_VACV_background.json"
+    ],
     "density":[
       "data/green_monkey/va_testing/web_data/density/12h_UNTR_density.json",
       "data/green_monkey/va_testing/web_data/density/12h_VACV_density.json"
     ],
     "contours":[
-      "data/green_monkey/va_testing/web_data/contours/12h_UNTR_contour.json",
-      "data/green_monkey/va_testing/web_data/contours/12h_VACV_contour.json"
+      "data/green_monkey/va_testing/web_data/contour/12h_UNTR_contour.json",
+      "data/green_monkey/va_testing/web_data/contour/12h_VACV_contour.json"
     ],
     "projections":[
       "data/green_monkey/va_testing/web_data/projections/YZ_projections.json",
@@ -35,7 +39,7 @@
     ]
   },
   "summary":{
-    "files":14,
-    "bytes":10788637
+    "files":16,
+    "bytes":11850561
   }
 }

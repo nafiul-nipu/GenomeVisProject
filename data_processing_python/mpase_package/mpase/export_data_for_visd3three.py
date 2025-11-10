@@ -109,6 +109,34 @@ def export_background_mask_json(result: RunResult, out_dir: str, *, progress_rep
     return [path]
 
 
+################### D3: background masks per label ###################
+
+def export_background_mask_by_label_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
+    """
+    Writes one JSON per label under <out_dir>/background_by_label/ with per-plane 0/1 masks.
+    """
+    written: List[str] = []
+    if "background_by_label" not in result:
+        return written
+    bgdir = os.path.join(out_dir, "background_by_label")
+    _ensure_dir(bgdir)
+    by_plane = result["background_by_label"]
+    # Collect labels
+    labels = list(result.get("labels", []))
+    for lab in labels:
+        payload = {}
+        for plane, d in by_plane.items():
+            if lab in d:
+                payload[plane] = d[lab].astype(np.uint8).tolist()
+        if not payload:
+            continue
+        fname = f"{_safe_name(lab)}_background.json"
+        path = _write_json(os.path.join(bgdir, fname), payload)
+        written.append(path)
+        _notify(progress_report, "write", kind="background_by_label", label=str(lab), path=path)
+    return written
+
+
 ################### D3: densities (per label) ###################
 
 def export_density_json(result: RunResult, out_dir: str, which: Optional[Iterable[str]] = None, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
@@ -369,6 +397,7 @@ def export_all(
 
     rec("meta", export_meta(result, out_dir, progress_report=progress_report))
     rec("background", export_background_mask_json(result, out_dir, progress_report=progress_report))
+    rec("background_by_label", export_background_mask_by_label_json(result, out_dir, progress_report=progress_report))
     if include_density:
         rec("density", export_density_json(result, out_dir, which=which_density, progress_report=progress_report))
     rec("contours", export_contours_d3(result, out_dir, kind_levels=kind_levels, progress_report=progress_report))
@@ -393,3 +422,4 @@ def export_all(
 
     _notify(progress_report, "done", files=manifest["summary"]["files"], bytes=manifest["summary"]["bytes"])
     
+

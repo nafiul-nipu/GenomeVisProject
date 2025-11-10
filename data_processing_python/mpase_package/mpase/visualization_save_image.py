@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Optional, Tuple, Literal
+import re
 
 from .types import CfgHDR, CfgPF, RunResult, Plane, ShapeProduct
 
@@ -280,3 +281,124 @@ def save_projections(result: RunResult,
             base = os.path.join(out_dir, f"projection_{plane}")
             pd.DataFrame(A2, columns=[f"{plane[0]}", f"{plane[1]}"]).to_csv(base + f"_{A_key}.csv", index=False)
             pd.DataFrame(B2, columns=[f"{plane[0]}", f"{plane[1]}"]).to_csv(base + f"_{B_key}.csv", index=False)
+
+# --------------------------- NEW: single-label (no overlay) ---------------------------
+
+def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray, title: str, color="#1f77b4"):
+    if bg_single is not None:
+        ax.imshow(bg_single, cmap="gray", alpha=0.18)
+    C = shape.get("contour")
+    if C is not None:
+        ax.plot(C[:,1], C[:,0], '-', lw=2.4, color=color, alpha=0.95,
+                label=f"{shape['variant']} {shape['level']}%" )
+        ax.legend(frameon=False, loc="upper right")
+    ax.set_title(title); ax.set_axis_off()
+
+
+def view_single(result: RunResult,
+                label: str,
+                kind: Literal["hdr","point_fraction"] = "hdr",
+                plane: Plane = "XY",
+                levels: "int|list[int]|str" = "all",
+                *,
+                show_heat: bool = False,
+                cfg_hdr: Optional[CfgHDR] = None,
+                cfg_pf: Optional[CfgPF] = None):
+    """
+    View one label at a time (no overlay). If per-label background masks exist, use them.
+    """
+    cfg_hdr = cfg_hdr or CfgHDR()
+    cfg_pf  = cfg_pf  or CfgPF()
+    lvls = _levels_from_result(kind, cfg_hdr, cfg_pf, levels)
+
+    if kind not in result.get("shapes", {}):
+        print(f"[view_single] No shapes for kind='{kind}'.")
+        return
+    if plane not in result["shapes"][kind]:
+        print(f"[view_single] No shapes for plane='{plane}' and kind='{kind}'.")
+        return
+
+    by_level = result["shapes"][kind][plane]
+    # background selection
+    bg_single = None
+    if "background_by_label" in result and plane in result["background_by_label"]:
+        bg_single = result["background_by_label"][plane].get(label)
+    if bg_single is None:
+        bg_single = result.get("background", {}).get(plane)
+
+    # optional density heat for HDR
+    D_plane = None
+    if show_heat and kind == "hdr" and result.get("densities") and result["densities"].get(label):
+        D_plane = result["densities"][label].get(plane)
+
+    fig, axes = plt.subplots(1, len(lvls), figsize=(5.4*len(lvls), 5.2))
+    if not isinstance(axes, (list, np.ndarray)):
+        axes = [axes]
+
+    for ax, lvl in zip(axes, lvls):
+        d = by_level.get(lvl)
+        if not d or label not in d:
+            ax.text(0.5, 0.5, f"No {kind} {lvl}% for {label}", ha="center", va="center"); ax.axis("off"); continue
+        sp = d[label]
+        if D_plane is not None:
+            ax.imshow(D_plane, alpha=0.35)
+        _plot_single(ax, sp, bg_single, f"{label} — {plane} — {kind} {lvl}%")
+
+    plt.tight_layout(); plt.show()
+
+
+def save_per_label(result: RunResult,
+                   labels: Optional[Tuple[str, ...]] = None,
+                   *,
+                   kind: Literal["hdr","point_fraction"] = "hdr",
+                   plane: Plane = "XY",
+                   levels: "int|list[int]|str" = "all",
+                   out_dir: str = "figures_single",
+                   show_heat: bool = False,
+                   cfg_hdr: Optional[CfgHDR] = None,
+                   cfg_pf: Optional[CfgPF] = None,
+                   dpi: int = 220):
+    """
+    Save figures for one or more labels without overlay. Each label × level gets its own PNG.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    cfg_hdr = cfg_hdr or CfgHDR()
+    cfg_pf  = cfg_pf  or CfgPF()
+    lvls = _levels_from_result(kind, cfg_hdr, cfg_pf, levels)
+
+    all_labels = list(result.get("labels", []))
+    labels = labels or tuple(all_labels)
+
+    if kind not in result.get("shapes", {}):
+        print(f"[save_per_label] No shapes for kind='{kind}'.")
+        return
+    if plane not in result["shapes"][kind]:
+        print(f"[save_per_label] No shapes for plane='{plane}' and kind='{kind}'.")
+        return
+
+    by_level = result["shapes"][kind][plane]
+
+    for lab in labels:
+        # background selection: per-label preferred
+        bg_single = None
+        if "background_by_label" in result and plane in result["background_by_label"]:
+            bg_single = result["background_by_label"][plane].get(lab)
+        if bg_single is None:
+            bg_single = result.get("background", {}).get(plane)
+
+        D_plane = None
+        if show_heat and kind == "hdr" and result.get("densities") and result["densities"].get(lab):
+            D_plane = result["densities"][lab].get(plane)
+
+        for lvl in lvls:
+            d = by_level.get(lvl)
+            if not d or lab not in d:
+                continue
+            sp = d[lab]
+            fig, ax = plt.subplots(figsize=(5.2, 5.2))
+            if D_plane is not None:
+                ax.imshow(D_plane, alpha=0.35, cmap="inferno")
+            _plot_single(ax, sp, bg_single, f"{lab} — {plane} — {kind} {lvl}%")
+            fname = f"{re.sub(r'[^A-Za-z0-9_.-]+','_', lab)}_{kind}_{plane}_{lvl}.png"
+            fig.savefig(os.path.join(out_dir, fname), dpi=dpi, bbox_inches="tight")
+            plt.close(fig)
