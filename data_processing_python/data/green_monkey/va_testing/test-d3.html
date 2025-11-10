@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MPASE · Per-Condition (XY/YZ/XZ)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+      :root {
+        --bg: #0b0b0c;
+        --panel: #111217;
+        --fg: #eaeaea;
+        --grid: #1c1e24;
+        --mask: #e9eef7;
+        --outside: #5a5170;
+        --contour: #4ea0ff;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      header {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--grid);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      header label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #161822;
+        border: 1px solid var(--grid);
+        padding: 6px 10px;
+        border-radius: 10px;
+      }
+      main {
+        padding: 14px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .plane-card {
+        background: var(--panel);
+        border: 1px solid var(--grid);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .plane-head {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--grid);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      .plane-body {
+        padding: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      svg {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        background: var(--outside);
+      }
+      .contour {
+        fill: none;
+        stroke: var(--contour);
+        stroke-width: 2.2px;
+      }
+      .note {
+        opacity: 0.8;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <label
+        >Data dir
+        <input id="baseDir" size="44" value="web_data" />
+      </label>
+      <label
+        >Label
+        <select id="labelSel"></select>
+      </label>
+      <label
+        >Kind
+        <select id="kindSel">
+          <option value="hdr">hdr</option>
+          <option value="point_fraction">point_fraction</option>
+        </select>
+      </label>
+      <label
+        >Level (%)
+        <select id="levelSel"></select>
+      </label>
+      <button id="reload">Load</button>
+      <span class="note"
+        >Per-condition background with contour overlay. Default level =
+        100.</span
+      >
+    </header>
+
+    <main>
+      <div class="plane-card" data-plane="XY">
+        <div class="plane-head">XY</div>
+        <div class="plane-body"><svg></svg></div>
+      </div>
+      <div class="plane-card" data-plane="YZ">
+        <div class="plane-head">YZ</div>
+        <div class="plane-body"><svg></svg></div>
+      </div>
+      <div class="plane-card" data-plane="XZ">
+        <div class="plane-head">XZ</div>
+        <div class="plane-body"><svg></svg></div>
+      </div>
+    </main>
+
+    <script>
+      (async function () {
+        const planes = ["XY", "YZ", "XZ"];
+        const BASE_DIR_INPUT = document.getElementById("baseDir");
+        const labelSel = document.getElementById("labelSel");
+        const kindSel = document.getElementById("kindSel");
+        const levelSel = document.getElementById("levelSel");
+        const reloadBtn = document.getElementById("reload");
+
+        const safeName = (s) => (s || "").replace(/[^A-Za-z0-9_.-]+/g, "_");
+
+        async function fetchJSON(path) {
+          const res = await fetch(path);
+          if (!res.ok) throw new Error(`Fetch failed: ${path}`);
+          return res.json();
+        }
+
+        async function fetchMaybe(path) {
+          try {
+            return await fetchJSON(path);
+          } catch {
+            return null;
+          }
+        }
+
+        function maskToDataURL(
+          mask,
+          maskColor = [233, 238, 247, 255],
+          outside = [90, 81, 112, 255]
+        ) {
+          const ny = mask.length,
+            nx = mask[0].length;
+          const c = document.createElement("canvas");
+          c.width = nx;
+          c.height = ny;
+          const ctx = c.getContext("2d");
+          const img = ctx.createImageData(nx, ny);
+          const data = img.data;
+          let k = 0;
+          for (let y = 0; y < ny; y++) {
+            const row = mask[y];
+            for (let x = 0; x < nx; x++) {
+              const on = row[x] ? maskColor : outside;
+              data[k++] = on[0];
+              data[k++] = on[1];
+              data[k++] = on[2];
+              data[k++] = on[3];
+            }
+          }
+          ctx.putImageData(img, 0, 0);
+          return c.toDataURL("image/png");
+        }
+
+        function drawPlane(svg, mask, contourPoly) {
+          const ny = mask.length,
+            nx = mask[0].length;
+          svg.setAttribute("viewBox", `0 0 ${nx} ${ny}`);
+          svg.setAttribute("width", nx);
+          svg.setAttribute("height", ny);
+
+          const sel = d3.select(svg);
+          sel.selectAll("*").remove();
+
+          const url = maskToDataURL(mask);
+          sel
+            .append("image")
+            .attr("href", url)
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", nx)
+            .attr("height", ny);
+
+          if (contourPoly && contourPoly.length) {
+            const d =
+              "M " +
+              contourPoly.map((p) => `${p[0]},${p[1]}`).join(" L ") +
+              " Z";
+            sel.append("path").attr("class", "contour").attr("d", d);
+          }
+        }
+
+        function extractLabelsFromContoursObject(contoursObj) {
+          const s = new Set();
+          for (const k of Object.keys(contoursObj || {})) {
+            for (const plane of Object.keys(contoursObj[k] || {})) {
+              for (const lvl of Object.keys(contoursObj[k][plane] || {})) {
+                for (const lab of Object.keys(contoursObj[k][plane][lvl] || {}))
+                  s.add(lab);
+              }
+            }
+          }
+          return Array.from(s);
+        }
+
+        function levelsFor(contoursObj, kind, label) {
+          const res = new Set();
+          const byKind = (contoursObj || {})[kind] || {};
+          for (const plane of Object.keys(byKind)) {
+            for (const lvl of Object.keys(byKind[plane] || {})) {
+              const atLvl = byKind[plane][lvl] || {};
+              if (label in atLvl) res.add(+lvl);
+            }
+          }
+          const arr = Array.from(res).filter((n) => !Number.isNaN(n));
+          arr.sort((a, b) => b - a);
+          return arr;
+        }
+
+        // read contours in either format:
+        // 1) combined: contours_d3.json -> {kind}->{plane}->{level}->{label} -> [[x,y]]
+        // 2) per-label: contour/<Label>_contour.json -> either the same structure or {plane}->{level}->{kind?}->{poly}
+        async function loadContours(BASE, label) {
+          const combined = await fetchMaybe(`${BASE}/contours_d3.json`);
+          if (combined) return combined;
+          const byLabel = await fetchMaybe(
+            `${BASE}/contour/${safeName(label)}_contour.json`
+          );
+          if (!byLabel) return {};
+          // if file is already {kind}->{plane}->{level}->{label} -> poly, keep it as is
+          if (byLabel.hdr || byLabel.point_fraction) return byLabel;
+
+          // Otherwise try to normalize from {plane}->{level}->{poly or {hdr,pf}}
+          const out = { hdr: {}, point_fraction: {} };
+          for (const plane of Object.keys(byLabel)) {
+            const lvlObj = byLabel[plane] || {};
+            for (const lvl of Object.keys(lvlObj)) {
+              const val = lvlObj[lvl];
+              if (Array.isArray(val)) {
+                // just a polyline (assume HDR)
+                out.hdr[plane] = out.hdr[plane] || {};
+                out.hdr[plane][lvl] = out.hdr[plane][lvl] || {};
+                out.hdr[plane][lvl][label] = val;
+              } else {
+                if (val.hdr) {
+                  out.hdr[plane] = out.hdr[plane] || {};
+                  out.hdr[plane][lvl] = out.hdr[plane][lvl] || {};
+                  out.hdr[plane][lvl][label] = val.hdr;
+                }
+                if (val.point_fraction || val.pf) {
+                  const pfPoly = val.point_fraction || val.pf;
+                  out.point_fraction[plane] = out.point_fraction[plane] || {};
+                  out.point_fraction[plane][lvl] =
+                    out.point_fraction[plane][lvl] || {};
+                  out.point_fraction[plane][lvl][label] = pfPoly;
+                }
+              }
+            }
+          }
+          return out;
+        }
+
+        async function loadAll() {
+          const BASE = BASE_DIR_INPUT.value.trim();
+
+          // Labels: try from meta, else from per-label files present
+          const meta = await fetchMaybe(`${BASE}/meta_data.json`);
+          let labels =
+            meta && Array.isArray(meta.labels) ? meta.labels.slice() : [];
+          if (!labels.length) {
+            // fallback: list files under background_by_label (needs server dir listing; otherwise guess two)
+            // better: infer from contour filenames by trying both UNTR/VACV examples
+            const guess = ["12h_UNTR", "12h_VACV"];
+            labels = guess;
+          }
+          labelSel.innerHTML = labels
+            .map((l) => `<option>${l}</option>`)
+            .join("");
+          const label = labelSel.value;
+
+          // Load contours (combined or per-label) and per-label background
+          const contours = await loadContours(BASE, label);
+          const bgByPlane = await fetchJSON(
+            `${BASE}/background_by_label/${safeName(label)}_background.json`
+          );
+
+          // Populate level options for current (kind,label)
+          const kind = kindSel.value;
+          const lvls = levelsFor(contours, kind, label);
+          levelSel.innerHTML = (lvls.length ? lvls : [100])
+            .map(
+              (v) =>
+                `<option value="${v}"${
+                  v === 100 ? " selected" : ""
+                }>${v}</option>`
+            )
+            .join("");
+
+          // Draw panels for selected level
+          function render() {
+            const lvlStr = String(levelSel.value || "100");
+            planes.forEach((plane) => {
+              const svg = document.querySelector(
+                `.plane-card[data-plane="${plane}"] svg`
+              );
+              const mask =
+                bgByPlane && bgByPlane[plane] ? bgByPlane[plane] : null;
+              const poly = contours?.[kind]?.[plane]?.[lvlStr]?.[label] || [];
+              if (mask) {
+                drawPlane(svg, mask, poly);
+              } else {
+                const sel = d3.select(svg);
+                sel.selectAll("*").remove();
+                sel
+                  .append("text")
+                  .attr("x", 10)
+                  .attr("y", 20)
+                  .text("No mask for " + plane);
+              }
+            });
+          }
+
+          render();
+
+          // Handlers
+          kindSel.onchange = async () => {
+            const lvls = levelsFor(contours, kindSel.value, labelSel.value);
+            levelSel.innerHTML = (lvls.length ? lvls : [100])
+              .map(
+                (v) =>
+                  `<option value="${v}"${
+                    v === 100 ? " selected" : ""
+                  }>${v}</option>`
+              )
+              .join("");
+            render();
+          };
+          levelSel.onchange = render;
+          labelSel.onchange = async () => {
+            const contours2 = await loadContours(BASE, labelSel.value);
+            const bg2 = await fetchJSON(
+              `${BASE}/background_by_label/${safeName(
+                labelSel.value
+              )}_background.json`
+            );
+            const lv2 = levelsFor(contours2, kindSel.value, labelSel.value);
+            levelSel.innerHTML = (lv2.length ? lv2 : [100])
+              .map(
+                (v) =>
+                  `<option value="${v}"${
+                    v === 100 ? " selected" : ""
+                  }>${v}</option>`
+              )
+              .join("");
+            // redraw with new data
+            planes.forEach((plane) => {
+              const svg = document.querySelector(
+                `.plane-card[data-plane="${plane}"] svg`
+              );
+              const mask = bg2 && bg2[plane] ? bg2[plane] : null;
+              const poly =
+                contours2?.[kindSel.value]?.[plane]?.[String(levelSel.value)]?.[
+                  labelSel.value
+                ] || [];
+              if (mask) {
+                drawPlane(svg, mask, poly);
+              } else {
+                const sel = d3.select(svg);
+                sel.selectAll("*").remove();
+                sel
+                  .append("text")
+                  .attr("x", 10)
+                  .attr("y", 20)
+                  .text("No mask for " + plane);
+              }
+            });
+          };
+        }
+
+        reloadBtn.addEventListener("click", () =>
+          loadAll().catch((e) => {
+            console.error(e);
+            alert(e.message);
+          })
+        );
+        // first load
+        loadAll().catch((e) => {
+          console.error(e);
+          alert("Failed to load. Check paths & that export_all wrote JSONs.");
+        });
+      })();
+    </script>
+  </body>
+</html>
