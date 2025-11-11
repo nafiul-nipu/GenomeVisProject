@@ -101,12 +101,10 @@ export default function App() {
           <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
             {status === "loading" ? (
               <span className="text-sm text-sky-400 animate-pulse">
-                Loading silhouettes / densities…
+                Loading shapes ...
               </span>
             ) : (
-              <span className="text-sm text-gray-400">
-                <TwoDContainer meta_data_typed={meta_data_typed} />
-              </span>
+              <TwoDContainer meta_data_typed={meta_data_typed} />
             )}
           </div>
         </div>
