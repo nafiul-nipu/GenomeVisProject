@@ -47,9 +47,8 @@ export interface workerToClientMessageType {
   gene_edges: Record<string, Gene_Edges_Path_Row_Type[]>;
   gene_paths: Record<string, number[][]>;
   contour_data: Record<string, ContourWrapperType>;
-  density_data: Record<string, Density2DType>;
   projectionData: ProjectionResult;
-  backgroundMaskData: BackgroundMask;
+  perLabelBackgroundMaskData: PerLabelBackgroundMask;
 }
 
 export interface messageToWorkerType {
@@ -172,6 +171,16 @@ export interface BackgroundMask {
   XZ: MaskMatrix;
   YZ: MaskMatrix;
 }
+export type PerLabelBackgroundMask = Record<string, BackgroundMask>;
+
+export interface PerLabelContourMaskProps {
+  label: string; // e.g., "12h_UNTR"
+  plane: Plane; // "XY" | "YZ" | "XZ"
+  variant: Variant; // "hdr" | "pf"
+  level: number; // 50..100
+  maskOpacity?: number; // default 0.18
+  className?: string;
+}
 
 export type Vec3 = [number, number, number];
 export interface LightSettings {
@@ -233,10 +242,4 @@ export const defaultLightSettings: LightSettings = {
 export type Edge = { source: number; target: number };
 
 export type Variant = "hdr" | "pf";
-export type BgMode =
-  | "none"
-  | "density-12"
-  | "density-18"
-  | "density-24"
-  | "density-combined"
-  | "mask";
+export type Plane = "XY" | "YZ" | "XZ";
