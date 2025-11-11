@@ -19,7 +19,7 @@ export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
     <div className="flex items-center justify-between w-full">
       {/* Left: Tabs (fixed width to prevent layout shift) */}
       <div className="flex items-center gap-3 w-[18rem]">
-        <h2 className="text-lg font-medium">3D View</h2>
+        <h2 className="text-lg font-medium">Gene Structures</h2>
 
         <div className="inline-flex items-center rounded-xl border border-gray-800/70 bg-gray-900/60 overflow-hidden divide-x divide-gray-800/70 whitespace-nowrap">
           {[
