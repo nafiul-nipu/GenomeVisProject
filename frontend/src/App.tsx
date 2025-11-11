@@ -105,7 +105,7 @@ export default function App() {
               </span>
             ) : (
               <span className="text-sm text-gray-400">
-                <TwoDContainer />
+                <TwoDContainer meta_data_typed={meta_data_typed} />
               </span>
             )}
           </div>

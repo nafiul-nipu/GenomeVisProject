@@ -216,7 +216,8 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
         <h3 className="text-sm font-medium text-slate-200">{title}</h3>
       </div>
       <div className="rounded-lg bg-[#0f1013] border border-gray-800 overflow-hidden">
-        <svg ref={svgRef} className="w-full h-auto block" />
+        {/* <svg ref={svgRef} className="w-full h-auto block" /> */}
+        <svg ref={svgRef} className="w-full h-full block" />
       </div>
     </div>
   );
