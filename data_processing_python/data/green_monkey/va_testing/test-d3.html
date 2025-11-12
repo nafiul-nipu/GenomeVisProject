@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MPASE 2D SVG · Per-Label (BG+Contour)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+      :root {
+        --bg: #0b0b0c;
+        --panel: #0e0e11;
+        --fg: #eaeaea;
+        --grid: #222;
+        --contour: #4ea0ff;
+        --outside: #0f1013;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      header {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--grid);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      header label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      main {
+        padding: 12px;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--grid);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .panel h3 {
+        margin: 0;
+        padding: 8px 10px;
+        background: #111214;
+        font-weight: 600;
+      }
+      .panel .body {
+        padding: 8px;
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: var(--outside);
+        border-radius: 4px;
+      }
+      .contour-back {
+        fill: none;
+        stroke: #000;
+        stroke-opacity: 0.55;
+        stroke-width: 4.5;
+        vector-effect: non-scaling-stroke;
+      }
+      .contour {
+        fill: none;
+        stroke: var(--contour);
+        stroke-width: 2.5;
+        vector-effect: non-scaling-stroke;
+      }
+      input,
+      select {
+        background: #121316;
+        color: var(--fg);
+        border: 1px solid #2a2d34;
+        border-radius: 4px;
+        padding: 6px 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <label>Data dir <input id="dir" size="40" value="web_data" /></label>
+      <label>Label <input id="lab" size="16" value="12h_UNTR" /></label>
+      <label
+        >Variant
+        <select id="variant">
+          <option value="hdr">hdr</option>
+          <option value="pf">pf</option>
+        </select>
+      </label>
+      <label
+        >Level (%)
+        <input
+          id="level"
+          type="number"
+          value="100"
+          min="50"
+          max="100"
+          step="1"
+          style="width: 72px"
+      /></label>
+      <label
+        >Mask opacity
+        <input
+          id="maskAlpha"
+          type="number"
+          value="0.18"
+          min="0"
+          max="1"
+          step="0.02"
+          style="width: 72px"
+      /></label>
+      <button id="go">Load</button>
+    </header>
+
+    <main>
+      <div class="panel" data-plane="XY">
+        <h3>XY</h3>
+        <div class="body"><svg></svg></div>
+      </div>
+      <div class="panel" data-plane="YZ">
+        <h3>YZ</h3>
+        <div class="body"><svg></svg></div>
+      </div>
+      <div class="panel" data-plane="XZ">
+        <h3>XZ</h3>
+        <div class="body"><svg></svg></div>
+      </div>
+    </main>
+
+    <script>
+      const PLANES = ["XY", "YZ", "XZ"];
+      const $ = (s) => document.querySelector(s);
+      const safe = (s) => (s || "").replace(/[^A-Za-z0-9._-]+/g, "_");
+
+      // ---- Files (ONLY these two) ----
+      const CNT = (lab) =>
+        `${$("#dir").value.trim().replace(/\/+$/, "")}/contour/${safe(
+          lab
+        )}_contour.json`;
+      const BG_BY_LABEL = (lab) =>
+        `${$("#dir")
+          .value.trim()
+          .replace(/\/+$/, "")}/background_by_label/${safe(
+          lab
+        )}_background.json`;
+
+      // ---- IO helpers ----
+      async function j(path) {
+        const r = await fetch(path);
+        if (!r.ok) throw new Error(path);
+        return r.json();
+      }
+      async function maybe(path) {
+        try {
+          return await j(path);
+        } catch {
+          return null;
+        }
+      }
+
+      // ---- Render helpers ----
+      function maskToURL(mask, alphaFloat = 0.18, color = [255, 255, 255]) {
+        const ny = mask.length,
+          nx = mask[0].length;
+        const c = document.createElement("canvas");
+        c.width = nx;
+        c.height = ny;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        const img = ctx.createImageData(nx, ny),
+          d = img.data;
+        const A = Math.round(Math.max(0, Math.min(1, alphaFloat)) * 255);
+        let k = 0;
+        for (let y = 0; y < ny; y++) {
+          const row = mask[y];
+          for (let x = 0; x < nx; x++) {
+            if (row[x]) {
+              d[k] = color[0];
+              d[k + 1] = color[1];
+              d[k + 2] = color[2];
+              d[k + 3] = A;
+            }
+            k += 4;
+          }
+        }
+        ctx.putImageData(img, 0, 0);
+        return c.toDataURL("image/png");
+      }
+
+      function ensureXY(poly, nx, ny) {
+        if (!Array.isArray(poly) || poly.length < 2) return poly;
+        let badX = 0,
+          badSwap = 0;
+        for (const p of poly) {
+          const x = p[0];
+          if (x < 0 || x >= nx) badX++;
+        }
+        for (const p of poly) {
+          const x = p[1];
+          if (x < 0 || x >= nx) badSwap++;
+        }
+        if (badX > poly.length * 0.2 && badSwap < badX)
+          return poly.map((p) => [p[1], p[0]]);
+        return poly;
+      }
+
+      // Accepts either of these per-label shapes:
+      //   A) {contours:[{plane,variant,level,points:[[x,y],...]}, ...]}
+      //   B) {plane:{ level:{hdr:[...], pf:[...] }}}  OR  {plane:{ level:[...] }} (assume hdr)
+      function pickContourFor(raw, plane, vkey, levelStr, label) {
+        if (Array.isArray(raw?.contours)) {
+          const items = raw.contours.filter(
+            (d) =>
+              d.plane === plane &&
+              (d.variant === vkey ||
+                (vkey === "hdr" && d.variant === "hdr") ||
+                (vkey === "pf" &&
+                  (d.variant === "pf" || d.variant === "point_fraction"))) &&
+              String(d.level) === levelStr
+          );
+          if (items.length) return items[0].points;
+          // nearest level fallback
+          const levs = raw.contours
+            .filter(
+              (d) =>
+                d.plane === plane &&
+                (d.variant === vkey ||
+                  (vkey === "pf" && d.variant === "point_fraction"))
+            )
+            .map((d) => +d.level);
+          if (levs.length) {
+            const want = +levelStr;
+            let best = levs[0],
+              bd = Math.abs(levs[0] - want);
+            for (const L of levs) {
+              const d = Math.abs(L - want);
+              if (d < bd) {
+                best = L;
+                bd = d;
+              }
+            }
+            const alt = raw.contours.find(
+              (d) =>
+                d.plane === plane &&
+                (d.variant === vkey ||
+                  (vkey === "pf" && d.variant === "point_fraction")) &&
+                +d.level === best
+            );
+            if (alt) return alt.points;
+          }
+          return null;
+        }
+        const byPlane = raw?.[plane];
+        if (!byPlane) return null;
+        const leaf = byPlane[String(levelStr)];
+        if (Array.isArray(leaf)) return leaf; // assume hdr
+        if (leaf && typeof leaf === "object") {
+          const poly =
+            leaf[vkey] || (vkey === "pf" ? leaf.point_fraction : null);
+          if (Array.isArray(poly)) return poly;
+        }
+        return null;
+      }
+
+      function draw(svg, mask, poly) {
+        const ny = mask.length,
+          nx = mask[0].length;
+        svg.setAttribute("viewBox", `0 0 ${nx} ${ny}`);
+        const sel = d3.select(svg);
+        sel.selectAll("*").remove();
+        sel
+          .append("image")
+          .attr(
+            "href",
+            maskToURL(mask, parseFloat($("#maskAlpha").value || "0.18"))
+          )
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", nx)
+          .attr("height", ny);
+        if (poly && poly.length) {
+          const d =
+            "M " + poly.map((p) => `${p[0]},${p[1]}`).join(" L ") + " Z";
+          sel.append("path").attr("class", "contour-back").attr("d", d);
+          sel.append("path").attr("class", "contour").attr("d", d);
+        } else {
+          sel
+            .append("text")
+            .attr("x", 10)
+            .attr("y", 20)
+            .attr("fill", "#fff")
+            .text("No contour for this selection");
+        }
+      }
+
+      // ---- Main load ----
+      async function loadOnce() {
+        const lab = $("#lab").value.trim();
+        const vkey = $("#variant").value; // 'hdr' | 'pf'
+        const lvl = String($("#level").value || "100");
+
+        const bg = await j(BG_BY_LABEL(lab)); // { XY: [[0/1,..],..], ... }
+        const rawContours = await j(CNT(lab)); // per-label contour JSON
+
+        for (const plane of PLANES) {
+          const svg = document.querySelector(
+            `.panel[data-plane="${plane}"] svg`
+          );
+          const mask = bg?.[plane];
+          if (!mask) {
+            d3.select(svg).selectAll("*").remove();
+            d3.select(svg)
+              .append("text")
+              .attr("x", 10)
+              .attr("y", 20)
+              .attr("fill", "#fff")
+              .text(`No mask for ${plane}`);
+            continue;
+          }
+          let poly = pickContourFor(rawContours, plane, vkey, lvl, lab);
+          poly = ensureXY(poly, mask[0].length, mask.length);
+          draw(svg, mask, poly);
+        }
+      }
+
+      // UI
+      document.getElementById("go").onclick = () =>
+        loadOnce().catch((e) => {
+          console.error(e);
+          alert("Load failed: " + e.message);
+        });
+      loadOnce().catch(() => {
+        /* wait for user to adjust and click Load */
+      });
+    </script>
+  </body>
+</html>

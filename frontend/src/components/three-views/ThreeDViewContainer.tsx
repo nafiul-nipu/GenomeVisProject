@@ -228,6 +228,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
               }}
             />
             <DrawObject
+              geneColorPickerIdx={i}
               geneData={viewItems[i].geneData ?? []}
               geneEdges={viewItems[i].geneEdges ?? []}
               genePaths={viewItems[i].genePaths ?? []}

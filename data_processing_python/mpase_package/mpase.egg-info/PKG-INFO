@@ -30,11 +30,15 @@ Requires-Dist: mypy>=1.7.0; extra == "dev"
 # ----- Imports -----
 
 from mpase import (
-run_silhouettes, # main entrypoint (N sets)
+run_silhouettes,
 CfgCommon, CfgHDR, CfgPF, CfgMorph,
-view, save_figures, # silhouette overlays (HDR/PF)
-view_projections, save_projections# aligned 2D scatter by plane
+view, save_figures, # overlay (existing)
+view_projections, save_projections,
+view_single, save_per_label, # NEW: single-label (no overlay)
+export_all, # OPTIONAL: per-label background exporter
+export_background_mask_by_label_json,
 )
+
 from mpase import export_all # pure-data web bundle (D3/Three)
 
 # --------------------------------------------------------------------------------------------
@@ -219,6 +223,18 @@ labelA="12 h — UNTR", labelB="12 h — VACV",
 show_heat=False
 )
 
+# (d) Single-label view (no overlay; uses per-label background)
+
+```python
+from visualization_save_image import view_single
+
+# Show only UNTR, HDR at 100% and 95%, XY plane
+view_single(
+    res, label="12h_UNTR",
+    kind="hdr", plane="XY", levels=[100, 95],
+    show_heat=True  # optional: HDR heatmap underneath
+)
+
 # --------------------------------------------------------------------------------------------
 
 # 6) SAVE FIGURES
@@ -245,6 +261,18 @@ res, kind="point_fraction", plane="YZ", levels=[95,50],
 out_dir=out_dir,
 A_lab="12h_UNTR", B_lab="12h_VACV",
 labelA="12 h — UNTR", labelB="12 h — VACV"
+)
+
+### Save per label (no overlay)
+from visualization_save_image import save_per_label
+
+# Save PF 100/95/80 for each condition as separate PNGs
+save_per_label(
+    res,
+    labels=("12h_UNTR","12h_VACV"),  # omit to save all labels
+    kind="point_fraction", plane="XY", levels=[100,95,80],
+    out_dir=f"{out_dir}/figures_single",
+    show_heat=False
 )
 
 # --------------------------------------------------------------------------------------------
@@ -292,6 +320,8 @@ progress_report=True
 
 # background_mask.json (per-plane union-of-presence mask, 0/1)
 
+# export_background_mask_by_label_json(result, out_dir)  # writes per-label masks only
+
 # density\_<label>.json (bootstrapped 2D densities per plane, per label; only if HDR ran)
 
 # contours_d3.json (for each variant/plane/level/label → polyline [x,y] in pixel space)
@@ -333,3 +363,4 @@ progress_report=True
 # )
 
 # export_all(res_align, out_dir=f"{out_dir}/point_alignment_only", include_density=False)
+```

@@ -1,15 +1,14 @@
 import { fetch2DContoursOrDensity } from "../API/fetch2DContourOrDensity";
 import { fetch2DProjection } from "../API/fetch2DProjection";
-import { fetchBackgroundMask } from "../API/fetchBackgroundMask";
 import { fetchAllGeneDataJson } from "../API/fetchGeneDataJson";
+import { fetchPerLabelBackgroundMask } from "../API/fetchPerLabelBackgroundMask";
 import type {
   workerPostMessageType,
   GeneRowDataType,
   ContourWrapperType,
-  Density2DType,
-  BackgroundMask,
   ProjectionResult,
   Edge,
+  PerLabelBackgroundMask,
 } from "../types/data_types_interfaces";
 import { createEdges } from "../utilFunctions/createEdges";
 import { createPathsBetweenEdges } from "../utilFunctions/createPathsBetweenEdges";
@@ -75,13 +74,13 @@ addEventListener(
 
     // console.log("contour", contour_data);
 
-    const density_data: Record<string, Density2DType> =
-      await fetch2DContoursOrDensity({
-        speciesName: species,
-        chrName: chromosome,
-        dataInfo: meta_data,
-        which2D: "density",
-      });
+    // const density_data: Record<string, Density2DType> =
+    //   await fetch2DContoursOrDensity({
+    //     speciesName: species,
+    //     chrName: chromosome,
+    //     dataInfo: meta_data,
+    //     which2D: "density",
+    //   });
 
     // console.log("density", density_data);
 
@@ -92,12 +91,21 @@ addEventListener(
 
     // console.log("projection", projectionData);
 
-    const backgroundMaskData: BackgroundMask = await fetchBackgroundMask({
-      speciesName: species,
-      chrName: chromosome,
-    });
+    // const backgroundMaskData: BackgroundMask = await fetchBackgroundMask({
+    //   speciesName: species,
+    //   chrName: chromosome,
+    // });
 
     // console.log("background mask", backgroundMaskData);
+
+    const perLabelBackgroundMaskData: PerLabelBackgroundMask =
+      await fetchPerLabelBackgroundMask({
+        speciesName: species,
+        chrName: chromosome,
+        dataInfo: meta_data,
+      });
+
+    // console.log("per label background mask", perLabelBackgroundMaskData);
 
     postMessage({
       requestId,
@@ -106,9 +114,8 @@ addEventListener(
       gene_paths: gene_paths,
       gene_list: gene_list,
       contour_data: contour_data,
-      density_data: density_data,
       projectionData: projectionData,
-      backgroundMaskData: backgroundMaskData,
+      perLabelBackgroundMaskData: perLabelBackgroundMaskData,
     });
   }
 );

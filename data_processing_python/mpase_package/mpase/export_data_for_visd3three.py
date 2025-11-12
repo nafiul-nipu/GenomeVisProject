@@ -90,12 +90,6 @@ def export_meta(result: RunResult, out_dir: str, *, progress_report: bool = Fals
             "pf": sorted([int(x) for x in levels_pf], reverse=True),
         },
         labels=labels,
-        # NEW: Explicitly declare coordinate semantics for downstream tools.
-        # Everything we write for 2D overlays (contours, projections) is in pixel space,
-        # top-left origin, y-down to match SVG and skimage marching squares rasterization.
-        coord_space="pixel",
-        origin="top_left",
-        y_down=True,
     )
     path = _write_json(os.path.join(out_dir, "meta_data.json"), meta)
     _notify(progress_report, "write", kind="meta", path=path)
@@ -113,6 +107,34 @@ def export_background_mask_json(result: RunResult, out_dir: str, *, progress_rep
     path = _write_json(os.path.join(out_dir, "background_mask.json"), bg)
     _notify(progress_report, "write", kind="background_mask", path=path)
     return [path]
+
+
+################### D3: background masks per label ###################
+
+def export_background_mask_by_label_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
+    """
+    Writes one JSON per label under <out_dir>/background_by_label/ with per-plane 0/1 masks.
+    """
+    written: List[str] = []
+    if "background_by_label" not in result:
+        return written
+    bgdir = os.path.join(out_dir, "background_by_label")
+    _ensure_dir(bgdir)
+    by_plane = result["background_by_label"]
+    # Collect labels
+    labels = list(result.get("labels", []))
+    for lab in labels:
+        payload = {}
+        for plane, d in by_plane.items():
+            if lab in d:
+                payload[plane] = d[lab].astype(np.uint8).tolist()
+        if not payload:
+            continue
+        fname = f"{_safe_name(lab)}_background.json"
+        path = _write_json(os.path.join(bgdir, fname), payload)
+        written.append(path)
+        _notify(progress_report, "write", kind="background_by_label", label=str(lab), path=path)
+    return written
 
 
 ################### D3: densities (per label) ###################
@@ -165,8 +187,7 @@ def export_contours_d3(
     Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
     """
     written: List[str] = []
-    # NEW: fix directory name to match the viewer and docstring ("contours", plural).
-    cont_dir = os.path.join(out_dir, "contours")
+    cont_dir = os.path.join(out_dir, "contour")
     _ensure_dir(cont_dir)
 
     # Build a map label -> list of contour entries
@@ -189,11 +210,7 @@ def export_contours_d3(
                     if C is None:
                         continue
                     # skimage contours are [row(y), col(x)] — convert to [x,y]
-                    # pts = [[float(c[1]), float(c[0])] for c in C]
-                    # Align contour coordinates to pixel centers
-                    # Skimage find_contours returns coordinates in (row, col) with half-pixel offset.
-                    # We subtract 0.5 so contours align with the same pixel centers used by projections.
-                    pts = [[float(c[1]) - 0.5, float(c[0]) - 0.5] for c in C]
+                    pts = [[float(c[1]), float(c[0])] for c in C]
                     entry = dict(
                         plane=plane,
                         variant="hdr" if kind == "hdr" else "pf",
@@ -205,17 +222,8 @@ def export_contours_d3(
 
     # Write one file per label
     for label, entries in per_label.items():
-        # NEW: include lightweight meta for clarity (kept out of "contours" array to avoid breaking readers).
-        payload = {
-            "meta": {
-                "coord_space": "pixel",
-                "origin": "top_left",
-                "y_down": True
-            },
-            "contours": entries
-        }
         fname = f"{_safe_name(label)}_contour.json"
-        path = _write_json(os.path.join(cont_dir, fname), payload)
+        path = _write_json(os.path.join(cont_dir, fname), {"contours": entries})
         written.append(path)
         _notify(progress_report, "write", kind="contours", label=str(label), path=path, entries=len(entries))
 
@@ -227,97 +235,48 @@ def export_contours_d3(
 def export_projections_json(result: RunResult, out_dir: str, *, progress_report: bool = False, report: Optional[Callable] = None) -> List[str]:
     """
     Writes one file per plane under <out_dir>/projections/ in *pixel* grid coords that match contours:
-      projections/<PLANE>_projections.json
+    projections/<PLANE>_projections.json
       {"UNTR": [[x,y], ...], "VACV": [[x,y], ...], ...}
 
     Uses result["projections"][plane]["sets"][label] as 2D points.
-    Pixel grid must match HDR/PF lattice: dims_by_plane + bbox_world.
     """
     written: List[str] = []
     proj_dir = os.path.join(out_dir, "projections")
     _ensure_dir(proj_dir)
 
-    # Fallback grid sizes from background (nx, ny) = (width, height)
-    grid = {plane: (bg.shape[1], bg.shape[0]) for plane, bg in result["background"].items()}
+    # grid sizes from background (to align with contour pixel space)
+    grid = {plane: (bg.shape[1], bg.shape[0]) for plane, bg in result["background"].items()}  # (nx, ny)
 
     for plane, d in result.get("projections", {}).items():
         if plane not in grid:
             continue
-
-        # --- grid dims: prefer canonical dims saved with HDR/PF ---
-        if "dims_by_plane" in result and plane in result["dims_by_plane"]:
-            nx = int(result["dims_by_plane"][plane]["nx"])
-            ny = int(result["dims_by_plane"][plane]["ny"])
-        else:
-            nx, ny = grid[plane]  # fallback from background masks
-
+        nx, ny = grid[plane]
         sets2d = d.get("sets", {})
-        if not sets2d:
-            continue
+        plane_out = {}
 
-        # --- canonical bbox from HDR/PF; no per-plane re-minmaxing when available ---
-        bbox = (result.get("bbox_world", {}) or {}).get(plane)
-        if bbox and all(k in bbox for k in ("xmin", "xmax", "ymin", "ymax")):
-            xmin = float(bbox["xmin"]); xmax = float(bbox["xmax"])
-            ymin = float(bbox["ymin"]); ymax = float(bbox["ymax"])
-        else:
-            # Fallback (should not happen if FIX 2 ran): derive bbox from all points + padding
-            all_xy = []
-            for P2 in sets2d.values():
-                if P2 is None:
-                    continue
-                A = np.asarray(P2, dtype=float)
-                if A.size == 0:
-                    continue
-                all_xy.append(A)
-            if not all_xy:
-                continue
-            ALL = np.vstack(all_xy)
-            raw_xmin, raw_xmax = float(np.min(ALL[:, 0])), float(np.max(ALL[:, 0]))
-            raw_ymin, raw_ymax = float(np.min(ALL[:, 1])), float(np.max(ALL[:, 1]))
-            xrng = max(1e-9, raw_xmax - raw_xmin)
-            yrng = max(1e-9, raw_ymax - raw_ymin)
-            pad_frac = float((result.get("pad_frac_by_plane", {}) or {}).get(plane, 0.05))
-            xmin = raw_xmin - pad_frac * xrng; xmax = raw_xmax + pad_frac * xrng
-            ymin = raw_ymin - pad_frac * yrng; ymax = raw_ymax + pad_frac * yrng
-
-        # --- pad_frac for debug print: pull from result regardless of bbox path ---
-        pad_frac = float((result.get("pad_frac_by_plane", {}) or {}).get(plane, 0.05))
-
-        # guard against degenerate bbox
-        if xmax <= xmin:
-            xmax = xmin + 1.0
-        if ymax <= ymin:
-            ymax = ymin + 1.0
-
-        print(
-            f"[export_projections_json] plane={plane} "
-            f"bbox (padded/global): x[{xmin:.3f},{xmax:.3f}] y[{ymin:.3f},{ymax:.3f}] "
-            f"-> grid ({nx},{ny}), pad_frac={pad_frac:.3f}"
-        )
-
-        # map world -> pixel centers [0..nx-1],[0..ny-1] with y-down
-        def to_pixel_global(points: np.ndarray):
+        def to_pixel(points: np.ndarray):
             if points.size == 0:
                 return points.tolist()
-            P = np.asarray(points, dtype=float).copy()
-            P[:, 0] = (P[:, 0] - xmin) / (xmax - xmin) * (nx - 1)                # x right
-            P[:, 1] = (1.0 - (P[:, 1] - ymin) / (ymax - ymin)) * (ny - 1)        # y-down
-            P[:, 0] = np.clip(P[:, 0], 0.0, nx - 1.0)
-            P[:, 1] = np.clip(P[:, 1], 0.0, ny - 1.0)
+            P = points.astype(float).copy()
+
+            # If normalized 0..1 → scale to pixel grid
+            if np.all((P >= 0) & (P <= 1)):
+                P[:, 0] *= (nx - 1)
+                P[:, 1] *= (ny - 1)
+
+            # Flip Y to image coordinates (origin top-left)
+            P[:, 1] = (ny - 1) - P[:, 1]
             return P.tolist()
 
-        plane_out = {str(lab): to_pixel_global(np.asarray(P2, dtype=float))
-                     for lab, P2 in sets2d.items()}
+        for lab, P2 in sets2d.items():
+            plane_out[str(lab)] = to_pixel(np.asarray(P2))
 
         fname = f"{_safe_name(plane)}_projections.json"
         path = _write_json(os.path.join(proj_dir, fname), plane_out)
         written.append(path)
-        _notify(progress_report, "write", kind="projections", plane=str(plane),
-                path=path, labels=len(plane_out))
+        _notify(progress_report, "write", kind="projections", plane=str(plane), path=path, labels=len(plane_out))
 
     return written
-
 
 
 ############## Metrics ################
@@ -438,6 +397,7 @@ def export_all(
 
     rec("meta", export_meta(result, out_dir, progress_report=progress_report))
     rec("background", export_background_mask_json(result, out_dir, progress_report=progress_report))
+    rec("background_by_label", export_background_mask_by_label_json(result, out_dir, progress_report=progress_report))
     if include_density:
         rec("density", export_density_json(result, out_dir, which=which_density, progress_report=progress_report))
     rec("contours", export_contours_d3(result, out_dir, kind_levels=kind_levels, progress_report=progress_report))
@@ -461,3 +421,5 @@ def export_all(
     _notify(progress_report, "write", kind="manifest", path=mpath)
 
     _notify(progress_report, "done", files=manifest["summary"]["files"], bytes=manifest["summary"]["bytes"])
+    
+

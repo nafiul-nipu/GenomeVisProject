@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   defaultLightSettings,
-  type BgMode,
   type LightSettings,
   type Variant,
 } from "../types/data_types_interfaces";
@@ -18,7 +17,6 @@ interface UIState {
   toggleLightGear: boolean;
   lightSettings: LightSettings;
   twoDVariant: Variant; // "hdr" | "pf"
-  twoDBgMode: BgMode; // "none" | "density-*" | "mask"
   twoDLevel: number; // 100, 99, ...
 }
 
@@ -31,7 +29,6 @@ const initialState: UIState = {
   toggleLightGear: false,
   lightSettings: defaultLightSettings,
   twoDVariant: "hdr",
-  twoDBgMode: "density-combined",
   twoDLevel: 100,
 };
 
@@ -64,9 +61,6 @@ const uiSlice = createSlice({
     setTwoDVariant(state, action: PayloadAction<Variant>) {
       state.twoDVariant = action.payload;
     },
-    setTwoDBgMode(state, action: PayloadAction<BgMode>) {
-      state.twoDBgMode = action.payload;
-    },
     setTwoDLevel(state, action: PayloadAction<number>) {
       state.twoDLevel = action.payload;
     },
@@ -82,7 +76,6 @@ export const {
   setLightSettingsOpen,
   setLightSettings,
   setTwoDVariant,
-  setTwoDBgMode,
   setTwoDLevel,
 } = uiSlice.actions;
 

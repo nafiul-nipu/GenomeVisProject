@@ -4,11 +4,13 @@ import type { GeneSphereViewProps } from "../../types/data_types_interfaces";
 
 // import * as d3 from "d3";
 import { positionPicker } from "../../utilFunctions/positionPicker";
+import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
 
 // const colorScale = d3.scaleSequential().interpolator(d3.interpolateReds);
 const object = new Object3D();
 
 export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
+  geneColorPickerIdx,
   data,
   positionMode,
   nodeCtl,
@@ -56,15 +58,18 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
       // const color = new Color(colorScale(item.cluster) || "#ffffff");
       // console.log(color);
       // console.log(new Color("#ffffff"));
-      mesh.setColorAt(i, new Color("#ffffff"));
+      // mesh.setColorAt(i, new Color("#ffffff"));
+      mesh.setColorAt(
+        i,
+        new Color(colorPaletteSelector(geneColorPickerIdx ?? 0))
+      );
     });
     mesh.instanceMatrix.needsUpdate = true;
     mesh.instanceColor!.needsUpdate = true;
 
     // console.log("gene sphere rendering finished");
-  }, [data, positionMode, nodeCtl.geneRadius]);
+  }, [data, positionMode, nodeCtl.geneRadius, geneColorPickerIdx]);
 
-  // useEffect(() => {}, []);
   return (
     <instancedMesh
       ref={meshRef}

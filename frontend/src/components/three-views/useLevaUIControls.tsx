@@ -40,10 +40,10 @@ export function useLevaUIControls() {
     // ---------------- Genes ----------------
     Genes: folder(
       {
-        geneColor: "#63D7C5",
+        geneColor: "#ffffff",
         geneEmissive: "#000000",
-        geneSpecular: "#ffffff",
-        geneShininess: { value: 5, min: 0, max: 200, step: 1 },
+        geneSpecular: "#000000",
+        geneShininess: { value: 0, min: 0, max: 200, step: 1 },
         geneRadius: { value: 0.05, min: 0.01, max: 0.1, step: 0.01 }, // ← radius slider
       },
       { collapsed: true }
@@ -56,7 +56,7 @@ export function useLevaUIControls() {
         tubeEmissive: "#E6D8B8",
         tubeSpecular: "#ffffff",
         tubeShininess: { value: 5, min: 0, max: 200, step: 1 },
-        tubeRadius: { value: 0.01, min: 0.001, max: 0.09, step: 0.001 }, // ← radius slider
+        tubeRadius: { value: 0.002, min: 0.001, max: 0.09, step: 0.001 }, // ← radius slider
       },
       { collapsed: true }
     ),

@@ -95,18 +95,16 @@ export default function App() {
       <section className="h-[45%] px-1 pb-2 overflow-hidden">
         <div className="h-full rounded-2xl border border-gray-800 bg-gray-900/40 p-3 shadow-inner flex flex-col">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-lg font-medium">2D View</h2>
+            <h2 className="text-lg font-medium">Shape Analysis</h2>
             <TwoDControls />
           </div>
           <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
             {status === "loading" ? (
               <span className="text-sm text-sky-400 animate-pulse">
-                Loading silhouettes / densities…
+                Loading shapes ...
               </span>
             ) : (
-              <span className="text-sm text-gray-400">
-                <TwoDContainer />
-              </span>
+              <TwoDContainer meta_data_typed={meta_data_typed} />
             )}
           </div>
         </div>

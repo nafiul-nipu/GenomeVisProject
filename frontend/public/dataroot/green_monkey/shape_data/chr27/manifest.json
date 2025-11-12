@@ -7,6 +7,14 @@
     "background":[
       "data/green_monkey/shape_data/chr27/background_mask.json"
     ],
+    "background_by_label":[
+      "data/green_monkey/shape_data/chr27/background_by_label/chr27_12hrs_untr_background.json",
+      "data/green_monkey/shape_data/chr27/background_by_label/chr27_12hrs_vacv_background.json",
+      "data/green_monkey/shape_data/chr27/background_by_label/chr27_18hrs_untr_background.json",
+      "data/green_monkey/shape_data/chr27/background_by_label/chr27_18hrs_vacv_background.json",
+      "data/green_monkey/shape_data/chr27/background_by_label/chr27_24hrs_untr_background.json",
+      "data/green_monkey/shape_data/chr27/background_by_label/chr27_24hrs_vacv_background.json"
+    ],
     "density":[
       "data/green_monkey/shape_data/chr27/density/chr27_12hrs_untr_density.json",
       "data/green_monkey/shape_data/chr27/density/chr27_12hrs_vacv_density.json",
@@ -47,7 +55,7 @@
     ]
   },
   "summary":{
-    "files":26,
-    "bytes":20151085
+    "files":32,
+    "bytes":23358031
   }
 }
