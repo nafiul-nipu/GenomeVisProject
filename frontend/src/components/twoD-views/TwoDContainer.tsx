@@ -136,13 +136,14 @@ export const TwoDContainer: React.FC<Props> = ({ meta_data_typed }) => {
             className="flex items-stretch"
             style={{ gap: `${GAP}px` }}
           >
-            {labels.map((label) => (
+            {labels.map((label, idx) => (
               <div
                 key={`${plane}-${label}`}
                 className="rounded-xl border border-gray-800 bg-gray-900/40 flex flex-col min-h-0"
                 style={{ width: `${cellW}px`, height: "100%" }}
               >
                 <PerLabelContourMask
+                  idx={idx}
                   label={label}
                   plane={plane}
                   variant={variant}

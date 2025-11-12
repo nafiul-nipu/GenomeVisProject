@@ -11,6 +11,7 @@ import type {
   PerLabelContourMaskProps,
 } from "../../types/data_types_interfaces";
 import "../../App.css";
+import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
 
 function maskToURL(
   mask: number[][],
@@ -110,17 +111,16 @@ function draw(
   svg: SVGSVGElement,
   mask: MaskMatrix,
   poly: [number, number][] | null,
-  maskAlpha: number
+  maskAlpha: number,
+  strokeColor: string
 ) {
   const ny = mask.length,
     nx = mask[0].length;
   const PAD = 8;
-
   svg.setAttribute("viewBox", `0 0 ${nx + 2 * PAD} ${ny + 2 * PAD}`);
 
   const sel = d3.select(svg);
   sel.selectAll("*").remove();
-
   const g = sel.append("g").attr("transform", `translate(${PAD},${PAD})`);
 
   g.append("image")
@@ -132,15 +132,22 @@ function draw(
 
   if (poly && poly.length) {
     const d = "M " + poly.map((p) => `${p[0]},${p[1]}`).join(" L ") + " Z";
+    // soft glow/back
     g.append("path")
-      .attr("class", "contour-back")
       .attr("d", d)
+      .attr("fill", "none")
+      .attr("stroke", strokeColor)
+      .attr("stroke-width", 5)
+      .attr("opacity", 0.25)
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("vector-effect", "non-scaling-stroke");
+    // main stroke
     g.append("path")
-      .attr("class", "contour")
       .attr("d", d)
+      .attr("fill", "none")
+      .attr("stroke", strokeColor)
+      .attr("stroke-width", 2.2)
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
       .attr("vector-effect", "non-scaling-stroke");
@@ -149,11 +156,12 @@ function draw(
       .attr("x", 10)
       .attr("y", 20)
       .attr("fill", "#fff")
-      .text("No contour");
+      .text("No contour for this selection");
   }
 }
 
 export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
+  idx,
   label,
   plane,
   variant,
@@ -203,6 +211,8 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
     return { mask, poly, nx, ny };
   }, [bgByLabel, cntByLabel, plane, variant, level]);
 
+  const strokeColor = colorPaletteSelector(idx ?? 0);
+
   // Render with the same D3 'draw' used in the HTML
   useEffect(() => {
     const svg = svgRef.current;
@@ -218,8 +228,8 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
         .text(`No mask for ${plane}`);
       return;
     }
-    draw(svg, mask, poly, maskOpacity);
-  }, [mask, poly, maskOpacity, plane, nx, ny]);
+    draw(svg, mask, poly, maskOpacity, strokeColor);
+  }, [mask, poly, maskOpacity, plane, nx, ny, strokeColor]);
 
   const title = `${plane} · ${label} · ${variant.toUpperCase()} · L${level}`;
 

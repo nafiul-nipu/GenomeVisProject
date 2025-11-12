@@ -110,6 +110,7 @@ export interface TubeControl {
 }
 
 export interface GeneSphereViewProps {
+  geneColorPickerIdx?: number;
   data: GeneRowDataType[];
   positionMode: PositionMode;
   nodeCtl: NodeControl;
@@ -124,6 +125,7 @@ export interface GeneTubeViewProps {
 }
 
 export interface DrawObjectProps {
+  geneColorPickerIdx?: number;
   geneData: GeneRowDataType[];
   geneEdges: Gene_Edges_Path_Row_Type[];
   genePaths: number[][];
@@ -174,6 +176,7 @@ export interface BackgroundMask {
 export type PerLabelBackgroundMask = Record<string, BackgroundMask>;
 
 export interface PerLabelContourMaskProps {
+  idx?: number;
   label: string; // e.g., "12h_UNTR"
   plane: Plane; // "XY" | "YZ" | "XZ"
   variant: Variant; // "hdr" | "pf"

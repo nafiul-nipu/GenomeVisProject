@@ -7,6 +7,7 @@ import { positionPicker } from "../../utilFunctions/positionPicker";
 import { GeneTubeView } from "./GeneTubeView";
 
 export const DrawObject: React.FC<DrawObjectProps> = ({
+  geneColorPickerIdx,
   geneData,
   geneEdges,
   genePaths,
@@ -63,6 +64,7 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
   return (
     <group ref={groupRef}>
       <GeneSphereView
+        geneColorPickerIdx={geneColorPickerIdx}
         data={geneData}
         positionMode={positionMode}
         nodeCtl={nodeCtl}
