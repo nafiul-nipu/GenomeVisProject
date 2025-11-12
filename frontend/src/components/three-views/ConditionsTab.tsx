@@ -17,11 +17,13 @@ export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
 
   return (
     <div className="flex items-center justify-between w-full">
-      {/* Left: Tabs (fixed width to prevent layout shift) */}
-      <div className="flex items-center gap-3 w-[18rem]">
-        <h2 className="text-lg font-medium">Gene Structures</h2>
+      {/* Left cluster: title + tabs, side-by-side */}
+      <div className="flex items-center gap-3 min-w-0">
+        <h2 className="text-lg font-medium whitespace-nowrap shrink-0">
+          Gene Structures
+        </h2>
 
-        <div className="inline-flex items-center rounded-xl border border-gray-800/70 bg-gray-900/60 overflow-hidden divide-x divide-gray-800/70 whitespace-nowrap">
+        <div className="inline-flex items-center rounded-xl border border-gray-800/70 bg-gray-900/60 overflow-hidden divide-x divide-gray-800/70 whitespace-nowrap flex-none">
           {[
             { key: "before", label: beforeLabel },
             { key: "after", label: afterLabel },
@@ -45,9 +47,9 @@ export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
         </div>
       </div>
 
-      {/* Right: Slider for diff */}
+      {/* Right: slider (only in diff) */}
       {condTab === "diff" && timepoints.length > 0 && (
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1 flex-none">
           <div className="flex items-center gap-3">
             <label className="text-sm text-gray-300">Time</label>
             <input
@@ -60,7 +62,6 @@ export const ConditionTabs = ({ meta_data_typed }: ConditionTabsProps) => {
               className="w-56 accent-sky-400 cursor-pointer"
             />
           </div>
-
           <div className="w-56 flex justify-between text-[11px] text-gray-400 select-none whitespace-nowrap">
             {timepoints.map((tp, i) => (
               <span key={i} className="tabular-nums">

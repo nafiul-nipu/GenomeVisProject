@@ -103,7 +103,7 @@ export const TwoDContainer: React.FC<Props> = ({ meta_data_typed }) => {
 
   // height: fill row height, but never below MIN_H
   const rowH = Math.max(MIN_H, size.h);
-  console.log("minH:", MIN_H, "size.h:", size.h, "rowH:", rowH);
+  // console.log("minH:", MIN_H, "size.h:", size.h, "rowH:", rowH);
 
   // optional: debug only when size actually changes
   useEffect(() => {
