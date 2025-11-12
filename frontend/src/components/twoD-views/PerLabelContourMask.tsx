@@ -61,56 +61,56 @@ function ensureXY(poly: [number, number][] | null, nx: number) {
   return poly;
 }
 
-// Same logic as the test file
-function pickContourFor(
+// Same logic as the test file, but now returns ALL blobs for that level
+function pickContoursFor(
   raw: ContourWrapperType,
   plane: Plane,
   vkey: Variant,
   levelStr: string
-): [number, number][] | null {
+): [number, number][][] {
   const arr = raw?.contours;
-  if (!arr || !arr.length) return null;
+  if (!arr || !arr.length) return [];
 
   const want = vkey === "pf" ? ["pf", "point_fraction"] : ["hdr"];
 
-  // Try to find exact match
+  // --- exact matches for (plane, variant, level) ---
   const exact = arr.filter(
     (d) =>
       d.plane === plane &&
       want.includes(d.variant) &&
       String(d.level) === levelStr
   );
-  if (exact.length) return exact[0].points;
+  if (exact.length) {
+    return exact.map((d) => d.points as [number, number][]);
+  }
 
-  // Fallback: nearest level match
+  // --- fallback: nearest level for that plane+variant ---
   const levs = arr
     .filter((d) => d.plane === plane && want.includes(d.variant))
     .map((d) => +d.level);
-  if (levs.length) {
-    const target = +levelStr;
-    let best = levs[0];
-    let bd = Math.abs(levs[0] - target);
-    for (const L of levs) {
-      const dd = Math.abs(L - target);
-      if (dd < bd) {
-        best = L;
-        bd = dd;
-      }
+  if (!levs.length) return [];
+
+  const target = +levelStr;
+  let best = levs[0];
+  let bd = Math.abs(levs[0] - target);
+  for (const L of levs) {
+    const dd = Math.abs(L - target);
+    if (dd < bd) {
+      best = L;
+      bd = dd;
     }
-    const alt = arr.find(
-      (d) => d.plane === plane && want.includes(d.variant) && +d.level === best
-    );
-    if (alt) return alt.points;
   }
 
-  return null;
+  const alts = arr.filter(
+    (d) => d.plane === plane && want.includes(d.variant) && +d.level === best
+  );
+  return alts.map((d) => d.points as [number, number][]);
 }
 
-// ---- D3 view code identical to the test ----
 function draw(
   svg: SVGSVGElement,
   mask: MaskMatrix,
-  poly: [number, number][] | null,
+  polys: [number, number][][],
   maskAlpha: number,
   strokeColor: string
 ) {
@@ -123,6 +123,7 @@ function draw(
   sel.selectAll("*").remove();
   const g = sel.append("g").attr("transform", `translate(${PAD},${PAD})`);
 
+  // background
   g.append("image")
     .attr("href", maskToURL(mask, maskAlpha))
     .attr("x", 0)
@@ -130,27 +131,32 @@ function draw(
     .attr("width", nx)
     .attr("height", ny);
 
-  if (poly && poly.length) {
-    const d = "M " + poly.map((p) => `${p[0]},${p[1]}`).join(" L ") + " Z";
-    // soft glow/back
-    g.append("path")
-      .attr("d", d)
-      .attr("fill", "none")
-      .attr("stroke", strokeColor)
-      .attr("stroke-width", 5)
-      .attr("opacity", 0.25)
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("vector-effect", "non-scaling-stroke");
-    // main stroke
-    g.append("path")
-      .attr("d", d)
-      .attr("fill", "none")
-      .attr("stroke", strokeColor)
-      .attr("stroke-width", 2.2)
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("vector-effect", "non-scaling-stroke");
+  if (polys && polys.length) {
+    for (const poly of polys) {
+      if (!poly.length) continue;
+      const d = "M " + poly.map((p) => `${p[0]},${p[1]}`).join(" L ") + " Z";
+
+      // soft glow/back
+      g.append("path")
+        .attr("d", d)
+        .attr("fill", "none")
+        .attr("stroke", strokeColor)
+        .attr("stroke-width", 5)
+        .attr("opacity", 0.25)
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("vector-effect", "non-scaling-stroke");
+
+      // main stroke
+      g.append("path")
+        .attr("d", d)
+        .attr("fill", "none")
+        .attr("stroke", strokeColor)
+        .attr("stroke-width", 2.2)
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("vector-effect", "non-scaling-stroke");
+    }
   } else {
     g.append("text")
       .attr("x", 10)
@@ -186,29 +192,34 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  // Compute mask + contour using same helpers as the test
+  // Compute mask + contours using same helpers as the test
   const {
     mask,
-    poly,
+    polys,
     nx,
     ny,
   }: {
     mask: MaskMatrix | null;
-    poly: [number, number][] | null;
+    polys: [number, number][][];
     nx: number;
     ny: number;
   } = useMemo(() => {
     const mask = bgByLabel?.[plane];
     if (!mask || !mask.length || !mask[0]?.length)
-      return { mask: null, poly: null, nx: 0, ny: 0 };
+      return { mask: null, polys: [], nx: 0, ny: 0 };
+
     const ny = mask.length,
       nx = mask[0].length;
     const levelStr = String(level);
-    let poly = cntByLabel
-      ? pickContourFor(cntByLabel, plane, variant, levelStr)
-      : null;
-    poly = ensureXY(poly, nx);
-    return { mask, poly, nx, ny };
+
+    let polys: [number, number][][] = [];
+    if (cntByLabel) {
+      polys = pickContoursFor(cntByLabel, plane, variant, levelStr).map(
+        (poly) => ensureXY(poly, nx) as [number, number][]
+      );
+    }
+
+    return { mask, polys, nx, ny };
   }, [bgByLabel, cntByLabel, plane, variant, level]);
 
   const strokeColor = colorPaletteSelector(idx ?? 0);
@@ -228,8 +239,8 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
         .text(`No mask for ${plane}`);
       return;
     }
-    draw(svg, mask, poly, maskOpacity, strokeColor);
-  }, [mask, poly, maskOpacity, plane, nx, ny, strokeColor]);
+    draw(svg, mask, polys, maskOpacity, strokeColor);
+  }, [mask, polys, maskOpacity, plane, nx, ny, strokeColor]);
 
   const title = `${plane} · ${label} · ${variant.toUpperCase()} · L${level}`;
 
