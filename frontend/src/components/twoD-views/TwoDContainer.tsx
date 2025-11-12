@@ -139,7 +139,7 @@ export const TwoDContainer: React.FC<Props> = ({ meta_data_typed }) => {
             {labels.map((label) => (
               <div
                 key={`${plane}-${label}`}
-                className="rounded-xl border border-gray-800 bg-gray-900/40 overflow-hidden flex flex-col min-h-0"
+                className="rounded-xl border border-gray-800 bg-gray-900/40 flex flex-col min-h-0"
                 style={{ width: `${cellW}px`, height: "100%" }}
               >
                 <PerLabelContourMask

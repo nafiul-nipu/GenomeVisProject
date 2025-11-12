@@ -56,7 +56,7 @@ export function useLevaUIControls() {
         tubeEmissive: "#E6D8B8",
         tubeSpecular: "#ffffff",
         tubeShininess: { value: 5, min: 0, max: 200, step: 1 },
-        tubeRadius: { value: 0.01, min: 0.001, max: 0.09, step: 0.001 }, // ← radius slider
+        tubeRadius: { value: 0.002, min: 0.001, max: 0.09, step: 0.001 }, // ← radius slider
       },
       { collapsed: true }
     ),

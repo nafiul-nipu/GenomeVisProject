@@ -114,12 +114,16 @@ function draw(
 ) {
   const ny = mask.length,
     nx = mask[0].length;
-  svg.setAttribute("viewBox", `0 0 ${nx} ${ny}`);
+  const PAD = 8;
+
+  svg.setAttribute("viewBox", `0 0 ${nx + 2 * PAD} ${ny + 2 * PAD}`);
+
   const sel = d3.select(svg);
   sel.selectAll("*").remove();
 
-  sel
-    .append("image")
+  const g = sel.append("g").attr("transform", `translate(${PAD},${PAD})`);
+
+  g.append("image")
     .attr("href", maskToURL(mask, maskAlpha))
     .attr("x", 0)
     .attr("y", 0)
@@ -128,15 +132,24 @@ function draw(
 
   if (poly && poly.length) {
     const d = "M " + poly.map((p) => `${p[0]},${p[1]}`).join(" L ") + " Z";
-    sel.append("path").attr("class", "contour-back").attr("d", d);
-    sel.append("path").attr("class", "contour").attr("d", d);
+    g.append("path")
+      .attr("class", "contour-back")
+      .attr("d", d)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("vector-effect", "non-scaling-stroke");
+    g.append("path")
+      .attr("class", "contour")
+      .attr("d", d)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("vector-effect", "non-scaling-stroke");
   } else {
-    sel
-      .append("text")
+    g.append("text")
       .attr("x", 10)
       .attr("y", 20)
       .attr("fill", "#fff")
-      .text("No contour for this selection");
+      .text("No contour");
   }
 }
 
@@ -215,13 +228,22 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-200">{title}</h3>
       </div>
-      <div className="rounded-lg bg-[#0f1013] border border-gray-800 overflow-hidden">
-        {/* <svg ref={svgRef} className="w-full h-auto block" /> */}
+      {/* <div className="rounded-lg bg-[#0f1013] border border-gray-800 overflow-hidden">
         <svg
           ref={svgRef}
           className="w-full h-full block"
           preserveAspectRatio="xMidYMid meet"
         />
+      </div> */}
+      <div className="rounded-lg bg-[#0f1013] border border-gray-800">
+        <div className="w-full h-full p-3">
+          <svg
+            ref={svgRef}
+            className="w-full h-full block"
+            preserveAspectRatio="xMidYMid meet"
+            style={{ overflow: "visible" }}
+          />
+        </div>
       </div>
     </div>
   );
