@@ -28,3 +28,16 @@ def contour_from_bool(M: np.ndarray) -> Optional[np.ndarray]:
     # return the longest contour
     cs.sort(key=lambda c: c.shape[0], reverse=True)
     return cs[0]
+
+def all_contours_from_bool(M: np.ndarray, min_len: int = 10) -> list[np.ndarray]:
+    """
+    Return ALL reasonably sized contour loops from a boolean mask.
+    Used for visualization / export so we can keep multiple blobs.
+    """
+    if M is None or M.sum() == 0:
+        return []
+    cs = find_contours(M.astype(float), level=0.5)
+    if not cs:
+        return []
+    # Drop tiny specks
+    return [c for c in cs if c.shape[0] >= min_len]

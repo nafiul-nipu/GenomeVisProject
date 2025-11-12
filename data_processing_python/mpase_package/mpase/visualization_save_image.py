@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from typing import Optional, Tuple, Literal
 import re
 
+from skimage.measure import find_contours  
+from .metrics_calculation import all_contours_from_bool
 from .types import CfgHDR, CfgPF, RunResult, Plane, ShapeProduct
 
 
@@ -43,18 +45,59 @@ def _levels_from_result(kind: str, cfg_hdr: CfgHDR, cfg_pf: CfgPF, levels):
     raise ValueError("levels must be int, list[int], or 'all'")
 
 # simple overlay plot of two shapes on given axis
-def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct, bg: np.ndarray, title: str, labelA="A", labelB="B"):
+# def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct, bg: np.ndarray, title: str, labelA="A", labelB="B"):
+#     if bg is not None:
+#         ax.imshow(bg, cmap="gray", alpha=0.12)
+#     if shapeA.get("contour") is not None:
+#         C = shapeA["contour"]
+#         ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#1f77b4", alpha=0.95,
+#                 label=f"{labelA} {shapeA['variant']} {shapeA['level']}%")
+#     if shapeB.get("contour") is not None:
+#         C = shapeB["contour"]
+#         ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#d62728", alpha=0.95,
+#                 label=f"{labelB} {shapeB['variant']} {shapeB['level']}%")
+#     ax.set_title(title); ax.set_axis_off(); ax.legend(frameon=False, loc="upper right")
+
+# simple overlay plot of two shapes on given axis
+def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct,
+                  bg: np.ndarray, title: str, labelA="A", labelB="B"):
     if bg is not None:
         ax.imshow(bg, cmap="gray", alpha=0.12)
-    if shapeA.get("contour") is not None:
-        C = shapeA["contour"]
-        ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#1f77b4", alpha=0.95,
-                label=f"{labelA} {shapeA['variant']} {shapeA['level']}%")
-    if shapeB.get("contour") is not None:
-        C = shapeB["contour"]
-        ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#d62728", alpha=0.95,
-                label=f"{labelB} {shapeB['variant']} {shapeB['level']}%")
-    ax.set_title(title); ax.set_axis_off(); ax.legend(frameon=False, loc="upper right")
+
+    # ---- A: all blobs ----
+    maskA = shapeA.get("mask")
+    if maskA is not None:
+        contoursA = all_contours_from_bool(maskA, min_len=10)
+        label_str_A = f"{labelA} {shapeA['variant']} {shapeA['level']}%"
+        for i, C in enumerate(contoursA):
+            ax.plot(
+                C[:, 1], C[:, 0],
+                "-",
+                lw=2.4,
+                color="#1f77b4",
+                alpha=0.95,
+                label=label_str_A if i == 0 else None,  # one legend entry
+            )
+
+    # ---- B: all blobs ----
+    maskB = shapeB.get("mask")
+    if maskB is not None:
+        contoursB = all_contours_from_bool(maskB, min_len=10)
+        label_str_B = f"{labelB} {shapeB['variant']} {shapeB['level']}%"
+        for i, C in enumerate(contoursB):
+            ax.plot(
+                C[:, 1], C[:, 0],
+                "-",
+                lw=2.4,
+                color="#d62728",
+                alpha=0.95,
+                label=label_str_B if i == 0 else None,
+            )
+
+    ax.set_title(title)
+    ax.set_axis_off()
+    ax.legend(frameon=False, loc="upper right")
+
 
 def view(result: RunResult,
          kind: Literal["hdr","point_fraction"] = "hdr",
@@ -284,15 +327,40 @@ def save_projections(result: RunResult,
 
 # --------------------------- NEW: single-label (no overlay) ---------------------------
 
-def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray, title: str, color="#1f77b4"):
+# def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray, title: str, color="#1f77b4"):
+#     if bg_single is not None:
+#         ax.imshow(bg_single, cmap="gray", alpha=0.18)
+#     C = shape.get("contour")
+#     if C is not None:
+#         ax.plot(C[:,1], C[:,0], '-', lw=2.4, color=color, alpha=0.95,
+#                 label=f"{shape['variant']} {shape['level']}%" )
+#         ax.legend(frameon=False, loc="upper right")
+#     ax.set_title(title); ax.set_axis_off()
+
+def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray,
+                 title: str, color="#1f77b4"):
     if bg_single is not None:
         ax.imshow(bg_single, cmap="gray", alpha=0.18)
-    C = shape.get("contour")
-    if C is not None:
-        ax.plot(C[:,1], C[:,0], '-', lw=2.4, color=color, alpha=0.95,
-                label=f"{shape['variant']} {shape['level']}%" )
-        ax.legend(frameon=False, loc="upper right")
-    ax.set_title(title); ax.set_axis_off()
+
+    mask = shape.get("mask")
+    if mask is not None:
+        contours = all_contours_from_bool(mask, min_len=10)
+        label_str = f"{shape['variant']} {shape['level']}%"
+        for i, C in enumerate(contours):
+            ax.plot(
+                C[:, 1], C[:, 0],
+                "-",
+                lw=2.4,
+                color=color,
+                alpha=0.95,
+                label=label_str if i == 0 else None,
+            )
+        if contours:
+            ax.legend(frameon=False, loc="upper right")
+
+    ax.set_title(title)
+    ax.set_axis_off()
+
 
 
 def view_single(result: RunResult,

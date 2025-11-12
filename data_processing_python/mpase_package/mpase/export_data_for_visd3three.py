@@ -8,6 +8,7 @@ import numpy as np
 # Internal types and configs (from the main pipeline module)
 from .types import RunResult, Plane, CfgHDR, CfgPF, ShapeProduct
 from .visualization_save_image import _levels_from_result
+from .metrics_calculation import all_contours_from_bool
 
 ##################### PURE-DATA EXPORTERS (D3 + THREE) #####################
 # background mask
@@ -164,6 +165,71 @@ def export_density_json(result: RunResult, out_dir: str, which: Optional[Iterabl
 
 ################### D3: contours (pixel coords) ###################
 
+# def export_contours_d3(
+#     result: RunResult,
+#     out_dir: str,
+#     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
+#     *,
+#     progress_report: bool = False,
+#     report: Optional[Callable] = None,
+# ) -> List[str]:
+#     """
+#     Writes per-label contour bundles under <out_dir>/contours/.
+#     Each file aggregates that label's contours across planes and levels.
+
+#     contours/<Label>_contour.json
+#       {
+#         "contours": [
+#           {"plane": "XY", "variant": "hdr"|"pf", "level": 95, "label": "12h_UNTR", "points": [[x,y], ...]},
+#           ...
+#         ]
+#       }
+
+#     Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
+#     """
+#     written: List[str] = []
+#     cont_dir = os.path.join(out_dir, "contour")
+#     _ensure_dir(cont_dir)
+
+#     # Build a map label -> list of contour entries
+#     per_label: Dict[str, list] = {}
+
+#     cfg_hdr = CfgHDR()
+#     cfg_pf = CfgPF()
+
+#     for kind, lv in kind_levels.items():
+#         if kind not in result["shapes"]:
+#             continue
+#         levels = _levels_from_result(kind, cfg_hdr, cfg_pf, lv)
+#         for plane, by_level in result["shapes"][kind].items():
+#             for level in levels:
+#                 by_label = by_level.get(level)
+#                 if not by_label:
+#                     continue
+#                 for label, sp in by_label.items():
+#                     C = sp.get("contour")
+#                     if C is None:
+#                         continue
+#                     # skimage contours are [row(y), col(x)] — convert to [x,y]
+#                     pts = [[float(c[1]), float(c[0])] for c in C]
+#                     entry = dict(
+#                         plane=plane,
+#                         variant="hdr" if kind == "hdr" else "pf",
+#                         level=int(level),
+#                         label=str(label),
+#                         points=pts,
+#                     )
+#                     per_label.setdefault(str(label), []).append(entry)
+
+#     # Write one file per label
+#     for label, entries in per_label.items():
+#         fname = f"{_safe_name(label)}_contour.json"
+#         path = _write_json(os.path.join(cont_dir, fname), {"contours": entries})
+#         written.append(path)
+#         _notify(progress_report, "write", kind="contours", label=str(label), path=path, entries=len(entries))
+
+#     return written
+
 def export_contours_d3(
     result: RunResult,
     out_dir: str,
@@ -179,18 +245,19 @@ def export_contours_d3(
     contours/<Label>_contour.json
       {
         "contours": [
-          {"plane": "XY", "variant": "hdr"|"pf", "level": 95, "label": "12h_UNTR", "points": [[x,y], ...]},
+          {"plane": "XY", "variant": "hdr"|"pf", "level": 95,
+           "label": "12h_UNTR", "points": [[x,y], ...]},
           ...
         ]
       }
 
-    Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
+    Now: for each ShapeProduct, we may emit MULTIPLE entries (one per blob),
+    using all_contours_from_bool(shape['mask'], ...).
     """
     written: List[str] = []
     cont_dir = os.path.join(out_dir, "contour")
     _ensure_dir(cont_dir)
 
-    # Build a map label -> list of contour entries
     per_label: Dict[str, list] = {}
 
     cfg_hdr = CfgHDR()
@@ -200,34 +267,51 @@ def export_contours_d3(
         if kind not in result["shapes"]:
             continue
         levels = _levels_from_result(kind, cfg_hdr, cfg_pf, lv)
+
         for plane, by_level in result["shapes"][kind].items():
             for level in levels:
                 by_label = by_level.get(level)
                 if not by_label:
                     continue
+
                 for label, sp in by_label.items():
-                    C = sp.get("contour")
-                    if C is None:
+                    mask = sp.get("mask")
+                    if mask is None:
                         continue
-                    # skimage contours are [row(y), col(x)] — convert to [x,y]
-                    pts = [[float(c[1]), float(c[0])] for c in C]
-                    entry = dict(
-                        plane=plane,
-                        variant="hdr" if kind == "hdr" else "pf",
-                        level=int(level),
-                        label=str(label),
-                        points=pts,
-                    )
-                    per_label.setdefault(str(label), []).append(entry)
+
+                    # get ALL blobs for this mask
+                    contours = all_contours_from_bool(mask, min_len=10)
+                    if not contours:
+                        continue
+
+                    for C in contours:
+                        # skimage contours are [row(y), col(x)] — convert to [x,y]
+                        pts = [[float(c[1]), float(c[0])] for c in C]
+                        entry = dict(
+                            plane=plane,
+                            variant="hdr" if kind == "hdr" else "pf",
+                            level=int(level),
+                            label=str(label),
+                            points=pts,
+                        )
+                        per_label.setdefault(str(label), []).append(entry)
 
     # Write one file per label
     for label, entries in per_label.items():
         fname = f"{_safe_name(label)}_contour.json"
         path = _write_json(os.path.join(cont_dir, fname), {"contours": entries})
         written.append(path)
-        _notify(progress_report, "write", kind="contours", label=str(label), path=path, entries=len(entries))
+        _notify(
+            progress_report,
+            "write",
+            kind="contours",
+            label=str(label),
+            path=path,
+            entries=len(entries),
+        )
 
     return written
+
 
 
 ################### D3: 2D projections (per plane) ###################
