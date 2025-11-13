@@ -33,7 +33,7 @@ const initialState: UIState = {
   twoDVariant: "hdr",
   twoDLevel: 100,
   twoDCleanBlobs: false,
-  twoDBlobMinAreaPct: 5,
+  twoDBlobMinAreaPct: 2,
 };
 
 // creating slices
