@@ -61,6 +61,17 @@ function ensureXY(poly: [number, number][] | null, nx: number) {
   return poly;
 }
 
+function polygonArea(poly: [number, number][]): number {
+  if (!poly || poly.length < 3) return 0;
+  let sum = 0;
+  for (let i = 0; i < poly.length; i++) {
+    const [x1, y1] = poly[i];
+    const [x2, y2] = poly[(i + 1) % poly.length];
+    sum += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(sum) / 2;
+}
+
 // Same logic as the test file, but now returns ALL blobs for that level
 function pickContoursFor(
   raw: ContourWrapperType,
@@ -175,6 +186,7 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
   maskOpacity = 0.18,
   className,
 }) => {
+  const { twoDCleanBlobs, twoDBlobMinAreaPct } = useAppSelector((s) => s.ui);
   // Use your real slice paths
   const bgByLabel = useAppSelector(
     (s) =>
@@ -222,9 +234,28 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
     return { mask, polys, nx, ny };
   }, [bgByLabel, cntByLabel, plane, variant, level]);
 
+  const cleanedPolys = useMemo(() => {
+    if (!polys.length) return polys;
+    if (!twoDCleanBlobs) return polys;
+
+    const MIN_LEN = 10; // vertex count filter
+    const frac = (twoDBlobMinAreaPct ?? 0) / 100;
+    if (frac <= 0) {
+      // only length filter
+      return polys.filter((poly) => poly.length >= MIN_LEN);
+    }
+
+    const areas = polys.map((poly) => polygonArea(poly));
+    const maxArea = Math.max(...areas, 0);
+    if (!maxArea) return polys;
+
+    return polys.filter(
+      (poly, i) => poly.length >= MIN_LEN && areas[i] >= frac * maxArea
+    );
+  }, [polys, twoDCleanBlobs, twoDBlobMinAreaPct]);
+
   const strokeColor = colorPaletteSelector(idx ?? 0);
 
-  // Render with the same D3 'draw' used in the HTML
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -239,8 +270,8 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
         .text(`No mask for ${plane}`);
       return;
     }
-    draw(svg, mask, polys, maskOpacity, strokeColor);
-  }, [mask, polys, maskOpacity, plane, nx, ny, strokeColor]);
+    draw(svg, mask, cleanedPolys, maskOpacity, strokeColor);
+  }, [mask, cleanedPolys, maskOpacity, plane, nx, ny, strokeColor]);
 
   const title = `${plane} · ${label} · ${variant.toUpperCase()} · L${level}`;
 
