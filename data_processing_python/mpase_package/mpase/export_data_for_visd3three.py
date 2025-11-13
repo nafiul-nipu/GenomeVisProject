@@ -235,6 +235,9 @@ def export_contours_d3(
     out_dir: str,
     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
     *,
+    clean_blobs: bool = False,
+    blob_min_len: int = 10,
+    blob_min_area_frac: float = 0.05,
     progress_report: bool = False,
     report: Optional[Callable] = None,
 ) -> List[str]:
@@ -280,7 +283,7 @@ def export_contours_d3(
                         continue
 
                     # get ALL blobs for this mask
-                    contours = all_contours_from_bool(mask, min_len=10)
+                    contours = all_contours_from_bool(mask, min_len=blob_min_len, min_area_frac=blob_min_area_frac if clean_blobs else 0.0)
                     if not contours:
                         continue
 
@@ -454,6 +457,9 @@ def export_all(
     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
     which_density: Optional[Iterable[str]] = None,
     progress_report: bool = False,
+    clean_blobs: bool = False,
+    blob_min_len: int = 10,
+    blob_min_area_frac: float = 0.05,
 ) -> None:
     """
     Produces the full pure-data bundle for D3 + Three.js and writes a manifest file (manifest.json):
@@ -484,7 +490,8 @@ def export_all(
     rec("background_by_label", export_background_mask_by_label_json(result, out_dir, progress_report=progress_report))
     if include_density:
         rec("density", export_density_json(result, out_dir, which=which_density, progress_report=progress_report))
-    rec("contours", export_contours_d3(result, out_dir, kind_levels=kind_levels, progress_report=progress_report))
+    rec("contours", export_contours_d3(result, out_dir, kind_levels=kind_levels, progress_report=progress_report, clean_blobs=clean_blobs,
+                                      blob_min_len=blob_min_len, blob_min_area_frac=blob_min_area_frac))
     rec("projections", export_projections_json(result, out_dir, progress_report=progress_report))
     rec("metrics", export_metrics_json(result, out_dir, progress_report=progress_report))
     rec("points3d", export_points3d_json(result, out_dir, progress_report=progress_report))

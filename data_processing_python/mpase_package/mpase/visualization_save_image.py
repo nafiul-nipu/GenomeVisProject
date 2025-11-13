@@ -45,48 +45,55 @@ def _levels_from_result(kind: str, cfg_hdr: CfgHDR, cfg_pf: CfgPF, levels):
     raise ValueError("levels must be int, list[int], or 'all'")
 
 # simple overlay plot of two shapes on given axis
-# def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct, bg: np.ndarray, title: str, labelA="A", labelB="B"):
-#     if bg is not None:
-#         ax.imshow(bg, cmap="gray", alpha=0.12)
-#     if shapeA.get("contour") is not None:
-#         C = shapeA["contour"]
-#         ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#1f77b4", alpha=0.95,
-#                 label=f"{labelA} {shapeA['variant']} {shapeA['level']}%")
-#     if shapeB.get("contour") is not None:
-#         C = shapeB["contour"]
-#         ax.plot(C[:,1], C[:,0], '-', lw=2.4, color="#d62728", alpha=0.95,
-#                 label=f"{labelB} {shapeB['variant']} {shapeB['level']}%")
-#     ax.set_title(title); ax.set_axis_off(); ax.legend(frameon=False, loc="upper right")
-
-# simple overlay plot of two shapes on given axis
-def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct,
-                  bg: np.ndarray, title: str, labelA="A", labelB="B"):
+def _plot_overlay(
+    ax,
+    shapeA: ShapeProduct,
+    shapeB: ShapeProduct,
+    bg: np.ndarray,
+    title: str,
+    labelA: str = "A",
+    labelB: str = "B",
+    *,
+    clean: bool = False,
+    blob_min_len: int = 10,
+    blob_min_area_frac: float = 0.05,
+):
     if bg is not None:
         ax.imshow(bg, cmap="gray", alpha=0.12)
 
-    # ---- A: all blobs ----
+    # --- A ---
     maskA = shapeA.get("mask")
     if maskA is not None:
-        contoursA = all_contours_from_bool(maskA, min_len=10)
+        contoursA = all_contours_from_bool(
+            maskA,
+            min_len=blob_min_len,
+            min_area_frac=blob_min_area_frac if clean else 0.0,
+        )
         label_str_A = f"{labelA} {shapeA['variant']} {shapeA['level']}%"
         for i, C in enumerate(contoursA):
             ax.plot(
-                C[:, 1], C[:, 0],
+                C[:, 1],
+                C[:, 0],
                 "-",
                 lw=2.4,
                 color="#1f77b4",
                 alpha=0.95,
-                label=label_str_A if i == 0 else None,  # one legend entry
+                label=label_str_A if i == 0 else None,
             )
 
-    # ---- B: all blobs ----
+    # --- B ---
     maskB = shapeB.get("mask")
     if maskB is not None:
-        contoursB = all_contours_from_bool(maskB, min_len=10)
+        contoursB = all_contours_from_bool(
+            maskB,
+            min_len=blob_min_len,
+            min_area_frac=blob_min_area_frac if clean else 0.0,
+        )
         label_str_B = f"{labelB} {shapeB['variant']} {shapeB['level']}%"
         for i, C in enumerate(contoursB):
             ax.plot(
-                C[:, 1], C[:, 0],
+                C[:, 1],
+                C[:, 0],
                 "-",
                 lw=2.4,
                 color="#d62728",
@@ -97,6 +104,7 @@ def _plot_overlay(ax, shapeA: ShapeProduct, shapeB: ShapeProduct,
     ax.set_title(title)
     ax.set_axis_off()
     ax.legend(frameon=False, loc="upper right")
+
 
 
 def view(result: RunResult,
@@ -112,7 +120,10 @@ def view(result: RunResult,
          labelB: str = "B",
          show_heat: bool = False,
          cfg_hdr: Optional[CfgHDR] = None,
-         cfg_pf: Optional[CfgPF] = None):
+         cfg_pf: Optional[CfgPF] = None,
+         clean_blobs: bool = False,
+         blob_min_len: int = 10,
+         blob_min_area_frac: float = 0.05):
     """
     Quick viewer for shapes produced by mpase() [N-set].
     - kind: 'hdr' | 'point_fraction'
@@ -161,7 +172,8 @@ def view(result: RunResult,
         bg = result["background"].get(plane)
         if D_A_plane is not None:
             ax.imshow(D_A_plane, alpha=0.35)  # faint heat underlay
-        _plot_overlay(ax, spA, spB, bg, f"{plane} — {kind} {lvl}%", labelA, labelB)
+        _plot_overlay(ax, spA, spB, bg, f"{plane} — {kind} {lvl}%", labelA, labelB, clean=clean_blobs,
+                      blob_min_len=blob_min_len, blob_min_area_frac=blob_min_area_frac)
 
     plt.tight_layout(); plt.show()
 
@@ -179,7 +191,10 @@ def save_figures(result: RunResult,
                  labelB: str = "B",
                  show_heat: bool = False,
                  cfg_hdr: Optional[CfgHDR] = None,
-                 cfg_pf: Optional[CfgPF] = None):
+                 cfg_pf: Optional[CfgPF] = None,
+                 clean_blobs: bool = False,
+                 blob_min_len: int = 10,
+                 blob_min_area_frac: float = 0.05):
     """
     Save per-plane overlays as PNGs for the selected kind/levels.
     Signature is consistent with `view()`.
@@ -221,7 +236,8 @@ def save_figures(result: RunResult,
             ax.imshow(D_A_plane, alpha=0.35, cmap="inferno")
         _plot_overlay(ax, spA, spB, bg,
                       f"{plane} — {kind} {lvl}%",
-                      labelA, labelB)
+                      labelA, labelB, clean=clean_blobs,
+                      blob_min_len=blob_min_len, blob_min_area_frac=blob_min_area_frac)
 
         fname = f"{kind}_{plane}_{lvl}.png"
         fig.savefig(os.path.join(out_dir, fname), dpi=200, bbox_inches="tight")
@@ -327,28 +343,32 @@ def save_projections(result: RunResult,
 
 # --------------------------- NEW: single-label (no overlay) ---------------------------
 
-# def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray, title: str, color="#1f77b4"):
-#     if bg_single is not None:
-#         ax.imshow(bg_single, cmap="gray", alpha=0.18)
-#     C = shape.get("contour")
-#     if C is not None:
-#         ax.plot(C[:,1], C[:,0], '-', lw=2.4, color=color, alpha=0.95,
-#                 label=f"{shape['variant']} {shape['level']}%" )
-#         ax.legend(frameon=False, loc="upper right")
-#     ax.set_title(title); ax.set_axis_off()
-
-def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray,
-                 title: str, color="#1f77b4"):
+def _plot_single(
+    ax,
+    shape: ShapeProduct,
+    bg_single: np.ndarray,
+    title: str,
+    color: str = "#1f77b4",
+    *,
+    clean: bool = False,
+    blob_min_len: int = 10,
+    blob_min_area_frac: float = 0.05,
+):
     if bg_single is not None:
         ax.imshow(bg_single, cmap="gray", alpha=0.18)
 
     mask = shape.get("mask")
     if mask is not None:
-        contours = all_contours_from_bool(mask, min_len=10)
+        contours = all_contours_from_bool(
+            mask,
+            min_len=blob_min_len,
+            min_area_frac=blob_min_area_frac if clean else 0.0,
+        )
         label_str = f"{shape['variant']} {shape['level']}%"
         for i, C in enumerate(contours):
             ax.plot(
-                C[:, 1], C[:, 0],
+                C[:, 1],
+                C[:, 0],
                 "-",
                 lw=2.4,
                 color=color,
@@ -363,6 +383,7 @@ def _plot_single(ax, shape: ShapeProduct, bg_single: np.ndarray,
 
 
 
+
 def view_single(result: RunResult,
                 label: str,
                 kind: Literal["hdr","point_fraction"] = "hdr",
@@ -371,7 +392,9 @@ def view_single(result: RunResult,
                 *,
                 show_heat: bool = False,
                 cfg_hdr: Optional[CfgHDR] = None,
-                cfg_pf: Optional[CfgPF] = None):
+                cfg_pf: Optional[CfgPF] = None, clean_blobs: bool = False,
+                blob_min_len: int = 10,
+                blob_min_area_frac: float = 0.05):
     """
     View one label at a time (no overlay). If per-label background masks exist, use them.
     """
@@ -410,7 +433,8 @@ def view_single(result: RunResult,
         sp = d[label]
         if D_plane is not None:
             ax.imshow(D_plane, alpha=0.35)
-        _plot_single(ax, sp, bg_single, f"{label} — {plane} — {kind} {lvl}%")
+        _plot_single(ax, sp, bg_single, f"{label} — {plane} — {kind} {lvl}%", clean=clean_blobs,
+                      blob_min_len=blob_min_len, blob_min_area_frac=blob_min_area_frac)
 
     plt.tight_layout(); plt.show()
 
@@ -425,7 +449,9 @@ def save_per_label(result: RunResult,
                    show_heat: bool = False,
                    cfg_hdr: Optional[CfgHDR] = None,
                    cfg_pf: Optional[CfgPF] = None,
-                   dpi: int = 220):
+                   dpi: int = 220, clean_blobs: bool = False,
+                   blob_min_len: int = 10,
+                   blob_min_area_frac: float = 0.05):
     """
     Save figures for one or more labels without overlay. Each label × level gets its own PNG.
     """
@@ -466,7 +492,8 @@ def save_per_label(result: RunResult,
             fig, ax = plt.subplots(figsize=(5.2, 5.2))
             if D_plane is not None:
                 ax.imshow(D_plane, alpha=0.35, cmap="inferno")
-            _plot_single(ax, sp, bg_single, f"{lab} — {plane} — {kind} {lvl}%")
+            _plot_single(ax, sp, bg_single, f"{lab} — {plane} — {kind} {lvl}%", clean=clean_blobs,
+                          blob_min_len=blob_min_len, blob_min_area_frac=blob_min_area_frac)
             fname = f"{re.sub(r'[^A-Za-z0-9_.-]+','_', lab)}_{kind}_{plane}_{lvl}.png"
             fig.savefig(os.path.join(out_dir, fname), dpi=dpi, bbox_inches="tight")
             plt.close(fig)

@@ -29,15 +29,55 @@ def contour_from_bool(M: np.ndarray) -> Optional[np.ndarray]:
     cs.sort(key=lambda c: c.shape[0], reverse=True)
     return cs[0]
 
-def all_contours_from_bool(M: np.ndarray, min_len: int = 10) -> list[np.ndarray]:
+def _poly_area_rc(poly: np.ndarray) -> float:
     """
-    Return ALL reasonably sized contour loops from a boolean mask.
-    Used for visualization / export so we can keep multiple blobs.
+    Polygon area from contour in [row, col] coords.
+    We treat (x,y) = (col,row) and use shoelace formula.
+    """
+    if poly.shape[0] < 3:
+        return 0.0
+    x = poly[:, 1]
+    y = poly[:, 0]
+    return 0.5 * float(
+        np.abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+    )
+
+def all_contours_from_bool(
+    M: np.ndarray,
+    min_len: int = 10,
+    min_area_frac: float = 0.0,
+) -> list[np.ndarray]:
+    """
+    Return all reasonably sized contour loops from a boolean mask.
+
+    - min_len: drop contours with too few vertices (short noisy wiggles)
+    - min_area_frac:
+        * <= 0  → no area filtering (keep all lengths >= min_len)
+        * > 0   → keep only contours whose area >= min_area_frac * max_area
     """
     if M is None or M.sum() == 0:
         return []
+
     cs = find_contours(M.astype(float), level=0.5)
     if not cs:
         return []
-    # Drop tiny specks
-    return [c for c in cs if c.shape[0] >= min_len]
+
+    # 1) length filter
+    cs = [c for c in cs if c.shape[0] >= min_len]
+    if not cs:
+        return []
+
+    # 2) optional area filter
+    if min_area_frac <= 0:
+        return cs
+
+    areas = np.array([_poly_area_rc(c) for c in cs], dtype=float)
+    max_area = float(areas.max()) if areas.size else 0.0
+    if max_area <= 0:
+        return cs
+
+    keep = [
+        c for c, a in zip(cs, areas)
+        if a >= min_area_frac * max_area
+    ]
+    return keep

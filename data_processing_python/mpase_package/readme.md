@@ -186,7 +186,10 @@ view(
 res, kind="hdr", plane="XY", levels="all",
 A_lab="12h_UNTR", B_lab="12h_VACV",
 labelA="12 h — UNTR", labelB="12 h — VACV",
-show_heat=True
+show_heat=True,
+clean_blobs=False, // clean small blobs (true or false)
+blob_min_len=15, // drop very short contours
+blob_min_area_frac=0.05 // drop blobs < 5% of largest
 )
 
 # (c) Point-fraction silhouettes at chosen levels
@@ -195,7 +198,7 @@ view(
 res, kind="point_fraction", plane="XY", levels=[100,95,80],
 A_lab="12h_UNTR", B_lab="12h_VACV",
 labelA="12 h — UNTR", labelB="12 h — VACV",
-show_heat=False
+show_heat=False, clean_blobs=True, blob_min_len=15, blob_min_area_frac=0.08
 )
 
 # (d) Single-label view (no overlay; uses per-label background)
@@ -207,7 +210,8 @@ from visualization_save_image import view_single
 view_single(
     res, label="12h_UNTR",
     kind="hdr", plane="XY", levels=[100, 95],
-    show_heat=True  # optional: HDR heatmap underneath
+    show_heat=True,  # optional: HDR heatmap underneath
+    clean_blobs=True, blob_min_len=15, blob_min_area_frac=0.08
 )
 
 # --------------------------------------------------------------------------------------------
@@ -228,14 +232,14 @@ save_figures(
 res, kind="hdr", plane="XY", levels="all",
 out_dir=out_dir, show_heat=True,
 A_lab="12h_UNTR", B_lab="12h_VACV",
-labelA="12 h — UNTR", labelB="12 h — VACV"
+labelA="12 h — UNTR", labelB="12 h — VACV", clean_blobs=True, blob_min_len=15, blob_min_area_frac=0.08
 )
 
 save_figures(
 res, kind="point_fraction", plane="YZ", levels=[95,50],
 out_dir=out_dir,
 A_lab="12h_UNTR", B_lab="12h_VACV",
-labelA="12 h — UNTR", labelB="12 h — VACV"
+labelA="12 h — UNTR", labelB="12 h — VACV", clean_blobs=True, blob_min_len=15, blob_min_area_frac=0.08
 )
 
 ### Save per label (no overlay)
@@ -247,7 +251,7 @@ save_per_label(
     labels=("12h_UNTR","12h_VACV"),  # omit to save all labels
     kind="point_fraction", plane="XY", levels=[100,95,80],
     out_dir=f"{out_dir}/figures_single",
-    show_heat=False
+    show_heat=False, clean_blobs=True, blob_min_len=15, blob_min_area_frac=0.08
 )
 
 # --------------------------------------------------------------------------------------------
@@ -274,6 +278,12 @@ save_per_label(
 
 # progress_report: bool # prints progress notification # True or False
 
+# clean_blob: bool # cleans small blobs
+
+# blob_min_len: minimum length
+
+# blob_min_area_frac
+
 export_all(
 res,
 out_dir=out_dir,
@@ -282,7 +292,10 @@ export_layout=True,
 export_scales=True,
 kind_levels={"hdr": "all", "point_fraction": "all"},
 which_density=None,
-progress_report=True
+progress_report=True,
+clean_blobs=False,
+    blob_min_len=15,
+    blob_min_area_frac=0.05,
 )
 
 # --------------------------------------------------------------------------------------------
