@@ -21,6 +21,7 @@ import {
 } from "../../types/data_types_interfaces";
 import { DrawObject } from "./DrawObjects";
 import { useLevaUIControls } from "./useLevaUIControls";
+import { CornerAxes } from "./CornerAxes";
 
 type Props = { meta_data_typed: DataInfoType };
 
@@ -248,6 +249,9 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
                 tubeRadius: tubeRadius,
               }}
             />
+            {/* <axesHelper args={[5]} /> */}
+            <CornerAxes size={0.5} distance={20} offsetX={21} offsetY={11} />
+
             <OrbitControls
               makeDefault
               enableDamping={false}
