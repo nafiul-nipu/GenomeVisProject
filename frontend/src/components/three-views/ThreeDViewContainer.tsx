@@ -1,4 +1,3 @@
-// components/three-d/ThreeDViewContainer.tsx
 import React, {
   useMemo,
   useRef,

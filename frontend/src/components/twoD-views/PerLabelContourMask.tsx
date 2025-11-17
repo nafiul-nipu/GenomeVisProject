@@ -1,4 +1,3 @@
-// src/components/twoD/PerLabelPlane.tsx
 import React, { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { useAppSelector } from "../../redux-store/hooks";

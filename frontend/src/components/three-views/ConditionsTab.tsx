@@ -1,4 +1,3 @@
-// components/ConditionTabs.tsx
 import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
 import { setCondTabstate, setTimeIdx } from "../../redux-store/uiSlice";
 import type { ConditionTabsProps } from "../../types/data_types_interfaces";
