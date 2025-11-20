@@ -36,12 +36,12 @@ def _per_plane_sets(aligned: List[np.ndarray], edges3d, labels: List[str],
 
     # loop over three projections
     for a in ('x','y','z'):
-        # which plane (e.g., 'z' → "XY", 'y' → "XZ", `'x' → "YZ"'
+        # which plane (e.g., 'z' => "XY", 'y' => "XZ", `'x' => "YZ"'
         plane: Plane = PLANE_FROM_AXIS[a]  # type: ignore
         if plane not in planes: 
             continue
 
-        # which two axes to use (e.g., 'z' → (0,1) for X and Y)  
+        # which two axes to use (e.g., 'z' => (0,1) for X and Y)  
         # Needed to slice the point arrays correctly (A[:, [i, j]]).
         i, j = AXPAIR[a]
         # Pull out the grid edges along the chosen axes from the global 3D grid.
@@ -150,7 +150,7 @@ def mpase(csv_list: Optional[Sequence[str]] = None,
     if len(raw_sets) < 2:
         raise ValueError("Need at least 2 point sets for comparison.")
 
-    ########################## Alignment (center → optional PCA+ICP to ref) ##########################
+    ########################## Alignment (center => optional PCA+ICP to ref) ##########################
     # Reference is the first set (index 0)
     ref = raw_sets[0] - raw_sets[0].mean(0)
     aligned: List[np.ndarray] = []

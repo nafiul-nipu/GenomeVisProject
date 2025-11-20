@@ -38,7 +38,7 @@ class CfgHDR:
 class CfgMorph:
     closing: int = 1
     opening: int = 1
-    keep_largest: bool = True
+    keep_largest: bool = False
     fill_holes: bool = True
     
 @dataclass

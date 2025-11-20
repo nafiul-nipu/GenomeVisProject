@@ -18,6 +18,8 @@ interface UIState {
   lightSettings: LightSettings;
   twoDVariant: Variant; // "hdr" | "pf"
   twoDLevel: number; // 100, 99, ...
+  twoDCleanBlobs: boolean;
+  twoDBlobMinAreaPct: number; // e.g., 5 = keep blobs >= 5% of largest area
 }
 
 const initialState: UIState = {
@@ -30,6 +32,8 @@ const initialState: UIState = {
   lightSettings: defaultLightSettings,
   twoDVariant: "hdr",
   twoDLevel: 100,
+  twoDCleanBlobs: false,
+  twoDBlobMinAreaPct: 2,
 };
 
 // creating slices
@@ -64,6 +68,12 @@ const uiSlice = createSlice({
     setTwoDLevel(state, action: PayloadAction<number>) {
       state.twoDLevel = action.payload;
     },
+    setTwoDCleanBlobs(state, action: PayloadAction<boolean>) {
+      state.twoDCleanBlobs = action.payload;
+    },
+    setTwoDBlobMinAreaPct(state, action: PayloadAction<number>) {
+      state.twoDBlobMinAreaPct = action.payload;
+    },
   },
 });
 
@@ -77,6 +87,8 @@ export const {
   setLightSettings,
   setTwoDVariant,
   setTwoDLevel,
+  setTwoDCleanBlobs,
+  setTwoDBlobMinAreaPct,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

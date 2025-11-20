@@ -1,4 +1,3 @@
-README.md
 pyproject.toml
 mpase/__init__.py
 mpase/create_grid_planes.py

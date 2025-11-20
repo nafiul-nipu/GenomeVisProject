@@ -1,4 +1,3 @@
-// src/ui/controls/useUIControls.ts
 import { useControls, folder } from "leva";
 
 export function useLevaUIControls() {

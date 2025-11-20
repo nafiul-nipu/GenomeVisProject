@@ -16,7 +16,7 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
   tubeCtl,
 }) => {
   const groupRef = useRef<THREE.Group>(null);
-  const { camera, controls } = useThree(); // you get the current camera & OrbitControls
+  const { camera, controls } = useThree(); // get the current camera & OrbitControls
 
   // compute bounding box of all points
   const bbox = useMemo(() => {
