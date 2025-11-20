@@ -80,3 +80,15 @@ def rasterize_points(points2d: np.ndarray, xs, ys, disk_px=2) -> np.ndarray:
         # This step “paints” the disk onto the raster mask.
         img[y0:y1, x0:x1] |= disk[dy0:dy0+(y1-y0), dx0:dx0+(x1-x0)]
     return img
+
+
+def points_to_pixel_indices(points2d: np.ndarray, xs, ys):
+    """
+    Map each 2D point to integer pixel indices (x_idx, y_idx)
+    on the same grid used by rasterize_points.
+    """
+    ny, nx = len(ys), len(xs)
+    x_idx = np.clip(np.searchsorted(xs, points2d[:, 0]) - 1, 0, nx - 1)
+    y_idx = np.clip(np.searchsorted(ys, points2d[:, 1]) - 1, 0, ny - 1)
+    return x_idx, y_idx
+
