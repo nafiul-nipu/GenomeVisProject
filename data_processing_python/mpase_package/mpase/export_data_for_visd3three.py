@@ -385,26 +385,25 @@ def export_membership_json(
     out_dir: str,
     *,
     progress_report: bool = False,
+    report: Optional[Callable] = None,
 ) -> List[str]:
     """
     membership.json:
     {
       "<label>": {
         "points": N,
-        "ids": [...],           # optional: ids_by_label if present
+        "ids": [...],
         "planes": {
           "XY": {
-            "hdr": { "100": [0,1,5,...], "95": [...], ... },
-            "point_fraction": { "100": [...], ... }
+            "pixels": [[x,y], ...],             # per-gene pixel coords (mask space)
+            "hdr": { "100": [0,1,5,...], ... }, # gene indices inside each shape
+            "point_fraction": { ... }
           },
-          "YZ": { ... },
-          "XZ": { ... }
+          ...
         }
       },
       ...
     }
-
-    For each shape, we store the *indices* of points whose projection lies inside the mask.
     """
     _ensure_dir(out_dir)
     membership = {}
@@ -422,20 +421,29 @@ def export_membership_json(
 
         # assume all planes share same N for this label
         # pick any plane in projections
-        any_plane = next(iter(proj.keys()))
-        N = proj[any_plane]["sets"][lab].shape[0]
+        some_plane = next(iter(proj.keys()))
+        N = proj[some_plane]["sets"][lab].shape[0]
         lab_entry["points"] = int(N)
 
         for plane, pdata in proj.items():
             sets2d = pdata["sets"]
             if lab not in sets2d:
                 continue
+
             P2 = np.asarray(sets2d[lab])
             xs, ys = pdata["xs"], pdata["ys"]
+
+            # per-gene pixel indices in THIS plane
             x_idx, y_idx = points_to_pixel_indices(P2, xs, ys)
+            pixels = np.stack([x_idx, y_idx], axis=1).astype(float).tolist()
 
-            plane_entry = {"hdr": {}, "point_fraction": {}}
+            plane_entry = {
+                "pixels": pixels,         # <<< new
+                "hdr": {},
+                "point_fraction": {},
+            }
 
+            # for each variant/level, compute membership by sampling mask[y_idx, x_idx]
             for variant in ("hdr", "point_fraction"):
                 if variant not in shapes:
                     continue
@@ -448,6 +456,7 @@ def export_membership_json(
                     mask = sp.get("mask")
                     if mask is None:
                         continue
+
                     inside = mask[y_idx, x_idx]  # bool [N]
                     idxs = np.nonzero(inside)[0].astype(int).tolist()
                     if idxs:

@@ -219,9 +219,7 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
 
     const vkey = variant === "hdr" ? "hdr" : "point_fraction"; // map pf -> point_fraction
 
-    const byLevel = (planeEntry as any)[vkey] as
-      | Record<string, number[]>
-      | undefined;
+    const byLevel = planeEntry[vkey] as Record<string, number[]> | undefined;
 
     if (!byLevel) return [];
     return byLevel[String(level)] ?? [];
