@@ -1,5 +1,5 @@
-import { useLayoutEffect, useMemo, useRef } from "react";
-import { Object3D, Color, InstancedMesh } from "three";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Object3D, Color, InstancedMesh, Raycaster, Vector2 } from "three";
 import type { GeneSphereViewProps } from "../../types/data_types_interfaces";
 
 // import * as d3 from "d3";
@@ -7,7 +7,7 @@ import { positionPicker } from "../../utilFunctions/positionPicker";
 import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
 import { useAppDispatch } from "../../redux-store/hooks";
 import { setHoveredGene } from "../../redux-store/uiSlice";
-import type { ThreeEvent } from "@react-three/fiber";
+import { useThree, type ThreeEvent } from "@react-three/fiber";
 
 // const colorScale = d3.scaleSequential().interpolator(d3.interpolateReds);
 const object = new Object3D();
@@ -30,6 +30,11 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   const geneSphereViewMount = useRef<boolean>(false);
   const meshRef = useRef<InstancedMesh | null>(null);
 
+  // raycasting state
+  const { camera } = useThree();
+  const [raycaster] = useState(() => new Raycaster());
+  const [mouse, setMouse] = useState<Vector2 | null>(null);
+
   //on mount
   useLayoutEffect(() => {
     // console.log("gene sphere renderer mounted");
@@ -48,36 +53,8 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     if (!meshRef.current) return;
 
     const mesh = meshRef.current;
-    // console.log("gene sphere rendering started");
-
-    // const extent = d3.extent(data, (item) => item.cluster);
-    // const domain: [number, number] = [extent?.[0] ?? 0, extent?.[1] ?? 0];
-    // colorScale.domain([domain[1], domain[0]]);
 
     data.forEach((item, i) => {
-      //   object.scale.set(
-      //     nodeCtl.geneRadius,
-      //     nodeCtl.geneRadius,
-      //     nodeCtl.geneRadius
-      //   );
-      //   const [x, y, z] = positionPicker(item, positionMode);
-      //   object.position.set(x, y, z);
-
-      //   object.updateMatrix();
-      //   mesh.setMatrixAt(i, object.matrix);
-
-      //   // const color = new Color(colorScale(item.cluster) || "#ffffff");
-      //   // console.log(color);
-      //   // console.log(new Color("#ffffff"));
-      //   // mesh.setColorAt(i, new Color("#ffffff"));
-      //   mesh.setColorAt(
-      //     i,
-      //     new Color(colorPaletteSelector(geneColorPickerIdx ?? 0))
-      //   );
-      // });
-      // mesh.instanceMatrix.needsUpdate = true;
-      // mesh.instanceColor!.needsUpdate = true;
-
       const [x, y, z] = positionPicker(item, positionMode);
       const scaleBase = nodeCtl.geneRadius;
       let scale = scaleBase;
@@ -117,14 +94,46 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     hoveredIdx,
   ]);
 
-  const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
-    if (e.instanceId == null) return;
-    dispatch(setHoveredGene({ label, idx: e.instanceId }));
+  // pointer handlers: just track mouse in NDC, like old NodeRenderer
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+
+    const canvas = document.getElementById(label) as HTMLElement | null;
+    if (!canvas) {
+      // If no canvas element is found, clear mouse and hovered gene state.
+      setMouse(null);
+      dispatch(setHoveredGene(null));
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+
+    setMouse(
+      new Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      )
+    );
   };
 
   const handlePointerOut = () => {
+    setMouse(null);
     dispatch(setHoveredGene(null));
   };
+
+  // raycast effect: compute which instance is under the mouse
+  useEffect(() => {
+    if (!meshRef.current || !mouse) return;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(meshRef.current);
+
+    if (intersects.length > 0 && intersects[0].instanceId != null) {
+      const idx = intersects[0].instanceId;
+      dispatch(setHoveredGene({ label, idx }));
+    } else {
+      dispatch(setHoveredGene(null));
+    }
+  }, [mouse, raycaster, camera, dispatch, label]);
 
   return (
     <instancedMesh

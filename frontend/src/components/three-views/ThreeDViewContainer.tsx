@@ -189,6 +189,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
               ref={ref}
               style={{ width: viewWidth, height: viewHeight }}
               className="inline-block rounded-md border border-gray-800 bg-gray-900/40 box-border"
+              id={viewLabels[i]}
             />
           </div>
         ))}

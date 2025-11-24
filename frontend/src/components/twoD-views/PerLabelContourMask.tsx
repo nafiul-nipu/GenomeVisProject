@@ -261,8 +261,6 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
 
   const hoverPoint: Point2D | null = useMemo(() => {
     if (!hovered || hovered.label !== label) return null;
-    if (!highlightIdxs.length) return null;
-    if (!highlightIdxs.includes(hovered.idx)) return null;
 
     const labEntry = membership?.[label];
     if (!labEntry) return null;
@@ -270,12 +268,12 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
     if (!planeEntry) return null;
 
     const pixels = planeEntry.pixels;
-    const pt = pixels[hovered.idx];
-    if (!pt) return null;
+    // safety: check bounds
+    if (!pixels || hovered.idx < 0 || hovered.idx >= pixels.length) return null;
 
-    // pt is [x_idx, y_idx] in mask pixel space, same as contours/mask
+    const pt = pixels[hovered.idx]; // [x_idx, y_idx] in mask pixel coords
     return pt as Point2D;
-  }, [hovered, label, plane, highlightIdxs, membership]);
+  }, [hovered, label, plane, membership]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
