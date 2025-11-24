@@ -246,3 +246,18 @@ export type Edge = { source: number; target: number };
 
 export type Variant = "hdr" | "pf";
 export type Plane = "XY" | "YZ" | "XZ";
+
+export type MembershipVariant = "hdr" | "point_fraction";
+
+export type MembershipState = {
+  [label: string]: {
+    points: number;
+    ids: string[];
+    planes: {
+      [plane in "XY" | "YZ" | "XZ"]?: {
+        hdr: { [level: string]: number[] };
+        point_fraction: { [level: string]: number[] };
+      };
+    };
+  };
+};
