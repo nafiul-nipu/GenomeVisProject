@@ -118,6 +118,18 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     chromosome,
   ]);
 
+  const viewLabels = useMemo(() => {
+    if (condTab === "diff") {
+      const tp = timepoints[timeIdx] ?? "";
+      return [
+        makeKey(tp, beforecode), // chr1_12hrs_untr
+        makeKey(tp, aftercode), // chr1_12hrs_vacv
+      ];
+    }
+    const code = condTab === "before" ? beforecode : aftercode;
+    return timepoints.map((tp) => makeKey(tp, code)); // chr1_12hrs_untr, 18hrs...
+  }, [condTab, timeIdx, timepoints, beforecode, aftercode, chromosome]);
+
   useEffect(() => {
     invalidate();
   }, [viewItems, positionMode]);
@@ -228,6 +240,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
               }}
             />
             <DrawObject
+              label={viewLabels[i]}
               geneColorPickerIdx={i}
               geneData={viewItems[i].geneData ?? []}
               geneEdges={viewItems[i].geneEdges ?? []}

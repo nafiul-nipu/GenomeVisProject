@@ -20,6 +20,8 @@ interface UIState {
   twoDLevel: number; // 100, 99, ...
   twoDCleanBlobs: boolean;
   twoDBlobMinAreaPct: number; // e.g., 5 = keep blobs >= 5% of largest area
+  highlightedGenesByLabel: Record<string, number[]>; // 2D to 3D
+  hoveredGene: { label: string; idx: number } | null; // 3D to 2D
 }
 
 const initialState: UIState = {
@@ -34,6 +36,8 @@ const initialState: UIState = {
   twoDLevel: 100,
   twoDCleanBlobs: false,
   twoDBlobMinAreaPct: 2,
+  highlightedGenesByLabel: {},
+  hoveredGene: null,
 };
 
 // creating slices
@@ -74,6 +78,22 @@ const uiSlice = createSlice({
     setTwoDBlobMinAreaPct(state, action: PayloadAction<number>) {
       state.twoDBlobMinAreaPct = action.payload;
     },
+    setHighlightedGenesForLabel(
+      state,
+      action: PayloadAction<{ label: string; indices: number[] }>
+    ) {
+      const { label, indices } = action.payload;
+      state.highlightedGenesByLabel[label] = indices;
+    },
+    clearHighlightedGenes(state) {
+      state.highlightedGenesByLabel = {};
+    },
+    setHoveredGene(
+      state,
+      action: PayloadAction<{ label: string; idx: number } | null>
+    ) {
+      state.hoveredGene = action.payload;
+    },
   },
 });
 
@@ -89,6 +109,9 @@ export const {
   setTwoDLevel,
   setTwoDCleanBlobs,
   setTwoDBlobMinAreaPct,
+  setHighlightedGenesForLabel,
+  clearHighlightedGenes,
+  setHoveredGene,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

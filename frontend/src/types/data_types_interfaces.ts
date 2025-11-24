@@ -49,6 +49,7 @@ export interface workerToClientMessageType {
   contour_data: Record<string, ContourWrapperType>;
   projectionData: ProjectionResult;
   perLabelBackgroundMaskData: PerLabelBackgroundMask;
+  membership: MembershipState;
 }
 
 export interface messageToWorkerType {
@@ -110,10 +111,13 @@ export interface TubeControl {
 }
 
 export interface GeneSphereViewProps {
+  label: string;
   geneColorPickerIdx?: number;
   data: GeneRowDataType[];
   positionMode: PositionMode;
   nodeCtl: NodeControl;
+  highlightedIdxs?: number[];
+  hoveredIdx?: number | null;
 }
 
 export interface GeneTubeViewProps {
@@ -125,6 +129,7 @@ export interface GeneTubeViewProps {
 }
 
 export interface DrawObjectProps {
+  label: string;
   geneColorPickerIdx?: number;
   geneData: GeneRowDataType[];
   geneEdges: Gene_Edges_Path_Row_Type[];
@@ -261,3 +266,9 @@ export type MembershipState = {
     };
   };
 };
+
+export interface FetchMembershipArgs {
+  speciesName: string;
+  chrName: string;
+  dataInfo?: DataInfoType;
+}

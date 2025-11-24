@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
-import { useAppSelector } from "../../redux-store/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
 import type {
   ContourWrapperType,
   PerLabelBackgroundMask,
@@ -8,9 +8,14 @@ import type {
   Plane,
   Variant,
   PerLabelContourMaskProps,
+  MembershipState,
 } from "../../types/data_types_interfaces";
 import "../../App.css";
 import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
+import {
+  clearHighlightedGenes,
+  setHighlightedGenesForLabel,
+} from "../../redux-store/uiSlice";
 
 function maskToURL(
   mask: number[][],
@@ -185,6 +190,7 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
   maskOpacity = 0.18,
   className,
 }) => {
+  const dispatch = useAppDispatch();
   const { twoDCleanBlobs, twoDBlobMinAreaPct } = useAppSelector((s) => s.ui);
   // Use your real slice paths
   const bgByLabel = useAppSelector(
@@ -197,9 +203,35 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
     (s) =>
       (s.data.data?.contour_data as Record<string, ContourWrapperType>)?.[label]
   );
+  const membership = useAppSelector(
+    (s) => s.data.data?.membership as MembershipState | undefined
+  );
 
-  // console.log(cntByLabel);
-  // console.log(bgByLabel);
+  const hovered = useAppSelector((s) => s.ui.hoveredGene);
+
+  //helper to get indices for this plane
+  const highlightIdxs = useMemo(() => {
+    const labelEntry = membership?.[label];
+    if (!labelEntry) return [] as number[];
+
+    const planeEntry = labelEntry.planes?.[plane];
+    if (!planeEntry) return [];
+
+    const vkey = variant === "hdr" ? "hdr" : "point_fraction"; // map pf -> point_fraction
+
+    const byLevel = (planeEntry as any)[vkey] as
+      | Record<string, number[]>
+      | undefined;
+
+    if (!byLevel) return [];
+    return byLevel[String(level)] ?? [];
+  }, [membership, plane, label, variant, level]);
+
+  const containsHovered = useMemo(() => {
+    if (!hovered || hovered.label !== label) return false;
+    if (!highlightIdxs.length) return false;
+    return highlightIdxs.includes(hovered.idx);
+  }, [hovered, label, highlightIdxs]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -269,13 +301,38 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
         .text(`No mask for ${plane}`);
       return;
     }
+
     draw(svg, mask, cleanedPolys, maskOpacity, strokeColor);
   }, [mask, cleanedPolys, maskOpacity, plane, nx, ny, strokeColor]);
 
   const title = `${plane} · ${label} · ${variant.toUpperCase()} · L${level}`;
 
+  const handleMouseEnter = () => {
+    if (!highlightIdxs.length) return;
+    dispatch(
+      setHighlightedGenesForLabel({
+        label,
+        indices: highlightIdxs,
+      })
+    );
+  };
+
+  const handleMouseLeave = () => {
+    dispatch(clearHighlightedGenes());
+  };
+
+  const outerClass = `${className ?? ""} ${
+    containsHovered
+      ? "ring-2 ring-sky-400 ring-offset-1 ring-offset-gray-900"
+      : ""
+  }`;
+
   return (
-    <div className={className}>
+    <div
+      className={className}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium text-slate-200">{title}</h3>
       </div>
@@ -286,14 +343,16 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
           preserveAspectRatio="xMidYMid meet"
         />
       </div> */}
-      <div className="rounded-lg bg-[#0f1013] border border-gray-800">
-        <div className="w-full h-full p-3">
-          <svg
-            ref={svgRef}
-            className="w-full h-full block"
-            preserveAspectRatio="xMidYMid meet"
-            style={{ overflow: "visible" }}
-          />
+      <div className={outerClass}>
+        <div className="rounded-lg bg-[#0f1013] border border-gray-800">
+          <div className="w-full h-full p-3">
+            <svg
+              ref={svgRef}
+              className="w-full h-full block"
+              preserveAspectRatio="xMidYMid meet"
+              style={{ overflow: "visible" }}
+            />
+          </div>
         </div>
       </div>
     </div>
