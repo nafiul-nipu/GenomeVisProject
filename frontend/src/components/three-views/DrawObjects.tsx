@@ -7,6 +7,7 @@ import { positionPicker } from "../../utilFunctions/positionPicker";
 import { GeneTubeView } from "./GeneTubeView";
 import { useAppSelector } from "../../redux-store/hooks";
 
+const EMPTY_INDICES: number[] = [];
 export const DrawObject: React.FC<DrawObjectProps> = ({
   label,
   geneColorPickerIdx,
@@ -18,7 +19,7 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
   tubeCtl,
 }) => {
   const highlightedIdxs = useAppSelector(
-    (s) => s.ui.highlightedGenesByLabel[label] ?? []
+    (s) => s.ui.highlightedGenesByLabel[label] ?? EMPTY_INDICES
   );
   const hovered = useAppSelector((s) => s.ui.hoveredGene);
   const hoveredIdx = hovered && hovered.label === label ? hovered.idx : null;

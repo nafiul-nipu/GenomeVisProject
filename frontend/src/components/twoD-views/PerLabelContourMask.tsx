@@ -9,6 +9,7 @@ import type {
   Variant,
   PerLabelContourMaskProps,
   MembershipState,
+  Point2D,
 } from "../../types/data_types_interfaces";
 import "../../App.css";
 import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
@@ -127,7 +128,8 @@ function draw(
   mask: MaskMatrix,
   polys: [number, number][][],
   maskAlpha: number,
-  strokeColor: string
+  strokeColor: string,
+  hoverPoint?: Point2D | null
 ) {
   const ny = mask.length,
     nx = mask[0].length;
@@ -178,6 +180,32 @@ function draw(
       .attr("y", 20)
       .attr("fill", "#fff")
       .text("No contour for this selection");
+  }
+
+  // --- hovered gene marker (if provided) ---
+  if (hoverPoint) {
+    const [hx, hy] = hoverPoint;
+
+    // Outer halo
+    g.append("circle")
+      .attr("cx", hx)
+      .attr("cy", hy)
+      .attr("r", 5)
+      .attr("fill", "none")
+      .attr("stroke", "#0ea5e9") // cyan-ish halo
+      .attr("stroke-width", 3)
+      .attr("opacity", 0.6)
+      .attr("vector-effect", "non-scaling-stroke");
+
+    // Solid center dot
+    g.append("circle")
+      .attr("cx", hx)
+      .attr("cy", hy)
+      .attr("r", 2.5)
+      .attr("fill", "#f97316") // orange core
+      .attr("stroke", "#020617")
+      .attr("stroke-width", 1.2)
+      .attr("vector-effect", "non-scaling-stroke");
   }
 }
 
@@ -230,6 +258,24 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
     if (!highlightIdxs.length) return false;
     return highlightIdxs.includes(hovered.idx);
   }, [hovered, label, highlightIdxs]);
+
+  const hoverPoint: Point2D | null = useMemo(() => {
+    if (!hovered || hovered.label !== label) return null;
+    if (!highlightIdxs.length) return null;
+    if (!highlightIdxs.includes(hovered.idx)) return null;
+
+    const labEntry = membership?.[label];
+    if (!labEntry) return null;
+    const planeEntry = labEntry.planes?.[plane];
+    if (!planeEntry) return null;
+
+    const pixels = planeEntry.pixels;
+    const pt = pixels[hovered.idx];
+    if (!pt) return null;
+
+    // pt is [x_idx, y_idx] in mask pixel space, same as contours/mask
+    return pt as Point2D;
+  }, [hovered, label, plane, highlightIdxs, membership]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -300,8 +346,8 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
       return;
     }
 
-    draw(svg, mask, cleanedPolys, maskOpacity, strokeColor);
-  }, [mask, cleanedPolys, maskOpacity, plane, nx, ny, strokeColor]);
+    draw(svg, mask, cleanedPolys, maskOpacity, strokeColor, hoverPoint);
+  }, [mask, cleanedPolys, maskOpacity, plane, nx, ny, strokeColor, hoverPoint]);
 
   const title = `${plane} · ${label} · ${variant.toUpperCase()} · L${level}`;
 

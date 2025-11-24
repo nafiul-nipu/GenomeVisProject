@@ -254,17 +254,22 @@ export type Plane = "XY" | "YZ" | "XZ";
 
 export type MembershipVariant = "hdr" | "point_fraction";
 
-export type MembershipState = {
-  [label: string]: {
-    points: number;
-    ids: string[];
-    planes: {
-      [plane in "XY" | "YZ" | "XZ"]?: {
-        hdr: { [level: string]: number[] };
-        point_fraction: { [level: string]: number[] };
-      };
-    };
+export type MembershipPlaneEntry = {
+  pixels: [number, number][]; // length N, a point per gene
+  hdr: Record<string, number[]>;
+  point_fraction: Record<string, number[]>;
+};
+
+export type MembershipLabelEntry = {
+  points: number;
+  ids: string[];
+  planes: {
+    [plane in Plane]?: MembershipPlaneEntry;
   };
+};
+
+export type MembershipState = {
+  [label: string]: MembershipLabelEntry;
 };
 
 export interface FetchMembershipArgs {
