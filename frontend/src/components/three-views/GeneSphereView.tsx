@@ -14,6 +14,7 @@ const object = new Object3D();
 
 export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   label,
+  viewRef,
   geneColorPickerIdx,
   data,
   positionMode,
@@ -98,14 +99,13 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
 
-    const canvas = document.getElementById(label) as HTMLElement | null;
-    if (!canvas) {
-      // If no canvas element is found, clear mouse and hovered gene state.
+    const el = viewRef.current;
+    if (!el) {
       setMouse(null);
       dispatch(setHoveredGene(null));
       return;
     }
-    const rect = canvas.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
 
     setMouse(
       new Vector2(

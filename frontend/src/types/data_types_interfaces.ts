@@ -112,6 +112,7 @@ export interface TubeControl {
 
 export interface GeneSphereViewProps {
   label: string;
+  viewRef: React.RefObject<HTMLDivElement>;
   geneColorPickerIdx?: number;
   data: GeneRowDataType[];
   positionMode: PositionMode;
@@ -130,6 +131,7 @@ export interface GeneTubeViewProps {
 
 export interface DrawObjectProps {
   label: string;
+  viewRef: React.RefObject<HTMLDivElement>;
   geneColorPickerIdx?: number;
   geneData: GeneRowDataType[];
   geneEdges: Gene_Edges_Path_Row_Type[];

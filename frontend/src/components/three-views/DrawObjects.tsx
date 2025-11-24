@@ -10,6 +10,7 @@ import { useAppSelector } from "../../redux-store/hooks";
 const EMPTY_INDICES: number[] = [];
 export const DrawObject: React.FC<DrawObjectProps> = ({
   label,
+  viewRef,
   geneColorPickerIdx,
   geneData,
   geneEdges,
@@ -74,6 +75,7 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
     <group ref={groupRef}>
       <GeneSphereView
         label={label}
+        viewRef={viewRef}
         geneColorPickerIdx={geneColorPickerIdx}
         data={geneData}
         positionMode={positionMode}
