@@ -2,26 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   defaultLightSettings,
+  type CameraState,
   type CondTab,
   type LightSettings,
+  type UIState,
   type Variant,
 } from "../types/data_types_interfaces";
-
-interface UIState {
-  species: string;
-  chromosome: string;
-  selectedGenes: string[];
-  condTab: CondTab;
-  timeIdx: number;
-  toggleLightGear: boolean;
-  lightSettings: LightSettings;
-  twoDVariant: Variant; // "hdr" | "pf"
-  twoDLevel: number; // 100, 99, ...
-  twoDCleanBlobs: boolean;
-  twoDBlobMinAreaPct: number; // e.g., 5 = keep blobs >= 5% of largest area
-  highlightedGenesByLabel: Record<string, number[]>; // 2D to 3D
-  hoveredGene: { label: string; idx: number } | null; // 3D to 2D
-}
 
 const initialState: UIState = {
   species: "green_monkey",
@@ -37,6 +23,10 @@ const initialState: UIState = {
   twoDBlobMinAreaPct: 2,
   highlightedGenesByLabel: {},
   hoveredGene: null,
+  camera: {
+    position: [10, 5, 75],
+    target: [0, 0, 0],
+  },
 };
 
 // creating slices
@@ -93,6 +83,21 @@ const uiSlice = createSlice({
     ) {
       state.hoveredGene = action.payload;
     },
+    // CAMERA SYNC
+    setCameraState(state, action: PayloadAction<CameraState>) {
+      state.camera = action.payload;
+    },
+
+    // SNAPSHOT LOAD
+    loadSnapshot(state, action: PayloadAction<Partial<UIState>>) {
+      // shallow merge: any missing fields keep current values
+      return { ...state, ...action.payload };
+    },
+
+    // RESET TO DEFAULT
+    resetUI() {
+      return initialState;
+    },
   },
 });
 
@@ -111,6 +116,9 @@ export const {
   setHighlightedGenesForLabel,
   clearHighlightedGenes,
   setHoveredGene,
+  setCameraState,
+  loadSnapshot,
+  resetUI,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

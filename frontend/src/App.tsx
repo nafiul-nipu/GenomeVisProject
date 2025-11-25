@@ -14,14 +14,20 @@ import { TwoDContainer } from "./components/twoD-views/TwoDContainer";
 import { TwoDControls } from "./components/twoD-views/TwoDControls";
 
 import * as htmlToImage from "html-to-image";
+import { loadSnapshot, resetUI } from "./redux-store/uiSlice";
 
 const meta_data_typed = meta_data as DataInfoType;
 
 export default function App() {
   const mount = useRef<boolean | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
+
+  // NEW: for loading snapshot JSON
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const dispatch = useAppDispatch();
   const { species, chromosome } = useAppSelector((s) => s.ui);
+  const ui = useAppSelector((s) => s.ui); // full ui state for saving snapshot
   const status = useAppSelector((s) => s.data.status);
 
   useEffect(() => {
@@ -156,6 +162,64 @@ export default function App() {
     }
   };
 
+  const handleSaveSnapshot = () => {
+    try {
+      const snapshot = {
+        version: 1,
+        createdAt: new Date().toISOString(),
+        ui,
+      };
+
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      a.download = `GenomeVis_snapshot_${species}_${chromosome}_${ts}.json`;
+      a.href = url;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Save snapshot failed:", err);
+    }
+  };
+
+  const handleLoadSnapshotClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleLoadSnapshotChange: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = reader.result as string;
+        const parsed = JSON.parse(text);
+        const uiPayload = parsed.ui ?? parsed; // allow raw UI or wrapped
+        if (!uiPayload) {
+          console.warn("Snapshot file missing `ui` field");
+          return;
+        }
+        dispatch(loadSnapshot(uiPayload));
+      } catch (err) {
+        console.error("Load snapshot failed:", err);
+      } finally {
+        // reset the input so the same file can be picked again
+        e.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleResetView = () => {
+    dispatch(resetUI());
+  };
+
   return (
     <div
       ref={exportRef}
@@ -169,14 +233,46 @@ export default function App() {
           <SpeciesDropdown meta_data={meta_data_typed} />
           <ChromosomeDropdown meta_data={meta_data_typed} />
           <GeneDropdown />
-          {/* Screenshot button on the right */}
-          <div className="ml-auto">
+          {/* Snapshot + Screenshot buttons on the right */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Primary group */}
             <button
               onClick={handleExportPNG}
-              className="text-xs px-3 py-1.5 rounded-md border border-sky-500/60 text-sky-200 hover:bg-sky-500/10 hover:border-sky-400 transition"
+              className="text-xs px-3 py-1.5 rounded-md border border-sky-500/70 text-sky-100 hover:bg-sky-500/15 hover:border-sky-400 transition"
             >
-              Export
+              Export PNG
             </button>
+
+            <button
+              onClick={handleSaveSnapshot}
+              className="text-xs px-3 py-1.5 rounded-md border border-sky-500/70 text-sky-100 hover:bg-sky-500/15 hover:border-sky-400 transition"
+            >
+              Save Snapshot
+            </button>
+
+            <button
+              onClick={handleLoadSnapshotClick}
+              className="text-xs px-3 py-1.5 rounded-md border border-sky-500/70 text-sky-100 hover:bg-sky-500/15 hover:border-sky-400 transition"
+            >
+              Load Snapshot
+            </button>
+
+            {/* Danger / destructive */}
+            <button
+              onClick={handleResetView}
+              className="text-xs px-3 py-1.5 rounded-md border border-red-500/70 text-red-100 hover:bg-red-500/15 hover:border-red-400 transition"
+            >
+              Reset View
+            </button>
+
+            {/* hidden file input for loading snapshot */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json"
+              className="hidden"
+              onChange={handleLoadSnapshotChange}
+            />
           </div>
         </div>
       </header>

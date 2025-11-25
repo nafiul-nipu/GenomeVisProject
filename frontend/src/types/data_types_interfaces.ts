@@ -281,3 +281,31 @@ export interface FetchMembershipArgs {
 }
 
 export type CondTab = "before" | "after" | "diff";
+
+export interface CameraState {
+  position: Vec3;
+  target: Vec3;
+}
+
+export interface UIState {
+  species: string;
+  chromosome: string;
+  selectedGenes: string[];
+  condTab: CondTab;
+  timeIdx: number;
+  toggleLightGear: boolean;
+  lightSettings: LightSettings;
+  twoDVariant: Variant; // "hdr" | "pf"
+  twoDLevel: number; // 100, 99, ...
+  twoDCleanBlobs: boolean;
+  twoDBlobMinAreaPct: number; // e.g., 5 = keep blobs >= 5% of largest area
+  highlightedGenesByLabel: Record<string, number[]>; // 2D to 3D
+  hoveredGene: { label: string; idx: number } | null; // 3D to 2D
+  camera: CameraState;
+}
+
+export interface DataState {
+  data: workerToClientMessageType | null;
+  status: "idle" | "loading" | "success" | "failed";
+  error?: string;
+}

@@ -5,14 +5,15 @@ import React, {
   useEffect,
   useLayoutEffect,
 } from "react";
-import { Canvas, invalidate } from "@react-three/fiber";
+import { Canvas, invalidate, useThree } from "@react-three/fiber";
 import {
   AdaptiveDpr,
   AdaptiveEvents,
   OrbitControls,
   View,
 } from "@react-three/drei";
-import { useAppSelector } from "../../redux-store/hooks";
+import { useAppSelector, useAppDispatch } from "../../redux-store/hooks";
+import { setCameraState } from "../../redux-store/uiSlice";
 import { Lights } from "./Lights";
 import {
   type DataInfoType,
@@ -24,11 +25,55 @@ import { CornerAxes } from "./CornerAxes";
 
 type Props = { meta_data_typed: DataInfoType };
 
+const CameraStateSync: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const cameraState = useAppSelector((s) => s.ui.camera);
+  const camera = useThree((state) => state.camera);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const controls = useThree((state) => state.controls) as any;
+
+  // Push camera → Redux whenever user moves it
+  useEffect(() => {
+    if (!controls) return;
+
+    const handleChange = () => {
+      const pos = camera.position;
+      const tgt = controls.target;
+      dispatch(
+        setCameraState({
+          position: [pos.x, pos.y, pos.z],
+          target: [tgt.x, tgt.y, tgt.z],
+        })
+      );
+    };
+
+    controls.addEventListener("change", handleChange);
+    return () => controls.removeEventListener("change", handleChange);
+  }, [camera, controls, dispatch]);
+
+  // Apply Redux → camera whenever snapshot loads / state changes
+  useEffect(() => {
+    if (!cameraState) return;
+    const [px, py, pz] = cameraState.position;
+    const [tx, ty, tz] = cameraState.target;
+
+    camera.position.set(px, py, pz);
+    if (controls) {
+      controls.target.set(tx, ty, tz);
+      controls.update();
+    }
+  }, [cameraState, camera, controls]);
+
+  return null;
+};
+
 const titlesRow = 18; // label line-height
 const gapX = 8; // matches gap-2
 
 export function ThreeDViewContainer({ meta_data_typed }: Props) {
   const { condTab, timeIdx, species, chromosome } = useAppSelector((s) => s.ui);
+
+  const cameraState = useAppSelector((s) => s.ui.camera);
 
   // which position to use for genes
   const [positionMode] = useState<PositionMode>("aligned");
@@ -205,9 +250,10 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
         className="absolute inset-0 z-0"
         frameloop="demand"
         performance={{ min: 0.4 }}
-        camera={{ position: [10, 5, 75], near: 0.1 }}
+        camera={{ position: cameraState.position, near: 0.1 }}
         gl={{ preserveDrawingBuffer: true }} // remove this and screenshot component if it hampers performance
       >
+        <CameraStateSync />
         {viewRefs.map((ref, i) => (
           <View
             key={i}

@@ -4,16 +4,11 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type {
   workerToClientMessageType,
   DataInfoType,
+  DataState,
 } from "../types/data_types_interfaces";
 
 import type { RootState } from "./store";
 import { requestData } from "../worker/workerService";
-
-interface DataState {
-  data: workerToClientMessageType | null;
-  status: "idle" | "loading" | "success" | "failed";
-  error?: string;
-}
 
 const initialState: DataState = {
   data: null,
