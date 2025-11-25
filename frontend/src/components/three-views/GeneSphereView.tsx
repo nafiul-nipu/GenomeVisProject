@@ -5,7 +5,7 @@ import type { GeneSphereViewProps } from "../../types/data_types_interfaces";
 // import * as d3 from "d3";
 import { positionPicker } from "../../utilFunctions/positionPicker";
 import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
-import { useAppDispatch } from "../../redux-store/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
 import { setHoveredGene } from "../../redux-store/uiSlice";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 
@@ -23,10 +23,24 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   hoveredIdx = null,
 }) => {
   const dispatch = useAppDispatch();
-  const highlightset = useMemo(
-    () => new Set(highlightedIdxs),
-    [highlightedIdxs]
-  );
+  const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
+
+  // indices to highlight:
+  // - ones coming from 2D (highlightedIdxs)
+  // - plus any whose gene_name is in selectedGenes from dropdown
+  const highlightset = useMemo(() => {
+    const set = new Set<number>(highlightedIdxs);
+
+    if (selectedGenes.length) {
+      data.forEach((item, idx) => {
+        if (selectedGenes.includes(item.gene_name)) {
+          set.add(idx);
+        }
+      });
+    }
+
+    return set;
+  }, [highlightedIdxs, selectedGenes, data]);
   // console.log(data);
   const geneSphereViewMount = useRef<boolean>(false);
   const meshRef = useRef<InstancedMesh | null>(null);
