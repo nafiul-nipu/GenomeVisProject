@@ -63,7 +63,7 @@ export default function App() {
     if (!panelNode) return;
 
     try {
-      // 1) Snapshot the whole app (nav + 3D + 2D)
+      // Snapshot the whole app (nav + 3D + 2D)
       const pixelRatio = 2.5; // nice and crisp
       const panelDataUrl = await htmlToImage.toPng(panelNode, {
         cacheBust: true,
@@ -71,7 +71,7 @@ export default function App() {
         backgroundColor: "#020617", // same as bg-gray-950, kills transparency
       });
 
-      // 2) Find the 3D canvas and snapshot it
+      //Find the 3D canvas and snapshot it
       const threeRoot = document.getElementById("three-panel-root");
       const threeCanvas = threeRoot?.querySelector(
         "canvas"
@@ -89,7 +89,7 @@ export default function App() {
 
       const threeDataUrl = threeCanvas.toDataURL("image/png");
 
-      // 3) Load both images
+      //Load both images
       const loadImage = (src: string) =>
         new Promise<HTMLImageElement>((resolve, reject) => {
           const img = new Image();
@@ -103,7 +103,7 @@ export default function App() {
         loadImage(threeDataUrl),
       ]);
 
-      // 4) Composite into one canvas
+      //Composite into one canvas
       const rectPanel = panelNode.getBoundingClientRect();
       const rectThree = threeCanvas.getBoundingClientRect();
 
@@ -144,7 +144,7 @@ export default function App() {
         drawHeight
       );
 
-      // 5) Export final PNG
+      // Export final PNG
       const finalUrl = exportCanvas.toDataURL("image/png");
       const link = document.createElement("a");
       const ts = new Date().toISOString().replace(/[:.]/g, "-");
