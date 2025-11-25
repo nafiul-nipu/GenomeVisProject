@@ -176,7 +176,11 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   } = useLevaUIControls();
 
   return (
-    <div ref={hostRef} className="relative w-full h-full overflow-hidden">
+    <div
+      ref={hostRef}
+      className="relative w-full h-full overflow-hidden"
+      id="three-panel-root"
+    >
       {/* Titles + target divs */}
       <div
         ref={tracksWrapRef}
@@ -202,6 +206,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
         frameloop="demand"
         performance={{ min: 0.4 }}
         camera={{ position: [10, 5, 75], near: 0.1 }}
+        gl={{ preserveDrawingBuffer: true }} // remove this and screenshot component if it hampers performance
       >
         {viewRefs.map((ref, i) => (
           <View

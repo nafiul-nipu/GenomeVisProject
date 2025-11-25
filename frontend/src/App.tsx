@@ -13,10 +13,13 @@ import { ThreeDViewContainer } from "./components/three-views/ThreeDViewContaine
 import { TwoDContainer } from "./components/twoD-views/TwoDContainer";
 import { TwoDControls } from "./components/twoD-views/TwoDControls";
 
+import * as htmlToImage from "html-to-image";
+
 const meta_data_typed = meta_data as DataInfoType;
 
 export default function App() {
   const mount = useRef<boolean | null>(null);
+  const exportRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const { species, chromosome } = useAppSelector((s) => s.ui);
   const status = useAppSelector((s) => s.data.status);
@@ -55,8 +58,109 @@ export default function App() {
     // );
   }, [dispatch, species, chromosome]);
 
+  const handleExportPNG = async () => {
+    const panelNode = exportRef.current;
+    if (!panelNode) return;
+
+    try {
+      // 1) Snapshot the whole app (nav + 3D + 2D)
+      const pixelRatio = 2.5; // nice and crisp
+      const panelDataUrl = await htmlToImage.toPng(panelNode, {
+        cacheBust: true,
+        pixelRatio,
+        backgroundColor: "#020617", // same as bg-gray-950, kills transparency
+      });
+
+      // 2) Find the 3D canvas and snapshot it
+      const threeRoot = document.getElementById("three-panel-root");
+      const threeCanvas = threeRoot?.querySelector(
+        "canvas"
+      ) as HTMLCanvasElement | null;
+
+      if (!threeRoot || !threeCanvas) {
+        // Fallback: just download the HTML snapshot
+        const link = document.createElement("a");
+        const ts = new Date().toISOString().replace(/[:.]/g, "-");
+        link.download = `GenomeVis_panel_${species}_${chromosome}_${ts}.png`;
+        link.href = panelDataUrl;
+        link.click();
+        return;
+      }
+
+      const threeDataUrl = threeCanvas.toDataURL("image/png");
+
+      // 3) Load both images
+      const loadImage = (src: string) =>
+        new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+
+      const [panelImg, threeImg] = await Promise.all([
+        loadImage(panelDataUrl),
+        loadImage(threeDataUrl),
+      ]);
+
+      // 4) Composite into one canvas
+      const rectPanel = panelNode.getBoundingClientRect();
+      const rectThree = threeCanvas.getBoundingClientRect();
+
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = panelImg.width;
+      exportCanvas.height = panelImg.height;
+      const ctx = exportCanvas.getContext("2d");
+      if (!ctx) return;
+
+      // Solid background to ensure no transparency
+      ctx.fillStyle = "#020617";
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+      // Scale factor from CSS px → exported image px
+      const scaleX = exportCanvas.width / rectPanel.width;
+      const scaleY = exportCanvas.height / rectPanel.height;
+      const scale = (scaleX + scaleY) / 2;
+
+      // Where the 3D canvas sits relative to the whole app
+      const offsetX = (rectThree.left - rectPanel.left) * scale;
+      const offsetY = (rectThree.top - rectPanel.top) * scale;
+      const drawWidth = rectThree.width * scale;
+      const drawHeight = rectThree.height * scale;
+
+      // Draw HTML FIRST (nav + panels)
+      ctx.drawImage(panelImg, 0, 0);
+
+      // Then draw 3D screenshot ON TOP, just in its area
+      ctx.drawImage(
+        threeImg,
+        0,
+        0,
+        threeImg.width,
+        threeImg.height,
+        offsetX,
+        offsetY,
+        drawWidth,
+        drawHeight
+      );
+
+      // 5) Export final PNG
+      const finalUrl = exportCanvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-");
+      link.download = `GenomeVis_panel_${species}_${chromosome}_${ts}.png`;
+      link.href = finalUrl;
+      link.click();
+    } catch (err) {
+      console.error("Export PNG failed:", err);
+    }
+  };
+
   return (
-    <div className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden">
+    <div
+      ref={exportRef}
+      className="w-screen h-screen flex flex-col bg-gray-950 text-gray-100 overflow-hidden"
+    >
       {/* NAV (top) */}
       {/* <header className="h-14 flex-shrink-0 border-b border-gray-800/60 bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:bg-gray-900/40"> */}
       <header className="relative z-50 h-14 flex-shrink-0 border-b border-gray-800/60 bg-gray-900/70 backdrop-blur supports-[backdrop-filter]:bg-gray-900/40 overflow-visible">
@@ -65,6 +169,15 @@ export default function App() {
           <SpeciesDropdown meta_data={meta_data_typed} />
           <ChromosomeDropdown meta_data={meta_data_typed} />
           <GeneDropdown />
+          {/* Screenshot button on the right */}
+          <div className="ml-auto">
+            <button
+              onClick={handleExportPNG}
+              className="text-xs px-3 py-1.5 rounded-md border border-sky-500/60 text-sky-200 hover:bg-sky-500/10 hover:border-sky-400 transition"
+            >
+              Export
+            </button>
+          </div>
         </div>
       </header>
 
