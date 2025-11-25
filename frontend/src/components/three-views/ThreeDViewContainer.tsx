@@ -242,7 +242,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
             />
             <DrawObject
               label={viewLabels[i]}
-              viewRef={ref}
+              viewRef={ref as React.RefObject<HTMLDivElement>}
               geneColorPickerIdx={i}
               geneData={viewItems[i].geneData ?? []}
               geneEdges={viewItems[i].geneEdges ?? []}
