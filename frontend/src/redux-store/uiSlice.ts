@@ -2,11 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   defaultLightSettings,
+  type CondTab,
   type LightSettings,
   type Variant,
 } from "../types/data_types_interfaces";
-
-type CondTab = "before" | "after" | "diff";
 
 interface UIState {
   species: string;

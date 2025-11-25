@@ -279,3 +279,5 @@ export interface FetchMembershipArgs {
   chrName: string;
   dataInfo?: DataInfoType;
 }
+
+export type CondTab = "before" | "after" | "diff";
