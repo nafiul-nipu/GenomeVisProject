@@ -27,9 +27,13 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   const dispatch = useAppDispatch();
   const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
 
-  const geneColorMode = useAppSelector((s) => s.ui.geneColorMode);
   const temporalByGeneName =
     useAppSelector((s) => s.data.data?.temporalTrendData.byGeneName) ?? {};
+
+  // console.log(temporalByGeneName);
+
+  const temporalFilter = useAppSelector((s) => s.ui.temporalClassFilter);
+  // console.log(temporalFilter);
 
   // indices to highlight:
   // - ones coming from 2D (highlightedIdxs)
@@ -47,6 +51,8 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 
     return set;
   }, [highlightedIdxs, selectedGenes, data]);
+
+  // console.log(highlightset);
   // console.log(data);
   const geneSphereViewMount = useRef<boolean>(false);
   const meshRef = useRef<InstancedMesh | null>(null);
@@ -97,10 +103,18 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 
       let baseColorHex: string = colorPaletteSelector(geneColorPickerIdx ?? 0);
 
-      if (geneColorMode === "temporalAgreement") {
-        const cls =
-          temporalByGeneName[item.gene_name]?.agreement_class ?? "stable";
-        baseColorHex = AGREEMENT_COLORS[cls] ?? AGREEMENT_COLORS["stable"];
+      const cls = temporalByGeneName[item.gene_name]?.agreement_class;
+
+      if (temporalFilter.length === 0) {
+        baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
+      } else if (!cls && temporalFilter.includes("not_expressed")) {
+        baseColorHex = "#f97316"; // no_temporal / not_expressed
+      } else if (temporalFilter.includes(cls)) {
+        baseColorHex =
+          AGREEMENT_COLORS[cls] ??
+          colorPaletteSelector(geneColorPickerIdx ?? 0);
+      } else {
+        baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
       }
 
       const baseColor = new Color(baseColorHex);
@@ -124,6 +138,8 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     geneColorPickerIdx,
     highlightset,
     hoveredIdx,
+    temporalFilter,
+    temporalByGeneName,
   ]);
 
   // pointer handlers: just track mouse in NDC, like old NodeRenderer

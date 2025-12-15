@@ -28,7 +28,6 @@ const initialState: UIState = {
     position: [10, 5, 75],
     target: [0, 0, 0],
   },
-  geneColorMode: "viewPalette",
   temporalClassFilter: [],
 };
 
@@ -101,12 +100,6 @@ const uiSlice = createSlice({
     resetUI() {
       return initialState;
     },
-    setGeneColorMode(
-      state,
-      action: PayloadAction<"viewPalette" | "temporalAgreement">
-    ) {
-      state.geneColorMode = action.payload;
-    },
     setTemporalClassFilter(state, action: PayloadAction<AgreementClass[]>) {
       state.temporalClassFilter = action.payload;
     },
@@ -134,7 +127,6 @@ export const {
   setCameraState,
   loadSnapshot,
   resetUI,
-  setGeneColorMode,
   setTemporalClassFilter,
   clearTemporalClassFilter,
 } = uiSlice.actions;

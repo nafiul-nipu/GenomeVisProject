@@ -22,7 +22,6 @@ import {
 import { DrawObject } from "./DrawObjects";
 import { useLevaUIControls } from "./useLevaUIControls";
 import { CornerAxes } from "./CornerAxes";
-import { TemporalHighlighter } from "./TemporalHighlighter";
 
 type Props = { meta_data_typed: DataInfoType };
 
@@ -227,7 +226,6 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
       className="relative w-full h-full overflow-hidden"
       id="three-panel-root"
     >
-      <TemporalHighlighter viewLabels={viewLabels as unknown as string[]} />
       {/* Titles + target divs */}
       <div
         ref={tracksWrapRef}

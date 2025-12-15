@@ -13,6 +13,7 @@ const ALL: AgreementClass[] = [
   "expression_only",
   "accessibility_only",
   "stable",
+  "not_expressed",
 ];
 
 export function TemporalFilterControls() {
