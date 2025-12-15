@@ -304,6 +304,7 @@ export interface UIState {
   hoveredGene: { label: string; idx: number } | null; // 3D to 2D
   camera: CameraState;
   geneColorMode: GeneColorMode;
+  temporalClassFilter: AgreementClass[]; // empty = no filter
 }
 
 export interface DataState {

@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   defaultLightSettings,
+  type AgreementClass,
   type CameraState,
   type CondTab,
   type LightSettings,
@@ -28,6 +29,7 @@ const initialState: UIState = {
     target: [0, 0, 0],
   },
   geneColorMode: "viewPalette",
+  temporalClassFilter: [],
 };
 
 // creating slices
@@ -105,6 +107,12 @@ const uiSlice = createSlice({
     ) {
       state.geneColorMode = action.payload;
     },
+    setTemporalClassFilter(state, action: PayloadAction<AgreementClass[]>) {
+      state.temporalClassFilter = action.payload;
+    },
+    clearTemporalClassFilter(state) {
+      state.temporalClassFilter = [];
+    },
   },
 });
 
@@ -127,6 +135,8 @@ export const {
   loadSnapshot,
   resetUI,
   setGeneColorMode,
+  setTemporalClassFilter,
+  clearTemporalClassFilter,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

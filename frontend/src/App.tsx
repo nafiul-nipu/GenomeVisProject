@@ -15,6 +15,7 @@ import { TwoDControls } from "./components/twoD-views/TwoDControls";
 
 import * as htmlToImage from "html-to-image";
 import { loadSnapshot, resetUI } from "./redux-store/uiSlice";
+import { TemporalFilterControls } from "./components/dropdowns/TemporalFilterControls";
 
 const meta_data_typed = meta_data as DataInfoType;
 
@@ -282,6 +283,7 @@ export default function App() {
         <div className="h-full rounded-2xl border border-gray-800 bg-gray-900/40 p-3 shadow-inner flex flex-col min-h-0">
           <div className="mb-2">
             <ConditionTabs meta_data_typed={meta_data_typed} />
+            <TemporalFilterControls />
           </div>
 
           <div className="flex-1 rounded-xl bg-gray-800/40 relative overflow-hidden min-h-0">
