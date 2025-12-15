@@ -4,6 +4,8 @@
 
 (Depends on having node.js installed, version >=18.0) Last tested on v22.13.1
 (if a mac user, recommend using the Node Version Manager (nvm) to assist with proper versioning)
+.nvmrc file contains the current node version this project was tested.
+go to `frontend` and run `nvm install`
 
 1. Create a .env.local file in the root directory of the project
 2. Add the following line to the file: `VITE_PUBLIC_DATA_PATH=/dataroot/`
@@ -15,6 +17,12 @@
 ### How to run the data processing
 
 (python version == 3.9.6)
+use pyenv for proper versioning
+.python-version file contains the current python version for this project
+
+go to `data_processing_python` and run
+`pyenv install --skip-existing` and then `pyenv local`
+verify `pyenv version` and `python --version`
 
 1. Go to `data_processing_python` folder
 2. Create a virtual environment with `python3 -m venv venv`
