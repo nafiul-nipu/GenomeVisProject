@@ -10,7 +10,7 @@
 3. Create a `dataroot` folder inside `public` folder and copy the data inside it
 4. Run `npm install` to install all dependencies
 5. Run `npm run dev` to start the frontend
-6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
 
 ### How to run the data processing
 
