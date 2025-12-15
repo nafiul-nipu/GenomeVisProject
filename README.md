@@ -2,7 +2,7 @@
 
 ### How to run the frontend
 
-(Depends on having node.js installed, version >=18.0)
+(Depends on having node.js installed, version >=18.0) Last tested on v22.13.1
 (if a mac user, recommend using the Node Version Manager (nvm) to assist with proper versioning)
 
 1. Create a .env.local file in the root directory of the project
