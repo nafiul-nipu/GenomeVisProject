@@ -9,6 +9,8 @@ import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
 import { setHoveredGene } from "../../redux-store/uiSlice";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 
+import { AGREEMENT_COLORS } from "../../utilFunctions/colorForViews";
+
 // const colorScale = d3.scaleSequential().interpolator(d3.interpolateReds);
 const object = new Object3D();
 
@@ -24,6 +26,10 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
+
+  const geneColorMode = useAppSelector((s) => s.ui.geneColorMode);
+  const temporalByGeneName =
+    useAppSelector((s) => s.data.data?.temporalTrendData.byGeneName) ?? {};
 
   // indices to highlight:
   // - ones coming from 2D (highlightedIdxs)
@@ -85,9 +91,20 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
       object.updateMatrix();
       mesh.setMatrixAt(i, object.matrix);
 
-      const baseColor = new Color(
-        colorPaletteSelector(geneColorPickerIdx ?? 0)
-      );
+      // const baseColor = new Color(
+      //   colorPaletteSelector(geneColorPickerIdx ?? 0)
+      // );
+
+      let baseColorHex: string = colorPaletteSelector(geneColorPickerIdx ?? 0);
+
+      if (geneColorMode === "temporalAgreement") {
+        const cls =
+          temporalByGeneName[item.gene_name]?.agreement_class ?? "stable";
+        baseColorHex = AGREEMENT_COLORS[cls] ?? AGREEMENT_COLORS["stable"];
+      }
+
+      const baseColor = new Color(baseColorHex);
+
       const highlightColor = new Color("#f97316");
 
       mesh.setColorAt(

@@ -303,6 +303,7 @@ export interface UIState {
   highlightedGenesByLabel: Record<string, number[]>; // 2D to 3D
   hoveredGene: { label: string; idx: number } | null; // 3D to 2D
   camera: CameraState;
+  geneColorMode: GeneColorMode;
 }
 
 export interface DataState {
@@ -354,3 +355,5 @@ export interface TemporalTrendData {
   rows: TemporalTrendRow[];
   byGeneName: Record<string, TemporalTrendRow>;
 }
+
+export type GeneColorMode = "viewPalette" | "temporalAgreement";

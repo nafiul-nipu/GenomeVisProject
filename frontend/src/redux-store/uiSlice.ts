@@ -27,6 +27,7 @@ const initialState: UIState = {
     position: [10, 5, 75],
     target: [0, 0, 0],
   },
+  geneColorMode: "viewPalette",
 };
 
 // creating slices
@@ -98,6 +99,12 @@ const uiSlice = createSlice({
     resetUI() {
       return initialState;
     },
+    setGeneColorMode(
+      state,
+      action: PayloadAction<"viewPalette" | "temporalAgreement">
+    ) {
+      state.geneColorMode = action.payload;
+    },
   },
 });
 
@@ -119,6 +126,7 @@ export const {
   setCameraState,
   loadSnapshot,
   resetUI,
+  setGeneColorMode,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
