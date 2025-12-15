@@ -6,11 +6,11 @@ export const colorPaletteSelector = (idx: number): string => {
 };
 
 export const AGREEMENT_COLORS: Record<string, string> = {
-  expr_acc_up: "#2ca02c",
-  expr_acc_down: "#d62728",
-  expression_only: "#1f77b4",
-  accessibility_only: "#17becf",
-  conflict: "#ff7f0e",
+  expr_acc_up: "#a02c2cf8",
+  expr_acc_down: "#c1bcbbff",
+  expression_only: "#1111deff",
+  accessibility_only: "#c1e469ff",
+  conflict: "#c7819dff",
   mixed: "#9467bd",
   stable: "#7f7f7f",
 };

@@ -11,6 +11,8 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 
 import { AGREEMENT_COLORS } from "../../utilFunctions/colorForViews";
 
+const EMPTY_INDICES: number[] = [];
+
 // const colorScale = d3.scaleSequential().interpolator(d3.interpolateReds);
 const object = new Object3D();
 
@@ -21,10 +23,13 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
   data,
   positionMode,
   nodeCtl,
-  highlightedIdxs = [],
   hoveredIdx = null,
 }) => {
   const dispatch = useAppDispatch();
+  const highlightedIdxs = useAppSelector(
+    (s) => s.ui.highlightedGenesByLabel[label] ?? EMPTY_INDICES
+  );
+
   const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
 
   const temporalByGeneName =
