@@ -50,6 +50,7 @@ export interface workerToClientMessageType {
   projectionData: ProjectionResult;
   perLabelBackgroundMaskData: PerLabelBackgroundMask;
   membership: MembershipState;
+  temporalTrendData: TemporalTrendData;
 }
 
 export interface messageToWorkerType {
@@ -308,4 +309,48 @@ export interface DataState {
   data: workerToClientMessageType | null;
   status: "idle" | "loading" | "success" | "failed";
   error?: string;
+}
+
+// Temporal Trend Types
+export type AgreementClass =
+  | "mixed"
+  | "conflict"
+  | "expr_acc_up"
+  | "expr_acc_down"
+  | "accessibility_only"
+  | "expression_only"
+  | "stable";
+
+export interface TemporalTrendRowRaw {
+  gene_id: string;
+  gene_name: string;
+  agreement_class: AgreementClass;
+
+  increase?: number;
+  decrease?: number;
+  neutral?: number;
+
+  // Raw JSON has many extra columns. Keep it typed-safe without `any`.
+  [key: string]: unknown;
+}
+
+export interface TemporalTrendRow {
+  gene_id: string;
+  gene_name: string;
+  agreement_class: AgreementClass;
+
+  // derived from meta_data timepoints
+  expr_delta_by_time: Record<string, number | null>;
+  acc_delta_by_time: Record<string, number | null>;
+
+  increase: number | null;
+  decrease: number | null;
+  neutral: number | null;
+}
+
+export interface TemporalTrendData {
+  chr: string;
+  timepoints: string[];
+  rows: TemporalTrendRow[];
+  byGeneName: Record<string, TemporalTrendRow>;
 }

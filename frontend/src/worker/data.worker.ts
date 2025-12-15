@@ -11,9 +11,11 @@ import type {
   Edge,
   PerLabelBackgroundMask,
   MembershipState,
+  TemporalTrendData,
 } from "../types/data_types_interfaces";
 import { createEdges } from "../utilFunctions/createEdges";
 import { createPathsBetweenEdges } from "../utilFunctions/createPathsBetweenEdges";
+import { fetchTemporalData } from "../API/fetchTemporalData";
 
 addEventListener(
   "message",
@@ -116,6 +118,14 @@ addEventListener(
     });
     // console.log(membership);
 
+    const temporalTrendData: TemporalTrendData = await fetchTemporalData({
+      speciesName: species,
+      chrName: chromosome,
+      dataInfo: meta_data,
+    });
+
+    // console.log(temporalTrendData);
+
     postMessage({
       requestId,
       gene_data: gene_data,
@@ -126,6 +136,7 @@ addEventListener(
       projectionData: projectionData,
       perLabelBackgroundMaskData: perLabelBackgroundMaskData,
       membership: membership,
+      temporalTrendData: temporalTrendData,
     });
   }
 );
