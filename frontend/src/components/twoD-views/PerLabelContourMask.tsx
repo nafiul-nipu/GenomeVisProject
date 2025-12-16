@@ -10,13 +10,19 @@ import type {
   PerLabelContourMaskProps,
   MembershipState,
   Point2D,
+  GeneRowDataType,
 } from "../../types/data_types_interfaces";
 import "../../App.css";
-import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
+import {
+  AGREEMENT_COLORS,
+  colorPaletteSelector,
+} from "../../utilFunctions/colorForViews";
 import {
   clearHighlightedGenes,
   setHighlightedGenesForLabel,
 } from "../../redux-store/uiSlice";
+
+type ColoredPoint = { x: number; y: number; color: string };
 
 function maskToURL(
   mask: number[][],
@@ -129,7 +135,9 @@ function draw(
   polys: [number, number][][],
   maskAlpha: number,
   strokeColor: string,
-  hoverPoint?: Point2D | null
+  hoverPoint?: Point2D | null,
+  selectedPoints?: Point2D[] | null,
+  temporalPoints?: { x: number; y: number; color: string }[] | null
 ) {
   const ny = mask.length,
     nx = mask[0].length;
@@ -207,6 +215,47 @@ function draw(
       .attr("stroke-width", 1.2)
       .attr("vector-effect", "non-scaling-stroke");
   }
+
+  // --- selected genes markers ---
+  if (selectedPoints && selectedPoints.length) {
+    for (const [sx, sy] of selectedPoints) {
+      // halo
+      g.append("circle")
+        .attr("cx", sx)
+        .attr("cy", sy)
+        .attr("r", 4.5)
+        .attr("fill", "none")
+        .attr("stroke", "#a855f7") // purple halo
+        .attr("stroke-width", 2.5)
+        .attr("opacity", 0.7)
+        .attr("vector-effect", "non-scaling-stroke");
+
+      // solid dot
+      g.append("circle")
+        .attr("cx", sx)
+        .attr("cy", sy)
+        .attr("r", 2.2)
+        .attr("fill", "#a855f7")
+        .attr("stroke", "#020617")
+        .attr("stroke-width", 1.0)
+        .attr("vector-effect", "non-scaling-stroke");
+    }
+  }
+
+  // --- temporal class filter markers ---
+  if (temporalPoints && temporalPoints.length) {
+    for (const p of temporalPoints) {
+      g.append("circle")
+        .attr("cx", p.x)
+        .attr("cy", p.y)
+        .attr("r", 2.6)
+        .attr("fill", p.color)
+        .attr("stroke", "#020617")
+        .attr("stroke-width", 0.9)
+        .attr("opacity", 0.95)
+        .attr("vector-effect", "non-scaling-stroke");
+    }
+  }
 }
 
 export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
@@ -236,6 +285,19 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
   );
 
   const hovered = useAppSelector((s) => s.ui.hoveredGene);
+
+  const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
+
+  const geneDataForLabel = useAppSelector(
+    (s) =>
+      (
+        s.data.data?.gene_data as Record<string, GeneRowDataType[]> | undefined
+      )?.[label]
+  );
+
+  const temporalFilter = useAppSelector((s) => s.ui.temporalClassFilter);
+  const temporalByGeneName =
+    useAppSelector((s) => s.data.data?.temporalTrendData.byGeneName) ?? {};
 
   //helper to get indices for this plane
   const highlightIdxs = useMemo(() => {
@@ -274,6 +336,71 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
     const pt = pixels[hovered.idx]; // [x_idx, y_idx] in mask pixel coords
     return pt as Point2D;
   }, [hovered, label, plane, membership]);
+
+  const selectedPoints: Point2D[] = useMemo(() => {
+    if (!selectedGenes.length) return [];
+    if (!geneDataForLabel || !geneDataForLabel.length) return [];
+
+    const labEntry = membership?.[label];
+    const planeEntry = labEntry?.planes?.[plane];
+    const pixels = planeEntry?.pixels;
+
+    if (!pixels || !pixels.length) return [];
+
+    const pts: Point2D[] = [];
+
+    // geneDataForLabel index must match pixels index (same ordering)
+    for (let i = 0; i < geneDataForLabel.length; i++) {
+      const g = geneDataForLabel[i];
+      if (selectedGenes.includes(g.gene_name)) {
+        const p = pixels[i];
+        if (p) pts.push(p as Point2D);
+      }
+    }
+
+    return pts;
+  }, [selectedGenes, geneDataForLabel, membership, label, plane]);
+
+  const temporalPoints: ColoredPoint[] = useMemo(() => {
+    if (!temporalFilter.length) return [];
+    if (!geneDataForLabel || !geneDataForLabel.length) return [];
+
+    const labEntry = membership?.[label];
+    const planeEntry = labEntry?.planes?.[plane];
+    const pixels = planeEntry?.pixels;
+    if (!pixels || !pixels.length) return [];
+
+    const keep = new Set(temporalFilter);
+    const pts: ColoredPoint[] = [];
+
+    for (let i = 0; i < geneDataForLabel.length; i++) {
+      const g = geneDataForLabel[i];
+      const cls =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (temporalByGeneName[g.gene_name] as any)?.agreement_class ??
+        "not_expressed";
+
+      if (keep.has(cls)) {
+        const p = pixels[i];
+        if (p) {
+          pts.push({
+            x: p[0],
+            y: p[1],
+            color: AGREEMENT_COLORS[cls] ?? "#94a3b8",
+          });
+        }
+      }
+    }
+
+    return pts;
+  }, [
+    temporalFilter,
+    geneDataForLabel,
+    membership,
+    label,
+    plane,
+    temporalByGeneName,
+  ]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -344,8 +471,28 @@ export const PerLabelContourMask: React.FC<PerLabelContourMaskProps> = ({
       return;
     }
 
-    draw(svg, mask, cleanedPolys, maskOpacity, strokeColor, hoverPoint);
-  }, [mask, cleanedPolys, maskOpacity, plane, nx, ny, strokeColor, hoverPoint]);
+    draw(
+      svg,
+      mask,
+      cleanedPolys,
+      maskOpacity,
+      strokeColor,
+      hoverPoint,
+      selectedPoints,
+      temporalPoints
+    );
+  }, [
+    mask,
+    cleanedPolys,
+    maskOpacity,
+    plane,
+    nx,
+    ny,
+    strokeColor,
+    hoverPoint,
+    selectedPoints,
+    temporalPoints,
+  ]);
 
   const title = `${plane} · ${label} · ${variant.toUpperCase()} · L${level}`;
 

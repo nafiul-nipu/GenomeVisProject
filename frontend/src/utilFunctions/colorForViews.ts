@@ -6,11 +6,18 @@ export const colorPaletteSelector = (idx: number): string => {
 };
 
 export const AGREEMENT_COLORS: Record<string, string> = {
-  expr_acc_up: "#a02c2cf8",
-  expr_acc_down: "#c1bcbbff",
-  expression_only: "#1111deff",
-  accessibility_only: "#c1e469ff",
-  conflict: "#c7819dff",
-  mixed: "#9467bd",
-  stable: "#7f7f7f",
+  // concordant
+  expr_acc_up: "#a02c2c", // deep red
+  expr_acc_down: "#c1bcbb", // muted gray
+
+  // partial regulation
+  expression_only: "#1111de", // strong blue
+  accessibility_only: "#c1e469", // light green
+
+  // disagreement / complexity
+  conflict: "#c7819d", // pink/magenta (FIXED)
+  mixed: "#9467bd", // purple
+
+  // baseline
+  stable: "#7f7f7f", // neutral gray
 };
