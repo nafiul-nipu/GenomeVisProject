@@ -304,6 +304,14 @@ export interface UIState {
   hoveredGene: { label: string; idx: number } | null; // 3D to 2D
   camera: CameraState;
   temporalClassFilter: AgreementClass[]; // empty = no filter
+
+  // 2D panel tabs
+  twoDPanelTab: "shape" | "temporal";
+
+  // Temporal 2D view settings
+  temporal2DMaxGenes: number; // safety cap for barcode lists
+  temporal2DBarcodeSort: "abs" | "expr" | "acc";
+  temporal2DDeltaMode: "mean" | "last" | "peakAbs";
 }
 
 export interface DataState {
@@ -358,3 +366,41 @@ export interface TemporalTrendData {
 }
 
 export type GeneColorMode = "viewPalette" | "temporalAgreement";
+
+export type ExprAcc2DContainerProps = { meta_data_typed: DataInfoType };
+export type DeltaMode = "mean" | "last" | "peakAbs";
+
+export type GeneScatterPoints = {
+  gene: string;
+  idx: number;
+  agreement: AgreementClass;
+  expr: number;
+  acc: number;
+};
+
+export type ExprAccScatterProps = {
+  points: GeneScatterPoints[];
+  onHover: (idx: number | null) => void;
+  onClickGene: (gene: string) => void;
+};
+
+export type BarcodePoint = {
+  gene: string;
+  idx: number;
+  agreement: AgreementClass;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  row: any; // expects row.expr_delta_by_time and row.acc_delta_by_time
+  expr: number; // summarized (for sort only)
+  acc: number; // summarized (for sort only)
+};
+
+export type BarcodeSort = "abs" | "expr" | "acc";
+
+export type GeneBarCodeProps = {
+  points: BarcodePoint[];
+  timepoints: string[];
+  maxGenes: number;
+  sortMode: BarcodeSort;
+  onHover: (idx: number | null) => void;
+  onClickGene: (gene: string) => void;
+};

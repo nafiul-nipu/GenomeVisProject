@@ -10,12 +10,13 @@ import { useAppDispatch, useAppSelector } from "./redux-store/hooks";
 import { fetchWorkerData } from "./redux-store/dataSlice";
 import { terminateWorker } from "./worker/workerService";
 import { ThreeDViewContainer } from "./components/three-views/ThreeDViewContainer";
-import { TwoDContainer } from "./components/twoD-views/TwoDContainer";
-import { TwoDControls } from "./components/twoD-views/TwoDControls";
+import { TwoDContainer } from "./components/shape-views/TwoDContainer";
+import { TwoDControls } from "./components/shape-views/TwoDControls";
 
 import * as htmlToImage from "html-to-image";
-import { loadSnapshot, resetUI } from "./redux-store/uiSlice";
+import { loadSnapshot, resetUI, setTwoDPanelTab } from "./redux-store/uiSlice";
 import { TemporalFilterControls } from "./components/dropdowns/TemporalFilterControls";
+import { ExprAcc2DContainer } from "./components/expr-acc-views/ExprAcc2DContainer";
 
 const meta_data_typed = meta_data as DataInfoType;
 
@@ -30,6 +31,8 @@ export default function App() {
   const { species, chromosome } = useAppSelector((s) => s.ui);
   const ui = useAppSelector((s) => s.ui); // full ui state for saving snapshot
   const status = useAppSelector((s) => s.data.status);
+
+  const twoDPanelTab = useAppSelector((s) => s.ui.twoDPanelTab);
 
   useEffect(() => {
     mount.current = true;
@@ -304,20 +307,55 @@ export default function App() {
 
       {/* 2D PANEL */}
       <section className="h-[45%] px-1 pb-2 overflow-hidden">
-        <div className="h-full rounded-2xl border border-gray-800 bg-gray-900/40 p-3 shadow-inner flex flex-col">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-lg font-medium">Shape Analysis</h2>
-            <TwoDControls />
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-medium">
+              {twoDPanelTab === "shape"
+                ? "Shape Analysis"
+                : "Temporal Dynamics"}
+            </h2>
+
+            <div className="ml-2 flex items-center rounded-md border border-gray-700 overflow-hidden">
+              <button
+                onClick={() => dispatch(setTwoDPanelTab("shape"))}
+                className={`text-xs px-2.5 py-1 ${
+                  twoDPanelTab === "shape"
+                    ? "bg-slate-700/60 text-slate-100"
+                    : "bg-transparent text-slate-300 hover:bg-slate-700/30"
+                }`}
+              >
+                Shape
+              </button>
+              <button
+                onClick={() => dispatch(setTwoDPanelTab("temporal"))}
+                className={`text-xs px-2.5 py-1 ${
+                  twoDPanelTab === "temporal"
+                    ? "bg-slate-700/60 text-slate-100"
+                    : "bg-transparent text-slate-300 hover:bg-slate-700/30"
+                }`}
+              >
+                Temporal
+              </button>
+            </div>
           </div>
-          <div className="flex-1 rounded-xl bg-gray-800/40 grid place-items-center">
-            {status === "loading" ? (
+
+          {twoDPanelTab === "shape" ? <TwoDControls /> : null}
+        </div>
+
+        <div className="flex-1 h-full min-h-0 rounded-xl bg-gray-800/40 flex flex-col">
+          {status === "loading" ? (
+            <div className="flex-1 grid place-items-center">
               <span className="text-sm text-sky-400 animate-pulse">
-                Loading shapes ...
+                {twoDPanelTab === "shape"
+                  ? "Loading shapes ..."
+                  : "Loading temporal ..."}
               </span>
-            ) : (
-              <TwoDContainer meta_data_typed={meta_data_typed} />
-            )}
-          </div>
+            </div>
+          ) : twoDPanelTab === "shape" ? (
+            <TwoDContainer meta_data_typed={meta_data_typed} />
+          ) : (
+            <ExprAcc2DContainer meta_data_typed={meta_data_typed} />
+          )}
         </div>
       </section>
     </div>

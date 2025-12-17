@@ -29,6 +29,11 @@ const initialState: UIState = {
     target: [0, 0, 0],
   },
   temporalClassFilter: [],
+  // 2D panel tabs
+  twoDPanelTab: "shape",
+  temporal2DMaxGenes: 250,
+  temporal2DBarcodeSort: "abs",
+  temporal2DDeltaMode: "mean",
 };
 
 // creating slices
@@ -106,6 +111,25 @@ const uiSlice = createSlice({
     clearTemporalClassFilter(state) {
       state.temporalClassFilter = [];
     },
+    // twoD panel and temporal scatter etc
+    setTwoDPanelTab(state, action: PayloadAction<"shape" | "temporal">) {
+      state.twoDPanelTab = action.payload;
+    },
+    setTemporal2DMaxGenes(state, action: PayloadAction<number>) {
+      state.temporal2DMaxGenes = action.payload;
+    },
+    setTemporal2DBarcodeSort(
+      state,
+      action: PayloadAction<"abs" | "expr" | "acc">
+    ) {
+      state.temporal2DBarcodeSort = action.payload;
+    },
+    setTemporal2DDeltaMode(
+      state,
+      action: PayloadAction<"mean" | "last" | "peakAbs">
+    ) {
+      state.temporal2DDeltaMode = action.payload;
+    },
   },
 });
 
@@ -129,6 +153,10 @@ export const {
   resetUI,
   setTemporalClassFilter,
   clearTemporalClassFilter,
+  setTwoDPanelTab,
+  setTemporal2DMaxGenes,
+  setTemporal2DBarcodeSort,
+  setTemporal2DDeltaMode,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;
