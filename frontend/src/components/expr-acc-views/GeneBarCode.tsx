@@ -22,7 +22,7 @@ export const GeneBarCode: React.FC<GeneBarCodeProps> = ({
   timepoints,
   maxGenes,
   sortMode,
-  onHover,
+  selectedGenes,
   onClickGene,
 }) => {
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +46,9 @@ export const GeneBarCode: React.FC<GeneBarCodeProps> = ({
       )
       .map((p) => p as any);
 
+    const byGene = new Map<string, any>();
+    base.forEach((p) => byGene.set(p.gene, p));
+
     const key = (p: any) => {
       const e = p.expr;
       const a = p.acc;
@@ -54,10 +57,19 @@ export const GeneBarCode: React.FC<GeneBarCodeProps> = ({
       return Math.abs(e) + Math.abs(a);
     };
 
-    return base
-      .sort((a, b) => key(b) - key(a))
-      .slice(0, Math.max(10, maxGenes));
-  }, [points, maxGenes, sortMode]);
+    // selected first (in selectedGenes order)
+    const selectedRows = selectedGenes
+      .map((g) => byGene.get(g))
+      .filter(Boolean);
+
+    // remaining sorted
+    const selectedSet = new Set(selectedGenes);
+    const rest = base
+      .filter((p) => !selectedSet.has(p.gene))
+      .sort((a, b) => key(b) - key(a));
+
+    return [...selectedRows, ...rest].slice(0, Math.max(10, maxGenes));
+  }, [points, maxGenes, sortMode, selectedGenes]);
 
   useLayoutEffect(() => {
     const svg = svgRef.current;
@@ -67,6 +79,20 @@ export const GeneBarCode: React.FC<GeneBarCodeProps> = ({
     // const H = size.h;
     const sel = d3.select(svg);
     sel.selectAll("*").remove();
+
+    const wrap = wrapRef.current;
+    let tip: HTMLDivElement | null = null;
+    if (wrap) {
+      const old = wrap.querySelector(".barcode-tooltip");
+      if (old) old.remove();
+
+      tip = document.createElement("div");
+      tip.className =
+        "barcode-tooltip pointer-events-none absolute z-50 rounded-md border border-gray-700 bg-gray-900/90 px-2 py-1 text-xs text-slate-100 shadow";
+      tip.style.display = "none";
+      wrap.style.position = "relative";
+      wrap.appendChild(tip);
+    }
 
     const leftW = 140;
     const padX = 8;
@@ -119,11 +145,17 @@ export const GeneBarCode: React.FC<GeneBarCodeProps> = ({
       const r = rows[i];
       const y0 = i * rowH;
 
+      const isSel = selectedGenes.includes(r.gene);
+
       g.append("text")
         .attr("x", leftW - 6)
         .attr("y", y0 + 11)
         .attr("text-anchor", "end")
-        .attr("fill", AGREEMENT_COLORS[r.agreement] ?? "#cbd5e1")
+        .attr(
+          "fill",
+          isSel ? "#ffffff" : AGREEMENT_COLORS[r.agreement] ?? "#cbd5e1"
+        )
+        .attr("font-weight", isSel ? 700 : 400)
         .attr("font-size", 11)
         .text(r.gene);
 
@@ -169,18 +201,27 @@ export const GeneBarCode: React.FC<GeneBarCodeProps> = ({
           .attr("width", colW - 2)
           .attr("height", rowH - 4)
           .attr("fill", "transparent")
-          .on("mouseenter", () => onHover(r.idx))
-          .on("mouseleave", () => onHover(null))
+          .style("cursor", "pointer")
+          .style("pointer-events", "all")
           .on("click", () => onClickGene(r.gene));
 
-        overlay.append("title").text(() => {
-          const ee = typeof e === "number" ? e.toFixed(3) : "NA";
-          const aa = typeof a === "number" ? a.toFixed(3) : "NA";
-          return `${r.gene}\nclass: ${r.agreement}\n${tp}\nExpr Δ: ${ee}\nAcc Δ: ${aa}`;
-        });
+        if (tip) {
+          overlay
+            .on("mousemove", (evt: any) => {
+              const ee = typeof e === "number" ? e.toFixed(3) : "NA";
+              const aa = typeof a === "number" ? a.toFixed(3) : "NA";
+              tip!.textContent = `${r.gene} | ${r.agreement} | ${tp} | ExprΔ ${ee} | AccΔ ${aa}`;
+              tip!.style.left = `${evt.offsetX + 12}px`;
+              tip!.style.top = `${evt.offsetY + 12}px`;
+              tip!.style.display = "block";
+            })
+            .on("mouseleave", () => {
+              tip!.style.display = "none";
+            });
+        }
       }
     }
-  }, [rows, timepoints, size.w, size.h, onHover, onClickGene]);
+  }, [rows, timepoints, size.w, size.h, onClickGene]);
 
   return (
     <div ref={wrapRef} className="w-full h-full overflow-auto">

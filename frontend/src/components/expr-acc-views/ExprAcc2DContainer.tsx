@@ -11,7 +11,6 @@ import type {
 } from "../../types/data_types_interfaces";
 import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
 import {
-  setHoveredGene,
   setSelectedGenes,
   setTemporal2DMaxGenes,
   setTemporal2DBarcodeSort,
@@ -173,10 +172,24 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
     temporalByGene,
   ]);
 
-  const toggleSelect = (gene: string) => {
+  const promoteGene = (gene: string) => {
+    console.log("moving the gene at the top");
+    // If selected: move to front. If not: add to front.
     const next = selectedGenes.includes(gene)
-      ? selectedGenes.filter((g) => g !== gene)
-      : [...selectedGenes, gene];
+      ? [gene, ...selectedGenes.filter((g) => g !== gene)]
+      : [gene, ...selectedGenes];
+    dispatch(setSelectedGenes(next));
+  };
+
+  const setSelectionFromLasso = (genes: string[], mode: "replace" | "add") => {
+    console.log("lasso selection going on");
+    const uniq = (arr: string[]) => Array.from(new Set(arr));
+    if (mode === "replace") {
+      dispatch(setSelectedGenes(uniq(genes)));
+      return;
+    }
+    // add: newly lassoed should appear at top, preserve existing order after
+    const next = uniq([...genes, ...selectedGenes]);
     dispatch(setSelectedGenes(next));
   };
 
@@ -263,14 +276,9 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
           <div className="flex-1 min-h-0">
             <ExprAccScatter
               points={scatterPoints}
-              onHover={(idx) =>
-                dispatch(
-                  setHoveredGene(
-                    idx == null ? null : { label: primaryLabel, idx }
-                  )
-                )
-              }
-              onClickGene={toggleSelect}
+              selectedGenes={selectedGenes}
+              onClickGene={promoteGene}
+              onLasso={(genes, mode) => setSelectionFromLasso(genes, mode)}
             />
           </div>
         </div>
@@ -286,14 +294,8 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
               timepoints={timepoints}
               maxGenes={temporal2DMaxGenes}
               sortMode={temporal2DBarcodeSort as BarcodeSort}
-              onHover={(idx) =>
-                dispatch(
-                  setHoveredGene(
-                    idx == null ? null : { label: primaryLabel, idx }
-                  )
-                )
-              }
-              onClickGene={toggleSelect}
+              selectedGenes={selectedGenes}
+              onClickGene={promoteGene}
             />
           </div>
         </div>

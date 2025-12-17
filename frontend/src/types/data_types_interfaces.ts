@@ -380,8 +380,9 @@ export type GeneScatterPoints = {
 
 export type ExprAccScatterProps = {
   points: GeneScatterPoints[];
-  onHover: (idx: number | null) => void;
+  selectedGenes: string[];
   onClickGene: (gene: string) => void;
+  onLasso: (genes: string[], mode: "replace" | "add") => void;
 };
 
 export type BarcodePoint = {
@@ -401,6 +402,6 @@ export type GeneBarCodeProps = {
   timepoints: string[];
   maxGenes: number;
   sortMode: BarcodeSort;
-  onHover: (idx: number | null) => void;
+  selectedGenes: string[];
   onClickGene: (gene: string) => void;
 };

@@ -6,8 +6,9 @@ import { AGREEMENT_COLORS } from "../../utilFunctions/colorForViews";
 
 export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
   points,
-  onHover,
+  selectedGenes,
   onClickGene,
+  onLasso,
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -105,6 +106,9 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
 
     const g = sel.append("g");
 
+    const selected = new Set(selectedGenes);
+
+    // circles
     const circles = g
       .selectAll("circle")
       .data(points)
@@ -112,21 +116,126 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
       .append("circle")
       .attr("cx", (d) => x(d.expr))
       .attr("cy", (d) => y(d.acc))
-      .attr("r", 2.6)
+      .attr("r", (d) => (selected.has(d.gene) ? 4.0 : 2.6))
       .attr("fill", (d) => AGREEMENT_COLORS[d.agreement] ?? "#94a3b8")
-      .attr("stroke", "#020617")
-      .attr("stroke-width", 0.8)
+      .attr("stroke", (d) => (selected.has(d.gene) ? "#ffffff" : "#020617"))
+      .attr("stroke-width", (d) => (selected.has(d.gene) ? 1.6 : 0.8))
       .attr("opacity", 0.95)
-      .on("mouseenter", (_, d: any) => onHover(d.idx))
-      .on("mouseleave", () => onHover(null))
-      .on("click", (_, d: any) => onClickGene(d.gene));
+      .style("cursor", "pointer")
+      .style("pointer-events", "all")
+      .on("click", (evt, d: any) => {
+        evt.stopPropagation();
+        onClickGene(d.gene);
+      });
 
-    circles.append("title").text((d) => {
-      const e = Number.isFinite(d.expr) ? d.expr.toFixed(3) : "NA";
-      const a = Number.isFinite(d.acc) ? d.acc.toFixed(3) : "NA";
-      return `${d.gene}\nclass: ${d.agreement}\nExpr Δ: ${e}\nAcc Δ: ${a}`;
-    });
-  }, [points, size.w, size.h, onHover, onClickGene]);
+    // ---- HTML tooltip (reliable) ----
+    const wrap = wrapRef.current;
+    if (wrap) {
+      // remove any old tooltip
+      const old = wrap.querySelector(".expracc-tooltip");
+      if (old) old.remove();
+
+      const tip = document.createElement("div");
+      tip.className =
+        "expracc-tooltip pointer-events-none absolute z-50 rounded-md border border-gray-700 bg-gray-900/90 px-2 py-1 text-xs text-slate-100 shadow";
+      tip.style.display = "none";
+      wrap.style.position = "relative";
+      wrap.appendChild(tip);
+
+      circles
+        .on("mousemove.tooltip", (evt: any, d: any) => {
+          const e = Number.isFinite(d.expr) ? d.expr.toFixed(3) : "NA";
+          const a = Number.isFinite(d.acc) ? d.acc.toFixed(3) : "NA";
+          tip.textContent = `${d.gene} | ${d.agreement} | ExprΔ ${e} | AccΔ ${a}`;
+          tip.style.left = `${evt.offsetX + 12}px`;
+          tip.style.top = `${evt.offsetY + 12}px`;
+          tip.style.display = "block";
+        })
+        .on("mouseleave.tooltip", () => {
+          tip.style.display = "none";
+        });
+    }
+
+    // ---- LASSO (freeform polygon) ----
+    // ---- LASSO (freeform polygon) ----
+    const lineClosed = d3.line<[number, number]>().curve(d3.curveLinearClosed);
+
+    const lassoLayer = sel.append("g").attr("class", "lasso-layer");
+
+    const lassoPath = lassoLayer
+      .append("path")
+      .attr("fill", "rgba(148,163,184,0.12)")
+      .attr("stroke", "rgba(148,163,184,0.9)")
+      .attr("stroke-width", 1.2)
+      .attr("display", "none");
+
+    let isLasso = false;
+    let poly: [number, number][] = [];
+
+    // Capture events ONLY over the plot area, and keep it ON TOP
+    const hit = sel
+      .append("rect")
+      .attr("x", M.l)
+      .attr("y", M.t)
+      .attr("width", W - M.l - M.r)
+      .attr("height", H - M.t - M.b)
+      .attr("fill", "transparent")
+      .style("pointer-events", "all")
+      .style("cursor", "crosshair");
+
+    // ensure hit rect is above axes/circles
+    hit.raise();
+    lassoLayer.raise();
+
+    const svgNode = svgRef.current!;
+
+    hit
+      .on("mousedown", (evt: any) => {
+        if (evt.button !== 0) return;
+        evt.preventDefault();
+
+        isLasso = true;
+        poly = [];
+
+        const [mx, my] = d3.pointer(evt, svgNode);
+        poly.push([mx, my]);
+
+        lassoPath.attr("display", null).attr("d", lineClosed(poly) ?? "");
+      })
+      .on("mousemove", (evt: any) => {
+        if (!isLasso) return;
+        const [mx, my] = d3.pointer(evt, svgNode);
+        poly.push([mx, my]);
+        lassoPath.attr("d", lineClosed(poly) ?? "");
+      });
+
+    // Bind mouseup on window so it still ends selection even if mouse leaves the rect
+    const onWinUp = (evt: MouseEvent) => {
+      if (!isLasso) return;
+      isLasso = false;
+
+      if (poly.length < 3) {
+        lassoPath.attr("display", "none");
+        return;
+      }
+
+      const genesIn = points
+        .filter((p) => d3.polygonContains(poly, [x(p.expr), y(p.acc)]))
+        .map((p) => p.gene);
+
+      const mode: "replace" | "add" = (evt as any).shiftKey ? "add" : "replace";
+      onLasso(genesIn, mode);
+
+      lassoPath.attr("display", "none");
+    };
+
+    window.addEventListener("mouseup", onWinUp);
+
+    // IMPORTANT: cleanup listener (add this in your effect cleanup)
+    return () => {
+      window.removeEventListener("mouseup", onWinUp);
+    };
+  }, [points, selectedGenes, size.w, size.h, onClickGene, onLasso]);
 
   return (
     <div ref={wrapRef} className="w-full h-full">
