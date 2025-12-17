@@ -109,8 +109,7 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
     const selected = new Set(selectedGenes);
 
     // circles
-    const circles = g
-      .selectAll("circle")
+    g.selectAll("circle")
       .data(points)
       .enter()
       .append("circle")
@@ -128,35 +127,6 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
         onClickGene(d.gene);
       });
 
-    // ---- HTML tooltip (reliable) ----
-    const wrap = wrapRef.current;
-    if (wrap) {
-      // remove any old tooltip
-      const old = wrap.querySelector(".expracc-tooltip");
-      if (old) old.remove();
-
-      const tip = document.createElement("div");
-      tip.className =
-        "expracc-tooltip pointer-events-none absolute z-50 rounded-md border border-gray-700 bg-gray-900/90 px-2 py-1 text-xs text-slate-100 shadow";
-      tip.style.display = "none";
-      wrap.style.position = "relative";
-      wrap.appendChild(tip);
-
-      circles
-        .on("mousemove.tooltip", (evt: any, d: any) => {
-          const e = Number.isFinite(d.expr) ? d.expr.toFixed(3) : "NA";
-          const a = Number.isFinite(d.acc) ? d.acc.toFixed(3) : "NA";
-          tip.textContent = `${d.gene} | ${d.agreement} | ExprΔ ${e} | AccΔ ${a}`;
-          tip.style.left = `${evt.offsetX + 12}px`;
-          tip.style.top = `${evt.offsetY + 12}px`;
-          tip.style.display = "block";
-        })
-        .on("mouseleave.tooltip", () => {
-          tip.style.display = "none";
-        });
-    }
-
-    // ---- LASSO (freeform polygon) ----
     // ---- LASSO (freeform polygon) ----
     const lineClosed = d3.line<[number, number]>().curve(d3.curveLinearClosed);
 
@@ -183,6 +153,40 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
       .style("pointer-events", "all")
       .style("cursor", "crosshair");
 
+    // ---- HTML tooltip driven by hit-rect (works with lasso) ----
+    const wrap = wrapRef.current;
+    let tip: HTMLDivElement | null = null;
+
+    if (wrap) {
+      const old = wrap.querySelector(".expracc-tooltip");
+      if (old) old.remove();
+
+      tip = document.createElement("div");
+      tip.className =
+        "expracc-tooltip pointer-events-none absolute z-50 rounded-md border border-gray-700 bg-gray-900/90 px-2 py-1 text-xs text-slate-100 shadow";
+      tip.style.display = "none";
+      wrap.style.position = "relative";
+      wrap.appendChild(tip);
+    }
+
+    const findNearest = (mx: number, my: number) => {
+      let best: any = null;
+      let bestD2 = Infinity;
+      for (const p of points) {
+        const cx = x(p.expr);
+        const cy = y(p.acc);
+        const dx = cx - mx;
+        const dy = cy - my;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < bestD2) {
+          bestD2 = d2;
+          best = p;
+        }
+      }
+      // threshold (pixels)
+      return bestD2 <= 12 * 12 ? best : null;
+    };
+
     // ensure hit rect is above axes/circles
     hit.raise();
     lassoLayer.raise();
@@ -194,6 +198,9 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
         if (evt.button !== 0) return;
         evt.preventDefault();
 
+        // hide tooltip when lasso starts
+        if (tip) tip.style.display = "none";
+
         isLasso = true;
         poly = [];
 
@@ -203,10 +210,32 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
         lassoPath.attr("display", null).attr("d", lineClosed(poly) ?? "");
       })
       .on("mousemove", (evt: any) => {
-        if (!isLasso) return;
         const [mx, my] = d3.pointer(evt, svgNode);
-        poly.push([mx, my]);
-        lassoPath.attr("d", lineClosed(poly) ?? "");
+
+        // during lasso: draw polygon
+        if (isLasso) {
+          poly.push([mx, my]);
+          lassoPath.attr("d", lineClosed(poly) ?? "");
+          return;
+        }
+
+        // not lassoing: show tooltip
+        if (!tip) return;
+        const p = findNearest(mx, my);
+        if (!p) {
+          tip.style.display = "none";
+          return;
+        }
+
+        const e = Number.isFinite(p.expr) ? p.expr.toFixed(3) : "NA";
+        const a = Number.isFinite(p.acc) ? p.acc.toFixed(3) : "NA";
+        tip.textContent = `${p.gene} | ${p.agreement} | ExprΔ ${e} | AccΔ ${a}`;
+        tip.style.left = `${evt.offsetX + 12}px`;
+        tip.style.top = `${evt.offsetY + 12}px`;
+        tip.style.display = "block";
+      })
+      .on("mouseleave", () => {
+        if (tip) tip.style.display = "none";
       });
 
     // Bind mouseup on window so it still ends selection even if mouse leaves the rect
@@ -227,6 +256,8 @@ export const ExprAccScatter: React.FC<ExprAccScatterProps> = ({
       onLasso(genesIn, mode);
 
       lassoPath.attr("display", "none");
+
+      if (tip) tip.style.display = "none";
     };
 
     window.addEventListener("mouseup", onWinUp);
