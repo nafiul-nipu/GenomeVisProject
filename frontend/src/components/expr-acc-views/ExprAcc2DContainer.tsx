@@ -18,7 +18,7 @@ import {
 } from "../../redux-store/uiSlice";
 
 import { ExprAccScatter } from "./ExprAccScatter";
-import { GeneBarCode } from "./GeneBarCode";
+import { GeneExprAccBarsLinesAgreement } from "./GeneExprAccBarsLinesAgreement";
 
 function summarizeDelta(
   valsByTime: Record<string, number | null>,
@@ -285,11 +285,51 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
 
         {/* Barcode */}
         <div className="min-h-0 rounded-lg border border-gray-800 bg-gray-900/30 overflow-hidden flex flex-col">
-          <div className="px-2 py-1 text-xs text-slate-300 border-b border-gray-800">
-            Temporal barcode (expr top, acc bottom)
+          <div className="px-2 py-1 text-xs text-slate-300 border-b border-gray-800 flex items-center justify-between gap-2">
+            <div>Gene Expr Acc Details</div>
+
+            <div className="flex items-center gap-3 text-[11px] text-slate-400">
+              {/* line legend */}
+              <div className="flex items-center gap-1">
+                <span
+                  className="inline-block w-6 h-[2px]"
+                  style={{ background: "#e2e8f0" }}
+                />
+                <span>expr line</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span
+                  className="inline-block w-6 h-[2px]"
+                  style={{
+                    background: "transparent",
+                    borderTop: "2px dashed #94a3b8",
+                  }}
+                />
+                <span>acc line</span>
+              </div>
+
+              <span className="text-slate-600">|</span>
+
+              {/* bar sign legend */}
+              <div className="flex items-center gap-1">
+                <span
+                  className="inline-block w-3 h-3 rounded-sm"
+                  style={{ background: "rgb(249,115,22)" }}
+                />
+                <span>-</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span
+                  className="inline-block w-3 h-3 rounded-sm"
+                  style={{ background: "rgb(14,165,233)" }}
+                />
+                <span>+</span>
+              </div>
+            </div>
           </div>
+
           <div className="flex-1 min-h-0">
-            <GeneBarCode
+            <GeneExprAccBarsLinesAgreement
               points={barcodePoints}
               timepoints={timepoints}
               maxGenes={temporal2DMaxGenes}
