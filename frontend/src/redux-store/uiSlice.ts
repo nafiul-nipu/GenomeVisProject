@@ -3,7 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   defaultLightSettings,
   type AgreementClass,
-  type CameraState,
+  // type CameraState,
   type CondTab,
   type LightSettings,
   type UIState,
@@ -24,10 +24,10 @@ const initialState: UIState = {
   twoDBlobMinAreaPct: 2,
   highlightedGenesByLabel: {},
   hoveredGene: null,
-  camera: {
-    position: [10, 5, 75],
-    target: [0, 0, 0],
-  },
+  // camera: {
+  //   position: [10, 5, 75],
+  //   target: [0, 0, 0],
+  // },
   temporalClassFilter: [],
   // 2D panel tabs
   twoDPanelTab: "shape",
@@ -91,9 +91,9 @@ const uiSlice = createSlice({
       state.hoveredGene = action.payload;
     },
     // CAMERA SYNC
-    setCameraState(state, action: PayloadAction<CameraState>) {
-      state.camera = action.payload;
-    },
+    // setCameraState(state, action: PayloadAction<CameraState>) {
+    //   state.camera = action.payload;
+    // },
 
     // SNAPSHOT LOAD
     loadSnapshot(state, action: PayloadAction<Partial<UIState>>) {
@@ -148,7 +148,7 @@ export const {
   setHighlightedGenesForLabel,
   clearHighlightedGenes,
   setHoveredGene,
-  setCameraState,
+  // setCameraState,
   loadSnapshot,
   resetUI,
   setTemporalClassFilter,

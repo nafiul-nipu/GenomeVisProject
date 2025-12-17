@@ -302,7 +302,7 @@ export interface UIState {
   twoDBlobMinAreaPct: number; // e.g., 5 = keep blobs >= 5% of largest area
   highlightedGenesByLabel: Record<string, number[]>; // 2D to 3D
   hoveredGene: { label: string; idx: number } | null; // 3D to 2D
-  camera: CameraState;
+  // camera: CameraState;
   temporalClassFilter: AgreementClass[]; // empty = no filter
 
   // 2D panel tabs
