@@ -95,13 +95,6 @@ addEventListener(
 
     // console.log("projection", projectionData);
 
-    // const backgroundMaskData: BackgroundMask = await fetchBackgroundMask({
-    //   speciesName: species,
-    //   chrName: chromosome,
-    // });
-
-    // console.log("background mask", backgroundMaskData);
-
     const perLabelBackgroundMaskData: PerLabelBackgroundMask =
       await fetchPerLabelBackgroundMask({
         speciesName: species,
