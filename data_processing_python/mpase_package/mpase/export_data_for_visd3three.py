@@ -9,6 +9,7 @@ import numpy as np
 from .types import RunResult, Plane, CfgHDR, CfgPF, ShapeProduct
 from .visualization_save_image import _levels_from_result
 from .metrics_calculation import all_contours_from_bool
+from .create_grid_planes import points_to_pixel_indices
 
 ##################### PURE-DATA EXPORTERS (D3 + THREE) #####################
 # background mask
@@ -164,71 +165,6 @@ def export_density_json(result: RunResult, out_dir: str, which: Optional[Iterabl
 
 
 ################### D3: contours (pixel coords) ###################
-
-# def export_contours_d3(
-#     result: RunResult,
-#     out_dir: str,
-#     kind_levels: Dict[str, "int|Iterable[int]|str"] = {"hdr": "all", "point_fraction": "all"},
-#     *,
-#     progress_report: bool = False,
-#     report: Optional[Callable] = None,
-# ) -> List[str]:
-#     """
-#     Writes per-label contour bundles under <out_dir>/contours/.
-#     Each file aggregates that label's contours across planes and levels.
-
-#     contours/<Label>_contour.json
-#       {
-#         "contours": [
-#           {"plane": "XY", "variant": "hdr"|"pf", "level": 95, "label": "12h_UNTR", "points": [[x,y], ...]},
-#           ...
-#         ]
-#       }
-
-#     Reads from: result["shapes"][variant][plane][level][label] -> ShapeProduct
-#     """
-#     written: List[str] = []
-#     cont_dir = os.path.join(out_dir, "contour")
-#     _ensure_dir(cont_dir)
-
-#     # Build a map label -> list of contour entries
-#     per_label: Dict[str, list] = {}
-
-#     cfg_hdr = CfgHDR()
-#     cfg_pf = CfgPF()
-
-#     for kind, lv in kind_levels.items():
-#         if kind not in result["shapes"]:
-#             continue
-#         levels = _levels_from_result(kind, cfg_hdr, cfg_pf, lv)
-#         for plane, by_level in result["shapes"][kind].items():
-#             for level in levels:
-#                 by_label = by_level.get(level)
-#                 if not by_label:
-#                     continue
-#                 for label, sp in by_label.items():
-#                     C = sp.get("contour")
-#                     if C is None:
-#                         continue
-#                     # skimage contours are [row(y), col(x)] — convert to [x,y]
-#                     pts = [[float(c[1]), float(c[0])] for c in C]
-#                     entry = dict(
-#                         plane=plane,
-#                         variant="hdr" if kind == "hdr" else "pf",
-#                         level=int(level),
-#                         label=str(label),
-#                         points=pts,
-#                     )
-#                     per_label.setdefault(str(label), []).append(entry)
-
-#     # Write one file per label
-#     for label, entries in per_label.items():
-#         fname = f"{_safe_name(label)}_contour.json"
-#         path = _write_json(os.path.join(cont_dir, fname), {"contours": entries})
-#         written.append(path)
-#         _notify(progress_report, "write", kind="contours", label=str(label), path=path, entries=len(entries))
-
-#     return written
 
 def export_contours_d3(
     result: RunResult,
@@ -444,6 +380,96 @@ def export_scales_json(result: RunResult, out_dir: str, *, progress_report: bool
     _notify(progress_report, "write", kind="scales", path=path, mins=mins, maxs=maxs)
     return [path]
 
+def export_membership_json(
+    result: RunResult,
+    out_dir: str,
+    *,
+    progress_report: bool = False,
+    report: Optional[Callable] = None,
+) -> List[str]:
+    """
+    membership.json:
+    {
+      "<label>": {
+        "points": N,
+        "ids": [...],
+        "planes": {
+          "XY": {
+            "pixels": [[x,y], ...],             # per-gene pixel coords (mask space)
+            "hdr": { "100": [0,1,5,...], ... }, # gene indices inside each shape
+            "point_fraction": { ... }
+          },
+          ...
+        }
+      },
+      ...
+    }
+    """
+    _ensure_dir(out_dir)
+    membership = {}
+    labels = list(result.get("labels", []))
+    proj = result.get("projections", {})
+    shapes = result.get("shapes", {})
+    ids_by_label = result.get("ids_by_label", {})
+
+    for lab in labels:
+        lab_entry = {
+            "points": 0,
+            "ids": ids_by_label.get(lab, []),
+            "planes": {}
+        }
+
+        # assume all planes share same N for this label
+        # pick any plane in projections
+        some_plane = next(iter(proj.keys()))
+        N = proj[some_plane]["sets"][lab].shape[0]
+        lab_entry["points"] = int(N)
+
+        for plane, pdata in proj.items():
+            sets2d = pdata["sets"]
+            if lab not in sets2d:
+                continue
+
+            P2 = np.asarray(sets2d[lab])
+            xs, ys = pdata["xs"], pdata["ys"]
+
+            # per-gene pixel indices in THIS plane
+            x_idx, y_idx = points_to_pixel_indices(P2, xs, ys)
+            pixels = np.stack([x_idx, y_idx], axis=1).astype(float).tolist()
+
+            plane_entry = {
+                "pixels": pixels,         # <<< new
+                "hdr": {},
+                "point_fraction": {},
+            }
+
+            # for each variant/level, compute membership by sampling mask[y_idx, x_idx]
+            for variant in ("hdr", "point_fraction"):
+                if variant not in shapes:
+                    continue
+                if plane not in shapes[variant]:
+                    continue
+                for level, by_label in shapes[variant][plane].items():
+                    sp = by_label.get(lab)
+                    if not sp:
+                        continue
+                    mask = sp.get("mask")
+                    if mask is None:
+                        continue
+
+                    inside = mask[y_idx, x_idx]  # bool [N]
+                    idxs = np.nonzero(inside)[0].astype(int).tolist()
+                    if idxs:
+                        plane_entry[variant][str(level)] = idxs
+
+            lab_entry["planes"][plane] = plane_entry
+
+        membership[lab] = lab_entry
+
+    path = _write_json(os.path.join(out_dir, "membership.json"), membership)
+    _notify(progress_report, "write", kind="membership", path=path)
+    return [path]
+
 
 ################ One-call convenience ################
 
@@ -495,6 +521,7 @@ def export_all(
     rec("projections", export_projections_json(result, out_dir, progress_report=progress_report))
     rec("metrics", export_metrics_json(result, out_dir, progress_report=progress_report))
     rec("points3d", export_points3d_json(result, out_dir, progress_report=progress_report))
+    rec("membership", export_membership_json(result, out_dir, progress_report=progress_report))
     if export_layout:
         rec("layout", export_layout_json(out_dir, progress_report=progress_report))
     if export_scales:

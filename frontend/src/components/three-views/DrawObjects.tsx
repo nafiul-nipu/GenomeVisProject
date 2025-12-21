@@ -5,8 +5,11 @@ import type { DrawObjectProps } from "../../types/data_types_interfaces";
 import { GeneSphereView } from "./GeneSphereView";
 import { positionPicker } from "../../utilFunctions/positionPicker";
 import { GeneTubeView } from "./GeneTubeView";
+import { useAppSelector } from "../../redux-store/hooks";
 
 export const DrawObject: React.FC<DrawObjectProps> = ({
+  label,
+  viewRef,
   geneColorPickerIdx,
   geneData,
   geneEdges,
@@ -15,6 +18,9 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
   nodeCtl,
   tubeCtl,
 }) => {
+  const hovered = useAppSelector((s) => s.ui.hoveredGene);
+  const hoveredIdx = hovered && hovered.label === label ? hovered.idx : null;
+
   const groupRef = useRef<THREE.Group>(null);
   const { camera, controls } = useThree(); // get the current camera & OrbitControls
 
@@ -64,10 +70,13 @@ export const DrawObject: React.FC<DrawObjectProps> = ({
   return (
     <group ref={groupRef}>
       <GeneSphereView
+        label={label}
+        viewRef={viewRef}
         geneColorPickerIdx={geneColorPickerIdx}
         data={geneData}
         positionMode={positionMode}
         nodeCtl={nodeCtl}
+        hoveredIdx={hoveredIdx}
       />
       <GeneTubeView
         geneData={geneData}

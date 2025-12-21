@@ -2,6 +2,7 @@ import { fetch2DContoursOrDensity } from "../API/fetch2DContourOrDensity";
 import { fetch2DProjection } from "../API/fetch2DProjection";
 import { fetchAllGeneDataJson } from "../API/fetchGeneDataJson";
 import { fetchPerLabelBackgroundMask } from "../API/fetchPerLabelBackgroundMask";
+import { fetchMembership } from "../API/fetchMembership";
 import type {
   workerPostMessageType,
   GeneRowDataType,
@@ -9,9 +10,12 @@ import type {
   ProjectionResult,
   Edge,
   PerLabelBackgroundMask,
+  MembershipState,
+  TemporalTrendData,
 } from "../types/data_types_interfaces";
 import { createEdges } from "../utilFunctions/createEdges";
 import { createPathsBetweenEdges } from "../utilFunctions/createPathsBetweenEdges";
+import { fetchTemporalData } from "../API/fetchTemporalData";
 
 addEventListener(
   "message",
@@ -91,13 +95,6 @@ addEventListener(
 
     // console.log("projection", projectionData);
 
-    // const backgroundMaskData: BackgroundMask = await fetchBackgroundMask({
-    //   speciesName: species,
-    //   chrName: chromosome,
-    // });
-
-    // console.log("background mask", backgroundMaskData);
-
     const perLabelBackgroundMaskData: PerLabelBackgroundMask =
       await fetchPerLabelBackgroundMask({
         speciesName: species,
@@ -106,6 +103,21 @@ addEventListener(
       });
 
     // console.log("per label background mask", perLabelBackgroundMaskData);
+
+    const membership: MembershipState = await fetchMembership({
+      speciesName: species,
+      chrName: chromosome,
+      dataInfo: meta_data,
+    });
+    // console.log(membership);
+
+    const temporalTrendData: TemporalTrendData = await fetchTemporalData({
+      speciesName: species,
+      chrName: chromosome,
+      dataInfo: meta_data,
+    });
+
+    // console.log(temporalTrendData);
 
     postMessage({
       requestId,
@@ -116,6 +128,8 @@ addEventListener(
       contour_data: contour_data,
       projectionData: projectionData,
       perLabelBackgroundMaskData: perLabelBackgroundMaskData,
+      membership: membership,
+      temporalTrendData: temporalTrendData,
     });
   }
 );

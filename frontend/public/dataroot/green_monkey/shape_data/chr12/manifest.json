@@ -47,6 +47,9 @@
       "data/green_monkey/shape_data/chr12/points3d/chr12_24hrs_untr_points3d.json",
       "data/green_monkey/shape_data/chr12/points3d/chr12_24hrs_vacv_points3d.json"
     ],
+    "membership":[
+      "data/green_monkey/shape_data/chr12/membership.json"
+    ],
     "layout":[
       "data/green_monkey/shape_data/chr12/layout.json"
     ],
@@ -55,7 +58,7 @@
     ]
   },
   "summary":{
-    "files":32,
-    "bytes":34409419
+    "files":33,
+    "bytes":41658840
   }
 }

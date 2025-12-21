@@ -118,6 +118,18 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
     chromosome,
   ]);
 
+  const viewLabels = useMemo(() => {
+    if (condTab === "diff") {
+      const tp = timepoints[timeIdx] ?? "";
+      return [
+        makeKey(tp, beforecode), // chr1_12hrs_untr
+        makeKey(tp, aftercode), // chr1_12hrs_vacv
+      ];
+    }
+    const code = condTab === "before" ? beforecode : aftercode;
+    return timepoints.map((tp) => makeKey(tp, code)); // chr1_12hrs_untr, 18hrs...
+  }, [condTab, timeIdx, timepoints, beforecode, aftercode, chromosome]);
+
   useEffect(() => {
     invalidate();
   }, [viewItems, positionMode]);
@@ -164,7 +176,11 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   } = useLevaUIControls();
 
   return (
-    <div ref={hostRef} className="relative w-full h-full overflow-hidden">
+    <div
+      ref={hostRef}
+      className="relative w-full h-full overflow-hidden"
+      id="three-panel-root"
+    >
       {/* Titles + target divs */}
       <div
         ref={tracksWrapRef}
@@ -177,6 +193,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
               ref={ref}
               style={{ width: viewWidth, height: viewHeight }}
               className="inline-block rounded-md border border-gray-800 bg-gray-900/40 box-border"
+              id={viewLabels[i]}
             />
           </div>
         ))}
@@ -189,6 +206,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
         frameloop="demand"
         performance={{ min: 0.4 }}
         camera={{ position: [10, 5, 75], near: 0.1 }}
+        gl={{ preserveDrawingBuffer: true }} // remove this and screenshot component if it hampers performance
       >
         {viewRefs.map((ref, i) => (
           <View
@@ -228,6 +246,8 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
               }}
             />
             <DrawObject
+              label={viewLabels[i]}
+              viewRef={ref as React.RefObject<HTMLDivElement>}
               geneColorPickerIdx={i}
               geneData={viewItems[i].geneData ?? []}
               geneEdges={viewItems[i].geneEdges ?? []}

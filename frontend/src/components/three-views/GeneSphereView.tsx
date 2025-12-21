@@ -1,23 +1,71 @@
-import { useLayoutEffect, useRef } from "react";
-import { Object3D, Color, InstancedMesh } from "three";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Object3D, Color, InstancedMesh, Raycaster, Vector2 } from "three";
 import type { GeneSphereViewProps } from "../../types/data_types_interfaces";
 
 // import * as d3 from "d3";
 import { positionPicker } from "../../utilFunctions/positionPicker";
 import { colorPaletteSelector } from "../../utilFunctions/colorForViews";
+import { useAppDispatch, useAppSelector } from "../../redux-store/hooks";
+import { setHoveredGene } from "../../redux-store/uiSlice";
+import { useThree, type ThreeEvent } from "@react-three/fiber";
+
+import { AGREEMENT_COLORS } from "../../utilFunctions/colorForViews";
+
+const EMPTY_INDICES: number[] = [];
 
 // const colorScale = d3.scaleSequential().interpolator(d3.interpolateReds);
 const object = new Object3D();
 
 export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
+  label,
+  viewRef,
   geneColorPickerIdx,
   data,
   positionMode,
   nodeCtl,
+  hoveredIdx = null,
 }) => {
+  const dispatch = useAppDispatch();
+  const highlightedIdxs = useAppSelector(
+    (s) => s.ui.highlightedGenesByLabel[label] ?? EMPTY_INDICES
+  );
+
+  const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
+
+  const temporalByGeneName =
+    useAppSelector((s) => s.data.data?.temporalTrendData.byGeneName) ?? {};
+
+  // console.log(temporalByGeneName);
+
+  const temporalFilter = useAppSelector((s) => s.ui.temporalClassFilter);
+  // console.log(temporalFilter);
+
+  // indices to highlight:
+  // - ones coming from 2D (highlightedIdxs)
+  // - plus any whose gene_name is in selectedGenes from dropdown
+  const highlightset = useMemo(() => {
+    const set = new Set<number>(highlightedIdxs);
+
+    if (selectedGenes.length) {
+      data.forEach((item, idx) => {
+        if (selectedGenes.includes(item.gene_name)) {
+          set.add(idx);
+        }
+      });
+    }
+
+    return set;
+  }, [highlightedIdxs, selectedGenes, data]);
+
+  // console.log(highlightset);
   // console.log(data);
   const geneSphereViewMount = useRef<boolean>(false);
   const meshRef = useRef<InstancedMesh | null>(null);
+
+  // raycasting state
+  const { camera } = useThree();
+  const [raycaster] = useState(() => new Raycaster());
+  const [mouse, setMouse] = useState<Vector2 | null>(null);
 
   //on mount
   useLayoutEffect(() => {
@@ -37,44 +85,115 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     if (!meshRef.current) return;
 
     const mesh = meshRef.current;
-    // console.log("gene sphere rendering started");
-
-    // const extent = d3.extent(data, (item) => item.cluster);
-    // const domain: [number, number] = [extent?.[0] ?? 0, extent?.[1] ?? 0];
-    // colorScale.domain([domain[1], domain[0]]);
 
     data.forEach((item, i) => {
-      object.scale.set(
-        nodeCtl.geneRadius,
-        nodeCtl.geneRadius,
-        nodeCtl.geneRadius
-      );
       const [x, y, z] = positionPicker(item, positionMode);
-      object.position.set(x, y, z);
+      const scaleBase = nodeCtl.geneRadius;
+      let scale = scaleBase;
 
+      const isHighlighted = highlightset.has(i);
+      const isHovered = hoveredIdx === i;
+
+      if (isHighlighted) scale *= 1.25;
+      if (isHovered) scale *= 1.4;
+
+      object.scale.set(scale, scale, scale);
+      object.position.set(x, y, z);
       object.updateMatrix();
       mesh.setMatrixAt(i, object.matrix);
 
-      // const color = new Color(colorScale(item.cluster) || "#ffffff");
-      // console.log(color);
-      // console.log(new Color("#ffffff"));
-      // mesh.setColorAt(i, new Color("#ffffff"));
+      // const baseColor = new Color(
+      //   colorPaletteSelector(geneColorPickerIdx ?? 0)
+      // );
+
+      let baseColorHex: string = colorPaletteSelector(geneColorPickerIdx ?? 0);
+
+      const cls = temporalByGeneName[item.gene_name]?.agreement_class;
+
+      if (temporalFilter.length === 0) {
+        baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
+      } else if (!cls && temporalFilter.includes("not_expressed")) {
+        baseColorHex = "#f97316"; // no_temporal / not_expressed
+      } else if (temporalFilter.includes(cls)) {
+        baseColorHex =
+          AGREEMENT_COLORS[cls] ??
+          colorPaletteSelector(geneColorPickerIdx ?? 0);
+      } else {
+        baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
+      }
+
+      const baseColor = new Color(baseColorHex);
+
+      const highlightColor = new Color("#f97316");
+
       mesh.setColorAt(
         i,
-        new Color(colorPaletteSelector(geneColorPickerIdx ?? 0))
+        isHighlighted || isHovered ? highlightColor : baseColor
       );
     });
+
     mesh.instanceMatrix.needsUpdate = true;
     mesh.instanceColor!.needsUpdate = true;
 
     // console.log("gene sphere rendering finished");
-  }, [data, positionMode, nodeCtl.geneRadius, geneColorPickerIdx]);
+  }, [
+    data,
+    positionMode,
+    nodeCtl.geneRadius,
+    geneColorPickerIdx,
+    highlightset,
+    hoveredIdx,
+    temporalFilter,
+    temporalByGeneName,
+  ]);
+
+  // pointer handlers: just track mouse in NDC, like old NodeRenderer
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+
+    const el = viewRef.current;
+    if (!el) {
+      setMouse(null);
+      dispatch(setHoveredGene(null));
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+
+    setMouse(
+      new Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      )
+    );
+  };
+
+  const handlePointerOut = () => {
+    setMouse(null);
+    dispatch(setHoveredGene(null));
+  };
+
+  // raycast effect: compute which instance is under the mouse
+  useEffect(() => {
+    if (!meshRef.current || !mouse) return;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(meshRef.current);
+
+    if (intersects.length > 0 && intersects[0].instanceId != null) {
+      const idx = intersects[0].instanceId;
+      dispatch(setHoveredGene({ label, idx }));
+    } else {
+      dispatch(setHoveredGene(null));
+    }
+  }, [mouse, raycaster, camera, dispatch, label]);
 
   return (
     <instancedMesh
       ref={meshRef}
       frustumCulled={true}
       args={[undefined, undefined, data.length]}
+      onPointerMove={handlePointerMove}
+      onPointerOut={handlePointerOut}
     >
       {/* if needed to lower the resolution to handle many points */}
       {/* <sphereGeometry args={[0.25, 12, 12]} /> */}

@@ -49,6 +49,8 @@ export interface workerToClientMessageType {
   contour_data: Record<string, ContourWrapperType>;
   projectionData: ProjectionResult;
   perLabelBackgroundMaskData: PerLabelBackgroundMask;
+  membership: MembershipState;
+  temporalTrendData: TemporalTrendData;
 }
 
 export interface messageToWorkerType {
@@ -110,10 +112,14 @@ export interface TubeControl {
 }
 
 export interface GeneSphereViewProps {
+  label: string;
+  viewRef: React.RefObject<HTMLDivElement>;
   geneColorPickerIdx?: number;
   data: GeneRowDataType[];
   positionMode: PositionMode;
   nodeCtl: NodeControl;
+  highlightedIdxs?: number[];
+  hoveredIdx?: number | null;
 }
 
 export interface GeneTubeViewProps {
@@ -125,6 +131,8 @@ export interface GeneTubeViewProps {
 }
 
 export interface DrawObjectProps {
+  label: string;
+  viewRef: React.RefObject<HTMLDivElement>;
   geneColorPickerIdx?: number;
   geneData: GeneRowDataType[];
   geneEdges: Gene_Edges_Path_Row_Type[];
@@ -246,3 +254,154 @@ export type Edge = { source: number; target: number };
 
 export type Variant = "hdr" | "pf";
 export type Plane = "XY" | "YZ" | "XZ";
+
+export type MembershipVariant = "hdr" | "point_fraction";
+
+export type MembershipPlaneEntry = {
+  pixels: [number, number][]; // length N, a point per gene
+  hdr: Record<string, number[]>;
+  point_fraction: Record<string, number[]>;
+};
+
+export type MembershipLabelEntry = {
+  points: number;
+  ids: string[];
+  planes: {
+    [plane in Plane]?: MembershipPlaneEntry;
+  };
+};
+
+export type MembershipState = {
+  [label: string]: MembershipLabelEntry;
+};
+
+export interface FetchMembershipArgs {
+  speciesName: string;
+  chrName: string;
+  dataInfo?: DataInfoType;
+}
+
+export type CondTab = "before" | "after" | "diff";
+
+export interface CameraState {
+  position: Vec3;
+  target: Vec3;
+}
+
+export interface UIState {
+  species: string;
+  chromosome: string;
+  selectedGenes: string[];
+  condTab: CondTab;
+  timeIdx: number;
+  toggleLightGear: boolean;
+  lightSettings: LightSettings;
+  twoDVariant: Variant; // "hdr" | "pf"
+  twoDLevel: number; // 100, 99, ...
+  twoDCleanBlobs: boolean;
+  twoDBlobMinAreaPct: number; // e.g., 5 = keep blobs >= 5% of largest area
+  highlightedGenesByLabel: Record<string, number[]>; // 2D to 3D
+  hoveredGene: { label: string; idx: number } | null; // 3D to 2D
+  // camera: CameraState;
+  temporalClassFilter: AgreementClass[]; // empty = no filter
+
+  // 2D panel tabs
+  twoDPanelTab: "shape" | "temporal";
+
+  // Temporal 2D view settings
+  temporal2DMaxGenes: number; // safety cap for barcode lists
+  temporal2DBarcodeSort: "abs" | "expr" | "acc";
+  temporal2DDeltaMode: "mean" | "last" | "peakAbs";
+}
+
+export interface DataState {
+  data: workerToClientMessageType | null;
+  status: "idle" | "loading" | "success" | "failed";
+  error?: string;
+}
+
+// Temporal Trend Types
+export type AgreementClass =
+  | "mixed"
+  | "conflict"
+  | "expr_acc_up"
+  | "expr_acc_down"
+  | "accessibility_only"
+  | "expression_only"
+  | "stable"
+  | "not_expressed";
+
+export interface TemporalTrendRowRaw {
+  gene_id: string;
+  gene_name: string;
+  agreement_class: AgreementClass;
+
+  increase?: number;
+  decrease?: number;
+  neutral?: number;
+
+  // Raw JSON has many extra columns. Keep it typed-safe without `any`.
+  [key: string]: unknown;
+}
+
+export interface TemporalTrendRow {
+  gene_id: string;
+  gene_name: string;
+  agreement_class: AgreementClass;
+
+  // derived from meta_data timepoints
+  expr_delta_by_time: Record<string, number | null>;
+  acc_delta_by_time: Record<string, number | null>;
+
+  increase: number | null;
+  decrease: number | null;
+  neutral: number | null;
+}
+
+export interface TemporalTrendData {
+  chr: string;
+  timepoints: string[];
+  rows: TemporalTrendRow[];
+  byGeneName: Record<string, TemporalTrendRow>;
+}
+
+export type GeneColorMode = "viewPalette" | "temporalAgreement";
+
+export type ExprAcc2DContainerProps = { meta_data_typed: DataInfoType };
+export type DeltaMode = "mean" | "last" | "peakAbs";
+
+export type GeneScatterPoints = {
+  gene: string;
+  idx: number;
+  agreement: AgreementClass;
+  expr: number;
+  acc: number;
+};
+
+export type ExprAccScatterProps = {
+  points: GeneScatterPoints[];
+  selectedGenes: string[];
+  onClickGene: (gene: string) => void;
+  onLasso: (genes: string[], mode: "replace" | "add") => void;
+};
+
+export type BarcodePoint = {
+  gene: string;
+  idx: number;
+  agreement: AgreementClass;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  row: any; // expects row.expr_delta_by_time and row.acc_delta_by_time
+  expr: number; // summarized (for sort only)
+  acc: number; // summarized (for sort only)
+};
+
+export type BarcodeSort = "abs" | "expr" | "acc";
+
+export type GeneBarCodeProps = {
+  points: BarcodePoint[];
+  timepoints: string[];
+  maxGenes: number;
+  sortMode: BarcodeSort;
+  selectedGenes: string[];
+  onClickGene: (gene: string) => void;
+};
