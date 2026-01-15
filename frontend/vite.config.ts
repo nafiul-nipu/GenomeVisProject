@@ -5,6 +5,7 @@ import checker from "vite-plugin-checker";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  base: "/GenomeVisProject/",
   plugins: [
     checker({
       typescript: { tsconfigPath: "tsconfig.app.json" },
