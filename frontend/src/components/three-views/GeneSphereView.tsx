@@ -86,13 +86,36 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 
     const mesh = meshRef.current;
 
+    // Visibility mask: if one or more temporal classes are selected,
+    // ONLY show genes that match the selected class(es).
+    // Missing temporal info is treated as "not_expressed".
+    const filterActive = temporalFilter.length > 0;
+    const filterSet = filterActive ? new Set(temporalFilter) : null;
+
     data.forEach((item, i) => {
       const [x, y, z] = positionPicker(item, positionMode);
       const scaleBase = nodeCtl.geneRadius;
       let scale = scaleBase;
 
-      const isHighlighted = highlightset.has(i);
-      const isHovered = hoveredIdx === i;
+      // const isHighlighted = highlightset.has(i);
+      // const isHovered = hoveredIdx === i;
+
+      const cls = temporalByGeneName[item.gene_name]?.agreement_class;
+      const effectiveClass = cls ?? "not_expressed";
+
+      const visible =
+        !filterActive || (filterSet?.has(effectiveClass) ?? false);
+
+      const isHighlighted = visible && highlightset.has(i);
+      const isHovered = visible && hoveredIdx === i;
+
+      if (!visible) {
+        // Hide by collapsing the instance (also prevents raycast hits).
+        scale = 0;
+      } else {
+        if (isHighlighted) scale *= 1.25;
+        if (isHovered) scale *= 1.4;
+      }
 
       if (isHighlighted) scale *= 1.25;
       if (isHovered) scale *= 1.4;
@@ -108,18 +131,26 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 
       let baseColorHex: string = colorPaletteSelector(geneColorPickerIdx ?? 0);
 
-      const cls = temporalByGeneName[item.gene_name]?.agreement_class;
+      // const cls = temporalByGeneName[item.gene_name]?.agreement_class;
 
-      if (temporalFilter.length === 0) {
-        baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
-      } else if (!cls && temporalFilter.includes("not_expressed")) {
-        baseColorHex = "#f97316"; // no_temporal / not_expressed
-      } else if (temporalFilter.includes(cls)) {
+      // if (temporalFilter.length === 0) {
+      //   baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
+      // } else if (!cls && temporalFilter.includes("not_expressed")) {
+      //   baseColorHex = "#f97316"; // no_temporal / not_expressed
+      // } else if (temporalFilter.includes(cls)) {
+      //   baseColorHex =
+      //     AGREEMENT_COLORS[cls] ??
+      //     colorPaletteSelector(geneColorPickerIdx ?? 0);
+      // } else {
+      //   baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
+      // }
+
+      // If filtering is active, color by agreement class.
+      // Otherwise keep the per-view palette color.
+      if (filterActive) {
         baseColorHex =
-          AGREEMENT_COLORS[cls] ??
+          AGREEMENT_COLORS[effectiveClass] ??
           colorPaletteSelector(geneColorPickerIdx ?? 0);
-      } else {
-        baseColorHex = colorPaletteSelector(geneColorPickerIdx ?? 0);
       }
 
       const baseColor = new Color(baseColorHex);
@@ -185,7 +216,7 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     } else {
       dispatch(setHoveredGene(null));
     }
-  }, [mouse, raycaster, camera, dispatch, label]);
+  }, [mouse, raycaster, camera, dispatch, label, temporalFilter]);
 
   return (
     <instancedMesh
