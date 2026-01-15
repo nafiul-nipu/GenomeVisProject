@@ -5,6 +5,7 @@ import type {
   ContourWrapperType,
   Density2DType,
 } from "../types/data_types_interfaces";
+import { publicDataUrl } from "./publicDataUrl";
 
 // Overload 1: contour
 export async function fetch2DContoursOrDensity(
@@ -27,7 +28,6 @@ export async function fetch2DContoursOrDensity({
     if (!dataInfo) throw new Error("dataInfo is required");
     if (!which2D) throw new Error("which2D must be 'contour' or 'density'");
 
-    const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
     const cfg: SpeciesInfoRaw = dataInfo[speciesName];
     if (!cfg)
       throw new Error(`Species "${speciesName}" not found in dataInfo.`);
@@ -42,9 +42,8 @@ export async function fetch2DContoursOrDensity({
       }
     }
 
-    const urls = fileNames.map(
-      (file) =>
-        `${basePath}${speciesName}/shape_data/${chrName}/${which2D}/${file}`
+    const urls = fileNames.map((file) =>
+      publicDataUrl(`${speciesName}/shape_data/${chrName}/${which2D}/${file}`)
     );
 
     const out: Record<string, ContourWrapperType | Density2DType> = {};

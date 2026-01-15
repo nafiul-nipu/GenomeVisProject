@@ -6,6 +6,7 @@ import type {
   SpeciesInfoRaw,
   PerLabelBackgroundMask,
 } from "../types/data_types_interfaces";
+import { publicDataUrl } from "./publicDataUrl";
 
 function isMaskMatrix(m: unknown): m is MaskMatrix {
   return (
@@ -25,7 +26,6 @@ export const fetchPerLabelBackgroundMask = async ({
   try {
     if (!dataInfo) throw new Error("dataInfo is required");
 
-    const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
     const cfg: SpeciesInfoRaw = dataInfo[speciesName];
     if (!cfg)
       throw new Error(`Species "${speciesName}" not found in dataInfo.`);
@@ -42,10 +42,15 @@ export const fetchPerLabelBackgroundMask = async ({
     }
 
     // build URLs
-    const urls = fileNames.map(
-      (file) =>
-        `${basePath}${speciesName}/shape_data/${chrName}/background_by_label/${file}`
+    const urls = fileNames.map((file) =>
+      publicDataUrl(
+        `${speciesName}/shape_data/${chrName}/background_by_label/${file}`
+      )
     );
+    // const urls = fileNames.map(
+    //   (file) =>
+    //     `${basePath}${speciesName}/shape_data/${chrName}/background_by_label/${file}`
+    // );
 
     // fetch in parallel
     const settled = await Promise.allSettled(

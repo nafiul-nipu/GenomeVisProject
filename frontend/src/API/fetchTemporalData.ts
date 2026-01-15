@@ -6,6 +6,7 @@ import type {
   TemporalTrendRow,
   TemporalTrendRowRaw,
 } from "../types/data_types_interfaces";
+import { publicDataUrl } from "./publicDataUrl";
 
 export interface FetchTemporalArgs {
   speciesName: string;
@@ -22,11 +23,14 @@ export async function fetchTemporalData({
   chrName,
   dataInfo,
 }: FetchTemporalArgs): Promise<TemporalTrendData> {
-  const base = import.meta.env.VITE_PUBLIC_DATA_PATH;
   const timepoints = dataInfo[speciesName].timepoints;
 
-  const url = `${base}${speciesName}/temporal_data/${chrName}_temporal_data.json`;
+  // const url = `${base}${speciesName}/temporal_data/${chrName}_temporal_data.json`;
+  const url = publicDataUrl(
+    `${speciesName}/temporal_data/${chrName}_temporal_data.json`
+  );
 
+  console.log(url);
   const res = await fetch(url, { cache: "no-cache" });
   if (!res.ok) {
     throw new Error(`fetchTemporalData failed (${res.status}) ${url}`);

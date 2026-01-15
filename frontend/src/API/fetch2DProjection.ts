@@ -4,19 +4,24 @@ import type {
   ProjectionDataMap,
   ProjectionResult,
 } from "../types/data_types_interfaces";
+import { publicDataUrl } from "./publicDataUrl";
 
 export const fetch2DProjection = async ({
   speciesName,
   chrName,
 }: FetchDataType): Promise<ProjectionResult> => {
   try {
-    const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
-
     // Each plane has its own file
     const files = {
-      XY: `${basePath}${speciesName}/shape_data/${chrName}/projections/XY_projections.json`,
-      XZ: `${basePath}${speciesName}/shape_data/${chrName}/projections/XZ_projections.json`,
-      YZ: `${basePath}${speciesName}/shape_data/${chrName}/projections/YZ_projections.json`,
+      XY: publicDataUrl(
+        `${speciesName}/shape_data/${chrName}/projections/XY_projections.json`
+      ),
+      XZ: publicDataUrl(
+        `${speciesName}/shape_data/${chrName}/projections/XZ_projections.json`
+      ),
+      YZ: publicDataUrl(
+        `${speciesName}/shape_data/${chrName}/projections/YZ_projections.json`
+      ),
     };
 
     // Fetch in parallel

@@ -4,6 +4,7 @@ import type {
   FetchDataType,
   GeneRowDataType,
 } from "../types/data_types_interfaces";
+import { publicDataUrl } from "./publicDataUrl";
 
 export const fetchAllGeneDataJson = async ({
   speciesName,
@@ -15,8 +16,6 @@ export const fetchAllGeneDataJson = async ({
     if (!dataInfo) {
       throw new Error("dataInfo is required");
     }
-
-    const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
     // console.log(basePath);
 
     const cfg: SpeciesInfoRaw = dataInfo[speciesName];
@@ -37,10 +36,13 @@ export const fetchAllGeneDataJson = async ({
     // console.log(fileNames[1]);
 
     // Create full URLs for each file
-    const urls = fileNames.map(
-      (file) =>
-        `${basePath}${speciesName}/${gene_data_folder}/${chrName}/${file}`
+    const urls = fileNames.map((file) =>
+      publicDataUrl(`${speciesName}/${gene_data_folder}/${chrName}/${file}`)
     );
+    // const urls = fileNames.map(
+    //   (file) =>
+    //     `${basePath}${speciesName}/${gene_data_folder}/${chrName}/${file}`
+    // );
     // console.log(urls[1]);
 
     // Fetch all files in parallel; skip missing files silently
