@@ -11,10 +11,12 @@ The repository is provided to support reproducibility of the results reported in
 
 ## Repository structure
 
+```
 GenomeVisProject/
-├── frontend/ # Web-based visual analytics system
-├── data_processing_python/ # Python data processing pipeline (incl. MPASE)
+├── frontend/                  # Web-based visual analytics system
+├── data_processing_python/    # Python data processing pipeline (incl. MPASE)
 ├── README.md
+```
 
 ---
 
@@ -42,18 +44,25 @@ The repository includes an `.nvmrc` file specifying the tested Node version.
 
 4. Copy the processed dataset into `frontend/public/dataroot/`.
 
+```
    Example structure:
-   frontend/public/dataroot/
-   dataset*name/
-   *.json
-   \_.csv
+   frontend/public/dataroot/green_monkey/
+├── shape_data/
+│   ├── chr1/
+│   ├── chr2/
+│   ├── chr3/
+│   └── ...
+├── structure_genes_aligned/
+└── temporal_data/
+
+```
 
 5. Install dependencies and start the development server:
    `npm install`  
    `npm run dev`
 
 6. Open the application in your browser:
-   `http://localhost:5173`
+   `http://localhost:5173/GenomeVisProject/`
 
 ---
 
