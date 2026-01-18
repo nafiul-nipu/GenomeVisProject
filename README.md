@@ -1,37 +1,158 @@
 # GenomeVisProject
 
-### How to run the frontend
+This repository contains the complete codebase used for the analyses and visualizations presented in the paper. It includes:
 
-(Depends on having node.js installed, version >=18.0) Last tested on v22.13.1
-(if a mac user, recommend using the Node Version Manager (nvm) to assist with proper versioning)
-.nvmrc file contains the current node version this project was tested.
-go to `frontend` and run `nvm install`
+1. A Python-based data processing pipeline, including the MPASE framework, used to align and abstract reconstructed 3D genome structures.
+2. A web-based visual analytics frontend for interactive exploration of spatial genome organization, gene relocation, and temporal functional changes.
 
-1. Create a `dataroot` folder inside `public` folder and copy the data inside it
-2. Run `npm install` to install all dependencies
-3. Run `npm run dev` to start the frontend
-4. Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
+The repository is provided to support reproducibility of the results reported in the paper and is not intended as a polished or production-ready software release.
 
-### How to run the data processing
+---
 
-(python version == 3.9.6)
-use pyenv for proper versioning
-.python-version file contains the current python version for this project
+## Repository structure
 
-go to `data_processing_python` and run
-`pyenv install --skip-existing` and then `pyenv local`
-verify `pyenv version` and `python --version`
+GenomeVisProject/
+├── frontend/ # Web-based visual analytics system
+├── data_processing_python/ # Python data processing pipeline (incl. MPASE)
+├── README.md
 
-1. Go to `data_processing_python` folder
-2. Create a virtual environment with `python3 -m venv venv`
-3. Activate the virtual environment with
-   for mac `source venv/bin/activate`
-   fow windows `.\venv\Scripts\activate`
-4. Run `pip install -r requirements.txt` to install all dependencies (only the first time running the project)
-5. (if new package is installed) update requirements.txt `pip freeze > requirements.txt`
-6. Run `jupyter notebook` to start the notebook
+---
 
-## Data Processing Guide
+## Running the frontend
 
-- Run the ipynb files based on the order they are created (e.g, 01*{file_name}, 02*{file_name})
-- For each ipynb, check if the input data file paths and output save paths are correct
+### Requirements
+
+- Node.js >= 18
+- Last tested with Node v22.13.1
+- Recommended: Node Version Manager (nvm)
+
+The repository includes an `.nvmrc` file specifying the tested Node version.
+
+### Steps
+
+1. Navigate to the frontend directory:
+   `cd frontend`
+
+2. Install and activate the correct Node version:
+   `nvm install`  
+   `nvm use`
+
+3. Create the data directory expected by the frontend:
+   `frontend/public/dataroot/`
+
+4. Copy the processed dataset into `frontend/public/dataroot/`.
+
+   Example structure:
+   frontend/public/dataroot/
+   dataset*name/
+   *.json
+   \_.csv
+
+5. Install dependencies and start the development server:
+   `npm install`  
+   `npm run dev`
+
+6. Open the application in your browser:
+   `http://localhost:5173`
+
+---
+
+## Running the data processing pipeline (Python)
+
+### Requirements
+
+- Python 3.9.6
+- Recommended: pyenv
+
+The repository includes a `.python-version` file specifying the tested Python version.
+
+### Steps
+
+1. Navigate to the data processing directory:
+   `cd data_processing_python`
+
+2. Install and activate the correct Python version:
+   `pyenv install --skip-existing 3.9.6`  
+   `pyenv local 3.9.6`  
+   `python --version`
+
+3. Create and activate a virtual environment:
+   `python -m venv venv`  
+   `source venv/bin/activate`
+
+   On Windows:
+   `.\venv\Scripts\activate`
+
+4. Install dependencies:
+   `pip install -r requirements.txt`
+
+   If new packages are added:
+   `pip freeze > requirements.txt`
+
+5. Start Jupyter Notebook:
+   `jupyter notebook`
+
+---
+
+## Data processing guide
+
+- Run notebooks in numerical order (e.g., 01*\*.ipynb, then 02*\*.ipynb).
+- For each notebook, verify input file paths and output save paths.
+- Final outputs (JSON/CSV files) should be copied into:
+  `frontend/public/dataroot/`
+
+---
+
+## Data availability
+
+Raw Hi-C datasets are large and are not hosted directly in this repository.
+
+The datasets used in this study are publicly available and described in:
+`Venu V, Roth C, Adikari SH, Small EM, et al. *Multi-omics analysis reveals the
+dynamic interplay between Vero host chromatin structure and function during
+vaccinia virus infection*. Communications Biology, 2024, 7(1):721.
+PMID: 38862613`.
+
+Links to the original data repositories (e.g., GEO) are provided in the
+corresponding publication.
+
+This repository provides preprocessed example inputs and scripts sufficient to
+reproduce the analyses and figures reported in the paper.
+
+---
+
+## Live demo
+
+A live, web-based version of the visual analytics system is available at:
+
+https://nafiul-nipu.github.io/GenomeVisProject/
+
+The demo includes the processed analysis results used in the paper and allows
+users to explore 3D genome structures, shape abstractions, and temporal
+dynamics without running the frontend locally. This demo is provided for
+convenience and inspection; full reproducibility is supported through the
+source code and data processing pipeline included in this repository.
+
+## Notes on reproducibility
+
+This repository supports reproducibility of the results presented in the paper.
+
+Users can:
+
+- Inspect the MPASE implementation in the data processing pipeline
+- Run provided notebooks to reproduce representative outputs
+- Launch the frontend to explore generated data interactively
+
+---
+
+## License
+
+This code is made publicly available for the purpose of academic review and
+reproducibility of the results presented in the associated paper.
+
+---
+
+## Contact
+
+Nafiul Nipu  
+Email: mnipu2@uic.edu
