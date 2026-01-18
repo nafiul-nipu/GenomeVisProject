@@ -61,7 +61,7 @@ def auto_bandwidth(points2d: np.ndarray, strategy: str = "median*0.5") -> float:
     return max(1e-6, md * 0.5)
 
 def point_fraction_mask(points2d: np.ndarray,
-                        xs, ys, ex, ey,
+                        xs, ys,
                         frac: float,
                         bandwidth: Optional[float],
                         disk_px: int,
@@ -94,8 +94,7 @@ def point_fraction_mask(points2d: np.ndarray,
     # Draw the kept points as small disks on the shared grid to create a raw boolean mask.
     # Converts scattered points into a contiguous region suitable for cleanup/contouring
     # mask = rasterize_points(kept, xs, ys, disk_px=disk_px)
-    # Expect ex, ey to be threaded in; see make_pf_shape() change below.
-    mask = rasterize_points(kept, xs, ys, disk_px=disk_px, ex=ex, ey=ey)
+    mask = rasterize_points(kept, xs, ys, disk_px=disk_px)
     if morph.closing > 0:
         # Morphological closing to seal tiny gaps and connect near pixels.
         # Prevents hairline breaks in the region.
@@ -157,7 +156,6 @@ def biggest_component_mask(mask: np.ndarray, fill_holes: bool = True) -> np.ndar
 def make_pf_shape(points2d: np.ndarray,
                   xs,
                   ys, 
-                  ex, ey,
                   plane: Plane, 
                   frac: float,
                   bandwidth: Optional[float], 
@@ -177,7 +175,7 @@ def make_pf_shape(points2d: np.ndarray,
     """
     # build the fraction mask and get the kept points
     # mask, kept, bw = point_fraction_mask(points2d, xs, ys, frac, bandwidth, disk_px, morph=morph)
-    mask, kept, bw = point_fraction_mask(points2d, xs, ys, ex, ey, frac, bandwidth, disk_px, morph=morph)
+    mask, kept, bw = point_fraction_mask(points2d, xs, ys, frac, bandwidth, disk_px, morph=morph)
     # Extract the main contour from the boolean mask
     contour = contour_from_bool(mask)
     return dict(plane=plane, level=int(round(frac*100)), variant="point_fraction", mask=mask, contour=contour)
