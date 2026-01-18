@@ -7,12 +7,10 @@
 .nvmrc file contains the current node version this project was tested.
 go to `frontend` and run `nvm install`
 
-1. Create a .env.local file in the root directory of the project
-2. Add the following line to the file: `VITE_PUBLIC_DATA_PATH=/dataroot/`
-3. Create a `dataroot` folder inside `public` folder and copy the data inside it
-4. Run `npm install` to install all dependencies
-5. Run `npm run dev` to start the frontend
-6. Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
+1. Create a `dataroot` folder inside `public` folder and copy the data inside it
+2. Run `npm install` to install all dependencies
+3. Run `npm run dev` to start the frontend
+4. Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
 
 ### How to run the data processing
 
