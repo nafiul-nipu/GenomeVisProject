@@ -1,3 +1,19 @@
+export type AppMode = "landing" | "setup" | "visualization";
+
+export type VisualizationRootProps = {
+  meta_data_typed: DataInfoType;
+};
+
+export type LandingScreenProps = {
+  onUseDemo: () => void;
+  onLoadUserData: () => void;
+};
+
+export type DataSetupWizardProps = {
+  onCancel: () => void;
+  onComplete: (config: DataInfoType) => void;
+};
+
 export interface SpeciesInfoRaw {
   chromosomes: string[];
   timepoints: string[];
