@@ -44,7 +44,8 @@ The repository includes an `.nvmrc` file specifying the tested Node version.
 3. Create the data directory expected by the frontend:
    `frontend/public/dataroot/`
 
-4. Copy the processed dataset into `frontend/public/dataroot/`.
+4. Copy the processed dataset into `frontend/public/dataroot/`.  
+The example processed data sample is in the `frontend/public/dataroot/` folder already
 
 ```
    Example structure:
