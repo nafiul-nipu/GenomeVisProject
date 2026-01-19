@@ -1,3 +1,0 @@
-[submodule "data_processing_python/MPASE"]
-	path = data_processing_python/MPASE
-	url = https://github.com/nafiul-nipu/MPASE.git
