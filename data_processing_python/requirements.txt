@@ -162,4 +162,5 @@ widgetsnbextension==4.0.7
 yellowbrick==1.5
 zipp==3.21.0
 # Other deps...
--e ./mpase_package
+mpase @ git+https://github.com/nafiul-nipu/MPASE.git@v0.1.1
+
