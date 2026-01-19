@@ -27,10 +27,10 @@ export async function fetchTemporalData({
 
   // const url = `${base}${speciesName}/temporal_data/${chrName}_temporal_data.json`;
   const url = publicDataUrl(
-    `${speciesName}/temporal_data/${chrName}_temporal_data.json`
+    `${speciesName}/temporal_data/${chrName}_temporal_data.json`,
   );
 
-  console.log(url);
+  // console.log(url);
   const res = await fetch(url, { cache: "no-cache" });
   if (!res.ok) {
     throw new Error(`fetchTemporalData failed (${res.status}) ${url}`);

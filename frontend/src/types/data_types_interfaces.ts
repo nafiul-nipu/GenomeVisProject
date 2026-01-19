@@ -331,6 +331,7 @@ export interface UIState {
 }
 
 export interface DataState {
+  source?: "worker" | "user";
   data: workerToClientMessageType | null;
   status: "idle" | "loading" | "success" | "failed";
   error?: string;

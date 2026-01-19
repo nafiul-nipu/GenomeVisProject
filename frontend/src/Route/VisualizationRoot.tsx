@@ -28,42 +28,46 @@ export function VisualizationRoot({ meta_data_typed }: VisualizationRootProps) {
   const { species, chromosome } = useAppSelector((s) => s.ui);
   const ui = useAppSelector((s) => s.ui); // full ui state for saving snapshot
   const status = useAppSelector((s) => s.data.status);
+  const isUserData = useAppSelector((s) => s.data.source === "user");
 
   const twoDPanelTab = useAppSelector((s) => s.ui.twoDPanelTab);
+
+  //   const source = useAppSelector((s) => s.data.source);
+  //   console.log("[DEBUG] data.source =", source, "status =", status);
 
   useEffect(() => {
     mount.current = true;
 
-    console.log("[component] Dispatching fetchWorkerData...");
-    dispatch(
-      fetchWorkerData({ data_info: meta_data_typed, species, chromosome }),
-    )
-      .unwrap()
-      .then((res) => console.log("[component] Worker success:", res))
-      .catch((err) => console.error("[component] Worker failed:", err));
+    // If user uploaded data, we already have Redux data; do NOT run worker.
+    if (!isUserData) {
+      console.log("[component] Dispatching fetchWorkerData...");
+      dispatch(
+        fetchWorkerData({ data_info: meta_data_typed, species, chromosome }),
+      )
+        .unwrap()
+        .then((res) => console.log("[component] Worker success:", res))
+        .catch((err) => console.error("[component] Worker failed:", err));
+    }
 
-    // dispatch(
-    //   fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
-    // );
-
-    return () => terminateWorker();
-  }, []);
+    // Only terminate worker if we actually used it
+    return () => {
+      if (!isUserData) terminateWorker();
+    };
+  }, []); // keep as-is
 
   useEffect(() => {
     if (!mount.current) return;
 
+    if (isUserData) return;
+
     console.log("[component] Dispatching fetchWorkerData...");
     dispatch(
       fetchWorkerData({ data_info: meta_data_typed, species, chromosome }),
     )
       .unwrap()
-      .then((res) => console.log("[component] Worker success:", res))
+      .then((/*res*/) => console.log("[component] Worker success:" /*res*/))
       .catch((err) => console.error("[component] Worker failed:", err));
-
-    // dispatch(
-    //   fetchWorkerData({ data_info: meta_data_typed, species, chromosome })
-    // );
-  }, [dispatch, species, chromosome]);
+  }, [dispatch, species, chromosome, isUserData]);
 
   const handleExportPNG = async () => {
     const panelNode = exportRef.current;

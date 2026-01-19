@@ -11,6 +11,7 @@ import type { RootState } from "./store";
 import { requestData } from "../worker/workerService";
 
 const initialState: DataState = {
+  source: "worker",
   data: null,
   status: "idle",
 };
@@ -37,6 +38,12 @@ const dataSlice = createSlice({
       state.status = "success";
       state.error = undefined;
     },
+    setExternalData(state, action: PayloadAction<workerToClientMessageType>) {
+      state.data = action.payload;
+      state.status = "success";
+      state.error = undefined;
+      state.source = "user";
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -47,6 +54,7 @@ const dataSlice = createSlice({
       .addCase(fetchWorkerData.fulfilled, (state, action) => {
         state.status = "success";
         state.data = action.payload;
+        state.source = "worker";
       })
       .addCase(fetchWorkerData.rejected, (state, action) => {
         state.status = "failed";
@@ -56,5 +64,5 @@ const dataSlice = createSlice({
   },
 });
 
-export const { workerDataArrived } = dataSlice.actions;
+export const { workerDataArrived, setExternalData } = dataSlice.actions;
 export default dataSlice.reducer;

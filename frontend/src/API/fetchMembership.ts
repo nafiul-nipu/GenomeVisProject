@@ -11,9 +11,9 @@ export async function fetchMembership({
   // const basePath = import.meta.env.VITE_PUBLIC_DATA_PATH;
   // const url = `${basePath}${speciesName}/shape_data/${chrName}/membership.json`;
   const url = publicDataUrl(
-    `${speciesName}/shape_data/${chrName}/membership.json`
+    `${speciesName}/shape_data/${chrName}/membership.json`,
   );
-  console.log("membership", url);
+  // console.log("membership", url);
 
   const res = await fetch(url);
   if (!res.ok) {
