@@ -31,7 +31,8 @@
     "before_name": "untr",
     "after_name": "vacv",
     "gene_folder_name": "structure_genes_aligned",
-    "gene_file_tail": "gene_aligned"
+    "gene_file_tail": "gene_aligned",
+    "gene_position_to_use": "aligned"
   },
   "another": {
     "chromosomes": [

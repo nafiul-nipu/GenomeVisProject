@@ -29,9 +29,13 @@ const gapX = 8; // matches gap-2
 
 export function ThreeDViewContainer({ meta_data_typed }: Props) {
   const { condTab, timeIdx, species, chromosome } = useAppSelector((s) => s.ui);
+  // console.log(meta_data_typed);
 
   // which position to use for genes
-  const [positionMode] = useState<PositionMode>("aligned");
+  const [positionMode] = useState<PositionMode>(() => {
+    const speciesMeta = meta_data_typed?.[species];
+    return (speciesMeta?.gene_position_to_use as PositionMode) ?? "default";
+  });
 
   const geneData = useAppSelector((s) => s.data.data?.gene_data) || {};
   const geneEdges = useAppSelector((s) => s.data.data?.gene_edges) || {};
@@ -138,7 +142,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   // NOTE: No manual assignment, no callback ref — just normal refs used directly.
   const viewRefs = useMemo(
     () => viewKeys.map(() => React.createRef<HTMLDivElement>()),
-    [viewKeys]
+    [viewKeys],
   );
 
   // Sizes
@@ -147,7 +151,7 @@ export function ThreeDViewContainer({ meta_data_typed }: Props) {
   const viewHeight = Math.max(120, Math.floor(wrapSize.h - titlesRow));
   const viewWidth = Math.max(
     220,
-    Math.floor((wrapSize.w - gapX * (columns - 1)) / columns) - 2
+    Math.floor((wrapSize.w - gapX * (columns - 1)) / columns) - 2,
   );
 
   // console.log(viewItems);

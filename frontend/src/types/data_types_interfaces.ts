@@ -11,7 +11,7 @@ export type LandingScreenProps = {
 
 export type DataSetupWizardProps = {
   onCancel: () => void;
-  onComplete: (config: DataInfoType) => void;
+  onComplete: (meta: DataInfoType) => void;
 };
 
 export interface SpeciesInfoRaw {
@@ -22,6 +22,7 @@ export interface SpeciesInfoRaw {
   after_name: string;
   gene_folder_name: string;
   gene_file_tail: string;
+  gene_position_to_use?: string;
 }
 
 export type DataInfoType = {
@@ -109,6 +110,9 @@ export interface GeneRowDataType {
   start_z: number;
   structure_end_id: number;
   structure_start_id: number;
+  x?: number;
+  y?: number;
+  z?: number;
 }
 
 export interface NodeControl {
@@ -157,7 +161,7 @@ export interface DrawObjectProps {
   nodeCtl: NodeControl;
   tubeCtl: TubeControl;
 }
-export type PositionMode = "aligned" | "middle" | "start" | "end";
+export type PositionMode = "aligned" | "middle" | "start" | "end" | "default";
 export interface PositionPicker {
   (item: GeneRowDataType, mode: PositionMode): [number, number, number];
 }
