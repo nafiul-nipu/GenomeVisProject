@@ -16,7 +16,7 @@ The repository is provided to support reproducibility of the results reported in
 ```
 GenomeVisProject/
 ├── frontend/                  # Web-based visual analytics system
-├── data_processing_python/    # Python data processing pipeline (incl. MPASE)
+├── data_processing_python/    # Python data processing pipeline
 ├── README.md
 ```
 
