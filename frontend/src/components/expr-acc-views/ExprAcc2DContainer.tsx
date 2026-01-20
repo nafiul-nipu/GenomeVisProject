@@ -23,7 +23,7 @@ import { GeneExprAccBarsLinesAgreement } from "./GeneExprAccBarsLinesAgreement";
 function summarizeDelta(
   valsByTime: Record<string, number | null>,
   timepoints: string[],
-  mode: DeltaMode
+  mode: DeltaMode,
 ): number | null {
   const vals = timepoints
     .map((tp) => valsByTime?.[tp] ?? null)
@@ -54,16 +54,35 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
 
   const temporal2DMaxGenes = useAppSelector((s) => s.ui.temporal2DMaxGenes);
   const temporal2DBarcodeSort = useAppSelector(
-    (s) => s.ui.temporal2DBarcodeSort
+    (s) => s.ui.temporal2DBarcodeSort,
   );
   const temporal2DDeltaMode = useAppSelector((s) => s.ui.temporal2DDeltaMode);
 
   const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
   const temporalFilter = useAppSelector((s) => s.ui.temporalClassFilter);
 
+  // const temporal =
+  //   useAppSelector((s) => s.data.data?.temporalTrendData) ?? null;
+  // const temporalByGene = temporal?.byGeneName ?? {};
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dataAny = useAppSelector((s) => s.data.data) as any;
+
   const temporal =
-    useAppSelector((s) => s.data.data?.temporalTrendData) ?? null;
+    dataAny?.temporalTrendDataByChr?.[chromosome] ??
+    dataAny?.temporalTrendData ??
+    null;
+
   const temporalByGene = temporal?.byGeneName ?? {};
+
+  // console.log(
+  //   "[ExprAcc] chr",
+  //   chromosome,
+  //   "temporal.chr",
+  //   temporal?.chr,
+  //   "rows",
+  //   temporal?.rows?.length,
+  // );
 
   // stable label for hoveredGene -> idx mapping (matches 3D/2D convention)
   const primaryLabel = useMemo(() => {
@@ -90,7 +109,7 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
   const meta = meta_data_typed?.[species];
   const timepoints = useMemo(
     () => (meta?.timepoints ?? []).slice(0, 3),
-    [meta]
+    [meta],
   );
 
   const points = useMemo(() => {
@@ -128,12 +147,12 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
       const expr = summarizeDelta(
         row.expr_delta_by_time,
         timepoints,
-        temporal2DDeltaMode
+        temporal2DDeltaMode,
       );
       const acc = summarizeDelta(
         row.acc_delta_by_time,
         timepoints,
-        temporal2DDeltaMode
+        temporal2DDeltaMode,
       );
       if (expr == null || acc == null) continue;
 
@@ -239,7 +258,7 @@ export const ExprAcc2DContainer: React.FC<ExprAcc2DContainerProps> = ({
               value={temporal2DBarcodeSort}
               onChange={(e) =>
                 dispatch(
-                  setTemporal2DBarcodeSort(e.target.value as BarcodeSort)
+                  setTemporal2DBarcodeSort(e.target.value as BarcodeSort),
                 )
               }
               className="bg-transparent border border-gray-700 rounded px-1 py-0.5"

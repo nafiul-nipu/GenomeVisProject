@@ -8,18 +8,12 @@ import type {
   DataSetupWizardProps,
   DataInfoType,
   workerToClientMessageType,
+  BundleType,
+  DataUploadMode,
+  DataValidationIssue,
 } from "../types/data_types_interfaces";
 
 import { setSpecies, setChromosome } from "../redux-store/uiSlice";
-
-type Bundle = {
-  meta: DataInfoType;
-  data: workerToClientMessageType;
-};
-
-type UploadMode = "bundle" | "folder";
-
-type ValidationIssue = { path: string; message: string };
 
 function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null && !Array.isArray(x);
@@ -27,9 +21,9 @@ function isObject(x: unknown): x is Record<string, unknown> {
 
 function validateBundle(parsed: any): {
   ok: boolean;
-  issues: ValidationIssue[];
+  issues: DataValidationIssue[];
 } {
-  const issues: ValidationIssue[] = [];
+  const issues: DataValidationIssue[] = [];
 
   if (!isObject(parsed)) {
     return {
@@ -196,7 +190,7 @@ function validateBundle(parsed: any): {
   return { ok: issues.length === 0, issues };
 }
 
-function makeTemplate(): Bundle {
+function makeTemplate(): BundleType {
   return {
     meta: {
       human: {
@@ -263,12 +257,12 @@ async function buildBundleFromFolder(
   files: FileList,
   onProgress?: FolderProgressFn,
 ): Promise<{
-  bundle: Bundle | null;
-  issues: ValidationIssue[];
+  bundle: BundleType | null;
+  issues: DataValidationIssue[];
   fileCount: number;
   metaFile?: string;
 }> {
-  const issues: ValidationIssue[] = [];
+  const issues: DataValidationIssue[] = [];
   const all = Array.from(files);
 
   const jsonFiles = all.filter((f) => f.name.toLowerCase().endsWith(".json"));
@@ -588,7 +582,7 @@ async function buildBundleFromFolder(
   onProgress?.(total, total, "Ready");
 
   return {
-    bundle: candidate as Bundle,
+    bundle: candidate as BundleType,
     issues,
     fileCount: all.length,
     metaFile: metaPath,
@@ -603,11 +597,12 @@ export function DataSetupWizard({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [helpOpen, setHelpOpen] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [uploadMode, setUploadMode] = useState<UploadMode>("bundle");
+  const [uploadMode, setUploadMode] = useState<DataUploadMode>("folder");
   const [fileName, setFileName] = useState<string>("");
-  const [bundle, setBundle] = useState<Bundle | null>(null);
-  const [issues, setIssues] = useState<ValidationIssue[]>([]);
+  const [bundle, setBundle] = useState<BundleType | null>(null);
+  const [issues, setIssues] = useState<DataValidationIssue[]>([]);
   const [folderInfo, setFolderInfo] = useState<null | {
     fileCount: number;
     metaFile?: string;
@@ -688,7 +683,7 @@ export function DataSetupWizard({
         return;
       }
 
-      setBundle(parsed as Bundle);
+      setBundle(parsed as BundleType);
       setLoadStage("ready");
       setStep(3);
     } catch (e) {
@@ -769,22 +764,22 @@ export function DataSetupWizard({
         dispatch(setChromosome(chr0));
         dispatch(setExternalData(bundle.data));
 
-        console.log(bundle.data);
+        // console.log(bundle.data);
 
-        console.log(
-          "[user data] externalData.temporalTrendData:",
-          bundle.data.temporalTrendData,
-        );
-        console.log(
-          "[user data] temporal rows:",
-          bundle.data.temporalTrendData?.rows?.length,
-        );
-        console.log(
-          "[user data] temporal byGeneName size:",
-          bundle.data.temporalTrendData?.byGeneName
-            ? Object.keys(bundle.data.temporalTrendData.byGeneName).length
-            : 0,
-        );
+        // console.log(
+        //   "[user data] externalData.temporalTrendData:",
+        //   bundle.data.temporalTrendData,
+        // );
+        // console.log(
+        //   "[user data] temporal rows:",
+        //   bundle.data.temporalTrendData?.rows?.length,
+        // );
+        // console.log(
+        //   "[user data] temporal byGeneName size:",
+        //   bundle.data.temporalTrendData?.byGeneName
+        //     ? Object.keys(bundle.data.temporalTrendData.byGeneName).length
+        //     : 0,
+        // );
 
         // navigate to genome interface
         onComplete(bundle.meta);
@@ -851,9 +846,19 @@ export function DataSetupWizard({
           <h2 className="text-2xl font-semibold">Load your data</h2>
           <p className="text-gray-400 text-sm">
             GenomeVis visualizes{" "}
-            <span className="text-gray-200">precomputed</span> outputs (it does
-            not run MPASE). Upload a single JSON bundle that contains metadata +
-            precomputed results.
+            <span className="text-gray-200">
+              precomputed outputs generated with MPASE
+            </span>
+            . MPASE runs offline to produce aligned 3D structures and shape
+            abstractions.
+            <a
+              href="https://github.com/nafiul-nipu/MPASE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-1 text-sky-400 hover:text-sky-300 underline"
+            >
+              Learn more
+            </a>
           </p>
         </div>
 
@@ -908,8 +913,9 @@ export function DataSetupWizard({
               </ul>
 
               <div className="text-sm text-gray-200 font-medium mt-3">
-                Label naming convention (recommended)
+                Label naming convention (required)
               </div>
+
               <div className="text-sm text-gray-400">
                 <code className="text-gray-200">
                   {"<chromosome>_<timepoint>_<condition>"}
@@ -920,7 +926,7 @@ export function DataSetupWizard({
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <button
                 onClick={downloadTemplate}
                 className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 transition text-sm"
@@ -928,12 +934,21 @@ export function DataSetupWizard({
                 Download JSON template
               </button>
 
-              <button
-                onClick={() => setStep(2)}
-                className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 transition text-sm font-medium"
-              >
-                Continue
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setHelpOpen(true)}
+                  className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 transition text-sm"
+                >
+                  Help: data format
+                </button>
+
+                <button
+                  onClick={() => setStep(2)}
+                  className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 transition text-sm font-medium"
+                >
+                  Continue
+                </button>
+              </div>
             </div>
 
             <button
@@ -1035,8 +1050,10 @@ export function DataSetupWizard({
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
                         Tip: select the{" "}
-                        <code className="text-gray-300">dataroot/</code> folder
-                        if you have it.
+                        <code className="text-gray-300">
+                          dataroot/green_monkey
+                        </code>{" "}
+                        folder if you have it.
                       </div>
                     </div>
                   </div>
@@ -1189,6 +1206,453 @@ export function DataSetupWizard({
 
             <div className="mt-3 text-xs text-gray-500">
               Please don’t refresh the page.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {helpOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+          onMouseDown={() => setHelpOpen(false)}
+        >
+          <div
+            className="h-full w-full grid place-items-center p-4"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className="w-full max-w-3xl rounded-2xl border border-gray-700 bg-gray-900 shadow-xl">
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4 p-5 border-b border-gray-800">
+                <div>
+                  <div className="text-lg font-semibold text-white">
+                    How to set up your data
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    GenomeVis visualizes{" "}
+                    <span className="text-gray-300">
+                      precomputed outputs generated using MPASE
+                    </span>
+                    . MPASE is used offline to extract{" "}
+                    <span className="text-gray-300">
+                      3D aligned genome structures
+                    </span>
+                    ,
+                    <span className="text-gray-300">2D shape abstractions</span>
+                    , and
+                    <span className="text-gray-300">
+                      gene–shape relationships
+                    </span>
+                    . GenomeVis does <strong>not</strong> run MPASE in the
+                    browser.
+                    <span className="ml-1">
+                      MPASE pipeline:
+                      <a
+                        href="https://github.com/nafiul-nipu/MPASE"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-1 text-sky-400 hover:text-sky-300 underline"
+                      >
+                        github.com/nafiul-nipu/MPASE
+                      </a>
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setHelpOpen(false)}
+                  className="px-3 py-1.5 rounded-md border border-gray-700 text-gray-200 hover:bg-gray-800 transition text-sm"
+                >
+                  ✕ Close
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 space-y-6 max-h-[75vh] overflow-auto">
+                {/* Overview */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    What GenomeVis shows
+                  </div>
+                  <ul className="list-disc pl-5 text-sm text-gray-400 space-y-1">
+                    <li>
+                      <span className="text-gray-200">3D Genome view</span>:
+                      requires gene coordinate JSON files.
+                    </li>
+                    <li>
+                      <span className="text-gray-200">2D Shape views</span>:
+                      require contour + background + membership (optional but
+                      recommended).
+                    </li>
+                    <li>
+                      <span className="text-gray-200">
+                        Temporal dynamics views
+                      </span>
+                      : require per-chromosome temporal JSON files.
+                    </li>
+                  </ul>
+                  <div className="text-xs text-gray-500">
+                    GenomeVis visualizes precomputed outputs only — it does not
+                    run{" "}
+                    <a
+                      href="https://github.com/nafiul-nipu/MPASE"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 text-sky-400 hover:text-sky-300 underline"
+                    >
+                      MPASE
+                    </a>{" "}
+                    in the browser. Use MPASE to extract 3D aligned points and
+                    data related to shape analysis
+                  </div>
+                </section>
+
+                {/* Folder mode */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    Recommended: Folder of JSON outputs
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Select any folder that contains{" "}
+                    <code className="text-gray-200">data_info.json</code> and
+                    the JSON outputs. Folder structure can be nested — GenomeVis
+                    scans recursively.
+                  </div>
+
+                  <pre className="rounded-lg bg-black/40 p-3 text-xs text-gray-300 overflow-auto">
+                    {`dataroot/
+├─ data_info.json                      (required)
+├─ gene_data/                          (required for 3D Genome view)
+│  ├─ chr1_12hrs_untr_gene_info.json
+│  ├─ chr1_12hrs_inf_gene_info.json
+│  └─ ...
+├─ temporal_data/                      (required for Temporal views)
+│  ├─ chr1_temporal_data.json
+│  ├─ chr2_temporal_data.json
+│  └─ ...
+├─ shape_data/                         (optional: enables Shape views)
+│  ├─ chr1_12hrs_untr_contour.json
+│  ├─ chr1_12hrs_untr_background.json
+│  └─ ...
+└─ membership.json                     (optional: enables shape↔gene linking)`}
+                  </pre>
+
+                  <div className="text-xs text-gray-500">
+                    Tip: You may place files anywhere (flat or nested). Only
+                    filenames and internal keys matter.
+                  </div>
+                </section>
+
+                {/* Label naming */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    Label naming convention
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Many files are keyed by:
+                    <span className="ml-2">
+                      <code className="text-gray-200">{`<chromosome>_<timepoint>_<condition>`}</code>
+                    </span>
+                  </div>
+
+                  <pre className="rounded-lg bg-black/40 p-3 text-xs text-gray-300 overflow-auto">
+                    {`Examples:
+  chr1_12hrs_untr
+  chr1_12hrs_inf
+  chr2_18hrs_untr
+
+These must match strings in data_info.json:
+  chromosomes: ["chr1", "chr2", ...]
+  timepoints:  ["12hrs", "18hrs", "24hrs"]
+  before_name: "untr"
+  after_name:  "inf"`}
+                  </pre>
+                </section>
+
+                {/* data_info.json */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    data_info.json (required)
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    This file defines your dataset “contract”. Values here must
+                    match your filenames and temporal keys.
+                  </div>
+
+                  <pre className="rounded-lg bg-black/40 p-3 text-xs text-gray-300 overflow-auto">
+                    {`{
+  "green_monkey": {
+    "chromosomes": ["chr1", "chr2", "chr3"],
+    "timepoints": ["12hrs", "18hrs", "24hrs"],
+    "before_name": "untr",
+    "after_name": "inf",
+
+    // optional but recommended (used by folder loader)
+    "gene_file_tail": "gene_info",
+
+    // optional (used by coordinate picking)
+    "gene_position_to_use": "aligned"
+  }
+}`}
+                  </pre>
+
+                  <div className="text-sm text-gray-400 space-y-1">
+                    <div>
+                      <span className="text-gray-200">chromosomes</span>:
+                      chromosomes shown in the UI selector.
+                    </div>
+                    <div>
+                      <span className="text-gray-200">timepoints</span>: must
+                      match temporal field suffixes (below).
+                    </div>
+                    <div>
+                      <span className="text-gray-200">
+                        before_name / after_name
+                      </span>
+                      : condition strings used in labels.
+                    </div>
+                    <div>
+                      <span className="text-gray-200">gene_file_tail</span>:
+                      identifies gene coordinate files by suffix.
+                    </div>
+                    <div>
+                      <span className="text-gray-200">
+                        gene_position_to_use
+                      </span>
+                      :{" "}
+                      <code className="text-gray-200 ml-2">
+                        "aligned" | "middle" | "start" | "end"
+                      </code>
+                    </div>
+                  </div>
+                </section>
+
+                {/* 3D Genome view */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    3D Genome view data (required)
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    Gene coordinate files must be JSON arrays of gene rows. Each
+                    row must include{" "}
+                    <code className="text-gray-200">gene_name</code> and
+                    coordinates for the chosen position mode.
+                  </div>
+
+                  <pre className="rounded-lg bg-black/40 p-3 text-xs text-gray-300 overflow-auto">
+                    {`// Example: chr1_12hrs_untr_gene_info.json
+[
+  { "gene_name": "GENE_A", "aligned_pos": [0.12, -1.3, 2.1] },
+  { "gene_name": "GENE_B", "aligned_pos": [-0.5, 0.2, 1.7] }
+]`}
+                  </pre>
+
+                  <div className="text-sm text-gray-400 space-y-1">
+                    <div className="text-gray-200">
+                      Supported coordinate fields:
+                    </div>
+                    <ul className="list-disc pl-5 text-gray-400 space-y-1">
+                      <li>
+                        <code className="text-gray-200">
+                          aligned_pos: [x,y,z]
+                        </code>{" "}
+                        (preferred)
+                      </li>
+                      <li>
+                        <code className="text-gray-200">
+                          middle_x/middle_y/middle_z
+                        </code>{" "}
+                        or{" "}
+                        <code className="text-gray-200">middle: [x,y,z]</code>
+                      </li>
+                      <li>
+                        <code className="text-gray-200">
+                          start_x/start_y/start_z
+                        </code>
+                      </li>
+                      <li>
+                        <code className="text-gray-200">end_x/end_y/end_z</code>
+                      </li>
+                      <li>
+                        Some datasets use{" "}
+                        <code className="text-gray-200">x/y/z</code>.
+                      </li>
+                    </ul>
+                    <div className="text-xs text-gray-500">
+                      Position mode is chosen from{" "}
+                      <code className="text-gray-300">
+                        data_info.json → gene_position_to_use
+                      </code>
+                      .
+                    </div>
+                  </div>
+                </section>
+
+                {/* 2D Shape views */}
+                <section className="space-y-4">
+                  <div className="text-sm font-medium text-gray-200">
+                    2D Shape views data (optional but recommended)
+                  </div>
+
+                  <ul className="list-disc pl-5 text-sm text-gray-400 space-y-3">
+                    <li>
+                      <div>
+                        <code className="text-gray-200">{`<label>_contour.json`}</code>{" "}
+                        <span className="text-gray-500">
+                          → enables contour overlays
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        2D contour geometry for a specific label (example:{" "}
+                        <code className="text-gray-300">
+                          chr1_12hrs_untr_contour.json
+                        </code>
+                        ).
+                      </div>
+                    </li>
+
+                    <li>
+                      <div>
+                        <code className="text-gray-200">{`<label>_background.json`}</code>{" "}
+                        <span className="text-gray-500">
+                          → enables background mask overlays
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Must share the same{" "}
+                        <code className="text-gray-300">&lt;label&gt;</code> as
+                        the contour file.
+                      </div>
+                    </li>
+
+                    <li>
+                      <div>
+                        <code className="text-gray-200">membership.json</code>{" "}
+                        <span className="text-gray-500">
+                          → enables shape↔gene linking
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 space-y-2">
+                        <div>
+                          Per-label membership mapping that connects genes to
+                          shape regions (HDR / point-fraction) for each plane
+                          (XY/XZ/YZ).
+                        </div>
+
+                        <pre className="rounded bg-black/40 p-2 text-[11px] text-gray-300 overflow-auto">
+                          {`{
+  "<label>": {
+    "points": N,
+    "ids": [...],
+    "planes": {
+      "XY": {
+        "pixels": [[x,y], ...],
+        "hdr": { "100": [0,1,5], "95": [0,2] },
+        "point_fraction": { ... }
+      }
+    }
+  }
+}`}
+                        </pre>
+
+                        <div className="text-xs text-gray-600">
+                          Indices inside{" "}
+                          <code className="text-gray-300">hdr</code> /{" "}
+                          <code className="text-gray-300">point_fraction</code>{" "}
+                          refer to positions in{" "}
+                          <code className="text-gray-300">ids</code> and{" "}
+                          <code className="text-gray-300">pixels</code>.
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </section>
+
+                {/* Temporal dynamics views */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    Temporal dynamics views data (required for those views)
+                  </div>
+
+                  <div className="text-sm text-gray-400">
+                    For each chromosome, provide:
+                    <code className="text-gray-200 ml-2">{`<chr>_temporal_data.json`}</code>
+                    as a JSON array (one row per gene).
+                  </div>
+
+                  <pre className="rounded-lg bg-black/40 p-3 text-xs text-gray-300 overflow-auto">
+                    {`// Example: chr1_temporal_data.json
+[
+  {
+    "gene_name": "GENE_A",
+    "agreement_class": "agree_up",
+    "expr_delta_12hrs": 0.42,
+    "expr_delta_18hrs": 0.11,
+    "expr_delta_24hrs": -0.08,
+    "acc_delta_12hrs": 0.18,
+    "acc_delta_18hrs": 0.05,
+    "acc_delta_24hrs": -0.02
+  }
+]`}
+                  </pre>
+
+                  <div className="text-sm text-gray-400 space-y-1">
+                    <div>
+                      The suffixes (
+                      <code className="text-gray-200">12hrs/18hrs/24hrs</code>)
+                      must match{" "}
+                      <code className="text-gray-200">
+                        data_info.json → timepoints
+                      </code>
+                      .
+                    </div>
+                    <div>
+                      Required per row:{" "}
+                      <code className="text-gray-200">gene_name</code>,{" "}
+                      <code className="text-gray-200">{`expr_delta_<timepoint>`}</code>
+                      ,{" "}
+                      <code className="text-gray-200">{`acc_delta_<timepoint>`}</code>
+                      .
+                    </div>
+                  </div>
+                </section>
+
+                {/* Other optional */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    Other optional files
+                  </div>
+                  <ul className="list-disc pl-5 text-sm text-gray-400 space-y-2">
+                    <li>
+                      <div>
+                        <code className="text-gray-200">gene_list.json</code>{" "}
+                        <span className="text-gray-500">
+                          → improves dropdown UX
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Optional explicit list of gene names for dropdowns. If
+                        missing, GenomeVis derives it from the first loaded gene
+                        coordinate file.
+                      </div>
+                    </li>
+                  </ul>
+
+                  <div className="text-xs text-gray-500">
+                    If a file is missing or misnamed, the corresponding view
+                    will simply be empty (no crash).
+                  </div>
+                </section>
+              </div>
+
+              {/* Footer */}
+              <div className="p-5 border-t border-gray-800 flex items-center justify-end">
+                <button
+                  onClick={() => setHelpOpen(false)}
+                  className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 transition text-sm font-medium"
+                >
+                  Got it
+                </button>
+              </div>
             </div>
           </div>
         </div>

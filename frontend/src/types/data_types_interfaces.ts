@@ -2,6 +2,7 @@ export type AppMode = "landing" | "setup" | "visualization";
 
 export type VisualizationRootProps = {
   meta_data_typed: DataInfoType;
+  onBackToLoad?: () => void;
 };
 
 export type LandingScreenProps = {
@@ -13,6 +14,15 @@ export type DataSetupWizardProps = {
   onCancel: () => void;
   onComplete: (meta: DataInfoType) => void;
 };
+
+export type BundleType = {
+  meta: DataInfoType;
+  data: workerToClientMessageType;
+};
+
+export type DataUploadMode = "bundle" | "folder";
+
+export type DataValidationIssue = { path: string; message: string };
 
 export interface SpeciesInfoRaw {
   chromosomes: string[];

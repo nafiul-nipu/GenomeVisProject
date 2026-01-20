@@ -17,7 +17,10 @@ import { loadSnapshot, resetUI, setTwoDPanelTab } from "../redux-store/uiSlice";
 import { TemporalFilterControls } from "../components/dropdowns/TemporalFilterControls";
 import { ExprAcc2DContainer } from "../components/expr-acc-views/ExprAcc2DContainer";
 
-export function VisualizationRoot({ meta_data_typed }: VisualizationRootProps) {
+export function VisualizationRoot({
+  meta_data_typed,
+  onBackToLoad,
+}: VisualizationRootProps) {
   const mount = useRef<boolean | null>(null);
   const exportRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,7 +48,7 @@ export function VisualizationRoot({ meta_data_typed }: VisualizationRootProps) {
         fetchWorkerData({ data_info: meta_data_typed, species, chromosome }),
       )
         .unwrap()
-        .then((res) => console.log("[component] Worker success:", res))
+        .then((/*res*/) => console.log("[component] Worker success:" /*, res*/))
         .catch((err) => console.error("[component] Worker failed:", err));
     }
 
@@ -278,6 +281,13 @@ export function VisualizationRoot({ meta_data_typed }: VisualizationRootProps) {
               className="hidden"
               onChange={handleLoadSnapshotChange}
             />
+
+            <button
+              onClick={onBackToLoad}
+              className="text-xs px-3 py-1.5 rounded-md border border-gray-700 text-gray-200 hover:bg-gray-800 transition"
+            >
+              ← Back
+            </button>
           </div>
         </div>
       </header>
