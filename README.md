@@ -22,13 +22,113 @@ GenomeVisProject/
 
 ---
 
-## Running the frontend
+# Running the Project Locally From Scratch (For the First Time)
+
+This repository contains two components:
+
+1. **Frontend** (Node.js / Vite / React)
+2. **Data Processing Pipeline / Backend** (Python / Jupyter)
+
+---
+
+## OS Compatibility
+
+### Frontend
+
+✅ **Fully cross-platform**
+
+- macOS
+- Linux
+- Windows (native)
+
+### Data Processing Pipeline / Backend (Python)
+
+✅ **Tested and supported**
+
+- macOS
+- Linux
+
+⚠️ **Windows (native)**
+
+- Not officially supported.
+- Some Python packages used in the pipeline may fail to install or behave differently on Windows.
+- Native Windows support is **best-effort only**.
+
+✅ **Windows via WSL (Recommended)**
+
+- Windows users should run the backend inside **Windows Subsystem for Linux (WSL – Ubuntu)**.
+- This provides the same environment as Linux and is the most reliable option.
+
+---
+
+## Part 1: Frontend Setup (Node.js)
 
 ### Requirements
 
-- Node.js >= 18
-- Last tested with Node v22.13.1
-- Recommended: Node Version Manager (nvm)
+- Internet connection
+- Terminal / Command Prompt
+- **Node.js ≥ 18**
+- Last tested with **Node v22.13.1**
+- **Node Version Manager (nvm)**
+
+The repository includes an `.nvmrc` file specifying the tested Node version.
+
+---
+
+## Step 1: Install Node Version Manager (nvm)
+
+### macOS & Linux
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+```
+
+Restart your terminal, then verify:
+
+```bash
+nvm --version
+```
+
+If `nvm` is not found, add the following to `~/.bashrc` or `~/.zshrc`:
+
+```bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+```
+
+---
+
+### Windows (Native)
+
+Windows does not support `nvm` directly. Use **nvm-windows**:
+
+https://github.com/coreybutler/nvm-windows
+
+```powershell
+nvm install 22.13.1
+nvm use 22.13.1
+```
+
+Alternatively, you may install Node.js directly from the official website:  
+https://nodejs.org/en
+
+- Download the LTS or v22.x installer
+- Make sure Node version is ≥ 18
+- Verify after installation: `node --version`
+
+---
+
+### Windows (WSL)
+
+Inside WSL (Ubuntu):
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+```
+
+---
+
+## Step 2: Install Frontend Dependencies
 
 The repository includes an `.nvmrc` file specifying the tested Node version.
 
@@ -45,7 +145,7 @@ The repository includes an `.nvmrc` file specifying the tested Node version.
    `frontend/public/dataroot/`
 
 4. Copy the processed dataset into `frontend/public/dataroot/`.  
-The example processed data sample is in the `frontend/public/dataroot/` folder already
+   The example processed data sample is in the `frontend/public/dataroot/` folder already
 
 ```
    Example structure:
@@ -69,42 +169,142 @@ The example processed data sample is in the `frontend/public/dataroot/` folder a
 
 ---
 
-## Running the data processing pipeline (Python)
+## Part 2: Data Processing Pipeline (Python)
 
-### Requirements
+### Python Version Notes
 
-- Python 3.9.6
-- Recommended: pyenv
-
-The repository includes a `.python-version` file specifying the tested Python version.
-
-### Steps
-
-1. Navigate to the data processing directory:
-   `cd data_processing_python`
-
-2. Install and activate the correct Python version:
-   `pyenv install --skip-existing 3.9.6`  
-   `pyenv local 3.9.6`  
-   `python --version`
-
-3. Create and activate a virtual environment:
-   `python -m venv venv`  
-   `source venv/bin/activate`
-
-   On Windows:
-   `.\venv\Scripts\activate`
-
-4. Install dependencies:
-   `pip install -r requirements.txt`
-
-   If new packages are added:
-   `pip freeze > requirements.txt`
-
-5. Start Jupyter Notebook:
-   `jupyter notebook`
+| Component            | Version            |
+| -------------------- | ------------------ |
+| Pipeline tested      | **Python 3.10.14** |
+| Backend also runs on | **Python 3.9.6**   |
 
 ---
+
+## Backend Setup (macOS / Linux / WSL)
+
+### Step 1: Install pyenv
+
+#### macOS
+
+Install homebrew (https://brew.sh/).
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Install pyenv
+
+```bash
+brew install pyenv
+```
+
+#### Linux / WSL (Ubuntu)
+
+```bash
+sudo apt update
+sudo apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl llvm libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+curl https://pyenv.run | bash
+```
+
+---
+
+### Step 2: Install Python and Create Virtual Environment
+
+```bash
+cd data_processing_python
+pyenv install --skip-existing 3.10.14
+pyenv local 3.10.14
+python -m venv venv
+source venv/bin/activate
+```
+
+---
+
+### Step 3: Install Dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+### Step 4: Run Jupyter
+
+```bash
+jupyter notebook
+```
+
+---
+
+## Windows (Native) – Backend Note
+
+The Python data processing pipeline is **tested and supported on macOS and Linux**.
+
+Native Windows is **not officially supported**, primarily because some third-party
+scientific Python packages may fail to install or behave differently on Windows.
+
+However, **not all packages listed in `requirements.txt` are required for every
+pipeline configuration**. Some dependencies are optional or used only in specific
+analysis paths.
+
+If you encounter installation issues on Windows:
+
+- You may remove or comment out unused packages from `requirements.txt`
+- You may adjust the environment based on the parts of the pipeline you intend to run
+- **Windows Subsystem for Linux (WSL – Ubuntu) is the recommended and fully supported option**
+
+---
+
+## Reusing the Project (After First-Time Setup)
+
+If you have already completed the setup once, or if you are only reusing
+**existing processed data**, you do **not** need to repeat the full installation.
+
+### Frontend Only (Most Users)
+
+If you are only running the visualization with existing processed data:
+
+```bash
+cd frontend
+nvm use        # or ensure Node ≥ 18
+npm install    # only needed if dependencies changed
+npm run dev
+```
+
+Make sure the processed dataset is present in:
+
+```text
+frontend/public/dataroot/
+```
+
+---
+
+### Backend Reuse (Optional)
+
+If you already have a working Python environment and only want to rerun
+or modify parts of the data processing pipeline:
+
+```bash
+cd data_processing_python
+source venv/bin/activate
+jupyter notebook
+```
+
+You do **not** need to reinstall Python, recreate the virtual environment,
+or reinstall dependencies unless:
+
+- `requirements.txt` has changed
+- You switched Python versions
+- Your environment was deleted
+
+---
+
+### Notes
+
+- The backend environment is reusable across runs
+- The frontend automatically reloads when data changes
+- Existing processed data can be reused across multiple frontend sessions
 
 ## Data processing guide
 
