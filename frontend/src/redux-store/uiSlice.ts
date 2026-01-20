@@ -20,7 +20,7 @@ const initialState: UIState = {
   lightSettings: defaultLightSettings,
   twoDVariant: "hdr",
   twoDLevel: 100,
-  twoDCleanBlobs: false,
+  twoDCleanBlobs: true,
   twoDBlobMinAreaPct: 2,
   highlightedGenesByLabel: {},
   hoveredGene: null,
@@ -76,7 +76,7 @@ const uiSlice = createSlice({
     },
     setHighlightedGenesForLabel(
       state,
-      action: PayloadAction<{ label: string; indices: number[] }>
+      action: PayloadAction<{ label: string; indices: number[] }>,
     ) {
       const { label, indices } = action.payload;
       state.highlightedGenesByLabel[label] = indices;
@@ -86,7 +86,7 @@ const uiSlice = createSlice({
     },
     setHoveredGene(
       state,
-      action: PayloadAction<{ label: string; idx: number } | null>
+      action: PayloadAction<{ label: string; idx: number } | null>,
     ) {
       state.hoveredGene = action.payload;
     },
@@ -120,13 +120,13 @@ const uiSlice = createSlice({
     },
     setTemporal2DBarcodeSort(
       state,
-      action: PayloadAction<"abs" | "expr" | "acc">
+      action: PayloadAction<"abs" | "expr" | "acc">,
     ) {
       state.temporal2DBarcodeSort = action.payload;
     },
     setTemporal2DDeltaMode(
       state,
-      action: PayloadAction<"mean" | "last" | "peakAbs">
+      action: PayloadAction<"mean" | "last" | "peakAbs">,
     ) {
       state.temporal2DDeltaMode = action.payload;
     },
