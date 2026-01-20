@@ -27,7 +27,7 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const highlightedIdxs = useAppSelector(
-    (s) => s.ui.highlightedGenesByLabel[label] ?? EMPTY_INDICES
+    (s) => s.ui.highlightedGenesByLabel[label] ?? EMPTY_INDICES,
   );
 
   const selectedGenes = useAppSelector((s) => s.ui.selectedGenes);
@@ -159,12 +159,14 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
 
       mesh.setColorAt(
         i,
-        isHighlighted || isHovered ? highlightColor : baseColor
+        isHighlighted || isHovered ? highlightColor : baseColor,
       );
     });
 
     mesh.instanceMatrix.needsUpdate = true;
-    mesh.instanceColor!.needsUpdate = true;
+    if (mesh.instanceColor) {
+      mesh.instanceColor.needsUpdate = true;
+    }
 
     // console.log("gene sphere rendering finished");
   }, [
@@ -193,8 +195,8 @@ export const GeneSphereView: React.FC<GeneSphereViewProps> = ({
     setMouse(
       new Vector2(
         ((event.clientX - rect.left) / rect.width) * 2 - 1,
-        -((event.clientY - rect.top) / rect.height) * 2 + 1
-      )
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      ),
     );
   };
 

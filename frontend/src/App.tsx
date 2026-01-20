@@ -37,7 +37,10 @@ function App() {
       {mode === "visualization" && dataInfo && (
         <VisualizationRoot
           meta_data_typed={dataInfo}
-          onBackToLoad={() => setMode("landing")}
+          onBackToLoad={() => {
+            setDataInfo(null);
+            setMode("landing");
+          }}
         />
       )}
     </div>

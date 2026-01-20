@@ -191,11 +191,92 @@ function validateBundle(parsed: any): {
 }
 
 function makeTemplate(): BundleType {
+  const GENE_COUNT = 60;
+  const genes = Array.from({ length: GENE_COUNT }, (_, i) => `GENE_${i + 1}`);
+
+  const timepoints = ["t1", "t2"] as const;
+
+  function makeAlignedCloudSmall(
+    genesIn: string[],
+    shift: [number, number, number] = [0, 0, 0],
+    sigma = 0.12,
+  ) {
+    const randn = () => {
+      let u = 0,
+        v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    };
+
+    return genesIn.map((g) => ({
+      gene_name: g,
+      aligned_pos: [
+        randn() * sigma + shift[0],
+        randn() * sigma + shift[1],
+        randn() * sigma + shift[2],
+      ],
+    }));
+  }
+
+  // Build gene_data for BOTH timepoints and BOTH conditions
+  const gene_data: Record<string, any[]> = {};
+  for (const tp of timepoints) {
+    // small drift over time so you can see change
+    const tShift = tp === "t1" ? [0, 0, 0] : [0.03, 0.015, -0.015];
+
+    // before
+    gene_data[`chr1_${tp}_before`] = makeAlignedCloudSmall(genes, [
+      0 + (tShift[0] as number),
+      0 + (tShift[1] as number),
+      0 + (tShift[2] as number),
+    ]);
+
+    // after (slightly shifted from before)
+    gene_data[`chr1_${tp}_after`] = makeAlignedCloudSmall(genes, [
+      0.06 + (tShift[0] as number),
+      -0.03 + (tShift[1] as number),
+      0.05 + (tShift[2] as number),
+    ]);
+  }
+
+  // Temporal rows for ONLY t1 + t2, using your supported agreement classes
+  const agreementCycle = [
+    "expr_acc_up",
+    "expr_acc_down",
+    "expression_only",
+    "accessibility_only",
+    "mixed",
+    "conflict",
+    "stable",
+  ] as const;
+
+  const temporalRows = genes.map((g, i) => {
+    const t1 = Math.sin(i * 0.2);
+    const t2 = Math.sin(i * 0.2 + 0.8);
+
+    const a1 = Math.cos(i * 0.2) * 0.6;
+    const a2 = Math.cos(i * 0.2 + 0.8) * 0.6;
+
+    return {
+      gene_id: g,
+      gene_name: g,
+      agreement_class: agreementCycle[i % agreementCycle.length],
+
+      expr_delta_by_time: { t1, t2 },
+      acc_delta_by_time: { t1: a1, t2: a2 },
+
+      increase: null,
+      decrease: null,
+      neutral: null,
+    };
+  });
+
   return {
     meta: {
-      human: {
+      demo_species: {
         chromosomes: ["chr1"],
-        timepoints: ["t1"],
+        timepoints: ["t1", "t2"],
         before_name: "before",
         after_name: "after",
         gene_position_to_use: "aligned",
@@ -203,19 +284,18 @@ function makeTemplate(): BundleType {
     } as any,
 
     data: {
-      gene_list: ["GENE_A", "GENE_B", "GENE_C"],
+      gene_list: genes,
 
-      gene_data: {
-        chr1_t1_before: [
-          { gene_name: "GENE_A", aligned_pos: [-1.2, 0.4, 0.9] },
-          { gene_name: "GENE_B", aligned_pos: [0.8, -0.6, -0.3] },
-          { gene_name: "GENE_C", aligned_pos: [0.2, 1.1, -0.7] },
-        ],
-        chr1_t1_after: [
-          { gene_name: "GENE_A", aligned_pos: [-0.9, 0.6, 1.2] },
-          { gene_name: "GENE_B", aligned_pos: [1, -0.2, -0.1] },
-          { gene_name: "GENE_C", aligned_pos: [0.4, 1.3, -0.4] },
-        ],
+      // chr1_t1_before/after + chr1_t2_before/after
+      gene_data,
+
+      temporalTrendData: {
+        chr: "chr1",
+        timepoints: ["t1", "t2"],
+        rows: temporalRows,
+        byGeneName: Object.fromEntries(
+          temporalRows.map((r) => [r.gene_name, r]),
+        ),
       },
 
       gene_edges: {},
@@ -223,11 +303,9 @@ function makeTemplate(): BundleType {
 
       contour_data: {},
       perLabelBackgroundMaskData: {},
-      projectionData: { XY: {}, XZ: {}, YZ: {} },
-
-      temporalTrendData: { byGeneName: {} },
-
       membership: {},
+
+      projectionData: { XY: {}, XZ: {}, YZ: {} },
     } as any,
   };
 }
@@ -599,7 +677,7 @@ export function DataSetupWizard({
 
   const [helpOpen, setHelpOpen] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [uploadMode, setUploadMode] = useState<DataUploadMode>("folder");
+  const [uploadMode, setUploadMode] = useState<DataUploadMode>("bundle");
   const [fileName, setFileName] = useState<string>("");
   const [bundle, setBundle] = useState<BundleType | null>(null);
   const [issues, setIssues] = useState<DataValidationIssue[]>([]);
@@ -1001,12 +1079,15 @@ export function DataSetupWizard({
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-medium">
-                        Click to choose a JSON bundle
+                        Click to choose a JSON bundle file
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
                         Expected:{" "}
                         <span className="text-gray-300">
                           genomevis_bundle.json
+                        </span>{" "}
+                        <span className="text-gray-500">
+                          (see the template for the required structure)
                         </span>
                       </div>
                     </div>
@@ -1077,19 +1158,29 @@ export function DataSetupWizard({
 
             <ProgressBox />
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <button
                 onClick={() => setStep(1)}
                 className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 transition text-sm"
               >
                 Back
               </button>
-              <button
-                onClick={onCancel}
-                className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition text-sm"
-              >
-                Cancel
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setHelpOpen(true)}
+                  className="px-4 py-2 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 transition text-sm"
+                >
+                  Help: data format
+                </button>
+
+                <button
+                  onClick={onCancel}
+                  className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition text-sm font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1303,6 +1394,68 @@ export function DataSetupWizard({
                     </a>{" "}
                     in the browser. Use MPASE to extract 3D aligned points and
                     data related to shape analysis
+                  </div>
+                </section>
+
+                {/* JSON bundle mode */}
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    If you upload a single JSON bundle
+                  </div>
+
+                  <div className="text-sm text-gray-400">
+                    Your bundle must be a JSON object with two top-level keys:
+                    <code className="text-gray-200 ml-2">meta</code> and{" "}
+                    <code className="text-gray-200">data</code>.
+                  </div>
+
+                  <pre className="rounded-lg bg-black/40 p-3 text-xs text-gray-300 overflow-auto">
+                    {`{
+  "meta": { ...data_info.json contents... }, // see below for required fields
+  "data": {
+    "gene_data": { "<label>": [ ...rows... ], ... },
+    "temporalTrendData": { ...optional but required for temporal views... },
+
+    "contour_data": { "<label>": ...optional... },
+    "perLabelBackgroundMaskData": { "<label>": ...optional... },
+    "membership": { "<label>": ...optional... },
+
+    "gene_list": [ ...optional... ],
+    "gene_edges": { ...optional... },
+    "gene_paths": { ...optional... },
+  }
+}`}
+                  </pre>
+
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>
+                      • <span className="text-gray-300">meta</span> is the same
+                      structure as{" "}
+                      <code className="text-gray-300">data_info.json</code>{" "}
+                      (species → config).
+                    </div>
+                    <div>
+                      • <span className="text-gray-300">data.gene_data</span> is
+                      required for the 3D Genome view.
+                    </div>
+                    <div>
+                      •{" "}
+                      <span className="text-gray-300">
+                        data.temporalTrendData
+                      </span>{" "}
+                      is required only if you want temporal views.
+                    </div>
+                    <div>
+                      • For shape views, the keys in{" "}
+                      <code className="text-gray-300">contour_data</code>,{" "}
+                      <code className="text-gray-300">
+                        perLabelBackgroundMaskData
+                      </code>
+                      , and <code className="text-gray-300">membership</code>{" "}
+                      must match the same{" "}
+                      <code className="text-gray-300">&lt;label&gt;</code>{" "}
+                      convention.
+                    </div>
                   </div>
                 </section>
 
@@ -1615,6 +1768,71 @@ These must match strings in data_info.json:
                     </div>
                   </div>
                 </section>
+
+                <section className="space-y-2">
+                  <div className="text-sm font-medium text-gray-200">
+                    Agreement classes (required for temporal views)
+                  </div>
+
+                  <div className="text-sm text-gray-400">
+                    GenomeVis currently supports the following predefined
+                    agreement classes. These control coloring, filtering, and
+                    grouping in expression–accessibility temporal views.
+                  </div>
+
+                  <ul className="list-disc pl-5 text-sm text-gray-400 space-y-1">
+                    <li>
+                      <code className="text-gray-200">conflict</code>
+                    </li>
+                    <li>
+                      <code className="text-gray-200">mixed</code>
+                    </li>
+                    <li>
+                      <code className="text-gray-200">expr_acc_up</code>
+                    </li>
+                    <li>
+                      <code className="text-gray-200">expr_acc_down</code>
+                    </li>
+                    <li>
+                      <code className="text-gray-200">expression_only</code>
+                    </li>
+                    <li>
+                      <code className="text-gray-200">accessibility_only</code>
+                    </li>
+                    <li>
+                      <code className="text-gray-200">stable</code>
+                    </li>
+                  </ul>
+
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>
+                      • The value must be provided per gene as
+                      <code className="text-gray-300 ml-1">
+                        agreement_class
+                      </code>
+                      in
+                      <code className="text-gray-300 ml-1">
+                        &lt;chr&gt;_temporal_data.json
+                      </code>
+                      .
+                    </div>
+                    <div>
+                      • If an unsupported or missing class is used, the gene may
+                      not appear correctly in temporal views.
+                    </div>
+                  </div>
+                </section>
+
+                <div className="rounded-lg border border-amber-800/60 bg-amber-900/20 p-3 text-xs text-amber-200">
+                  <div className="font-medium mb-1">Important</div>
+                  <div>
+                    GenomeVis does <strong>not</strong> compute agreement
+                    classes in the browser. These values must be computed using
+                    the backend pipeline (e.g., MPASE or downstream analysis
+                    scripts) and written into the temporal JSON files before
+                    loading.
+                  </div>
+                </div>
 
                 {/* Other optional */}
                 <section className="space-y-2">
