@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useLayoutEffect, useMemo, useRef } from "react";
 import {
   BufferAttribute,
@@ -40,7 +41,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
       bufferPositions.push(x0, y0, z0);
       const [x1, y1, z1] = positionPicker(
         geneData[path[path.length - 1]],
-        positionMode
+        positionMode,
       );
       bufferPositions.push(x1, y1, z1);
       const pathPosition: Vector3[] = [];
@@ -66,7 +67,7 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
     const geometry: InstancedBufferGeometry = new InstancedBufferGeometry();
     const positionAttribute: BufferAttribute = new BufferAttribute(
       new Float32Array(bufferPositions),
-      3
+      3,
     );
     geometry.setAttribute("position", positionAttribute);
 
@@ -81,54 +82,96 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
 
     // console.log(pathsPositions);
 
+    // for (let i = 0; i < pathsPositions.length; i++) {
+    //   const numberSegments: number = pathsPositions[i].length - 1;
+    //   const curve: CatmullRomCurve3 = new CatmullRomCurve3(pathsPositions[i]);
+    //   const tubeGeometry = new TubeGeometry(
+    //     curve,
+    //     numberSegments * 4,
+    //     tubeCtl.tubeRadius, //radius,
+    //     8,
+    //     false
+    //   );
+
+    //   // Create colors based on centromere values
+    //   const colorsArray: number[] = [];
+    //   //iterates through each vertex of the tube geometry
+    //   for (let j = 0; j < tubeGeometry.attributes.position.count; j++) {
+    //     // Average centromere value for the segment
+    //     // determines which segment of the tube the current vertex belongs to.
+    //     // It divides the total number of vertices by the number of segments to find the average segment index
+    //     // const segmentIndex = Math.floor(
+    //     //   j / (tubeGeometry.attributes.position.count / colorValues[i].length)
+    //     // );
+    //     // const colorValue = colorValues[i][segmentIndex];
+    //     // const color = tubeColorMap[colorValue] || new Vector3(0.5, 0.5, 0.5); // Default color if not found
+    //     const color: Vector3 = new Vector3(0.5, 0.5, 0.5);
+    //     // console.log(color);
+    //     colorsArray.push(...color.toArray());
+    //   }
+    //   // console.log(colorsArray);
+
+    //   tubeGeometry.setAttribute(
+    //     "color",
+    //     new BufferAttribute(new Float32Array(colorsArray), 3)
+    //   );
+
+    //   tubeGeometries.push(tubeGeometry);
+
+    //   matrix.makeTranslation(
+    //     pathsPositions[i][0].x,
+    //     pathsPositions[i][0].y,
+    //     pathsPositions[i][0].z
+    //   );
+
+    //   matrix.lookAt(
+    //     pathsPositions[i][0], // Start
+    //     pathsPositions[i][numberSegments], // End
+    //     new Vector3(0, 1, 0) // Up
+    //   );
+
+    //   matrix.toArray(instanceMatrix.array, i * 16);
+    // }
+
     for (let i = 0; i < pathsPositions.length; i++) {
-      const numberSegments: number = pathsPositions[i].length - 1;
-      const curve: CatmullRomCurve3 = new CatmullRomCurve3(pathsPositions[i]);
+      // 1) must have at least 2 points
+      if (!pathsPositions[i] || pathsPositions[i].length < 2) continue;
+
+      // 2) must have finite coordinates (user JSON may produce NaN/undefined)
+      const clean = pathsPositions[i].filter(
+        (p) =>
+          Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z),
+      );
+      if (clean.length < 2) continue;
+
+      const numberSegments = clean.length - 1;
+      const tubularSegments = Math.max(1, numberSegments * 4);
+
+      const curve = new CatmullRomCurve3(clean);
       const tubeGeometry = new TubeGeometry(
         curve,
-        numberSegments * 4,
-        tubeCtl.tubeRadius, //radius,
+        tubularSegments,
+        tubeCtl.tubeRadius,
         8,
-        false
+        false,
       );
 
-      // Create colors based on centromere values
+      // Create colors
       const colorsArray: number[] = [];
-      //iterates through each vertex of the tube geometry
       for (let j = 0; j < tubeGeometry.attributes.position.count; j++) {
-        // Average centromere value for the segment
-        // determines which segment of the tube the current vertex belongs to.
-        // It divides the total number of vertices by the number of segments to find the average segment index
-        // const segmentIndex = Math.floor(
-        //   j / (tubeGeometry.attributes.position.count / colorValues[i].length)
-        // );
-        // const colorValue = colorValues[i][segmentIndex];
-        // const color = tubeColorMap[colorValue] || new Vector3(0.5, 0.5, 0.5); // Default color if not found
-        const color: Vector3 = new Vector3(0.5, 0.5, 0.5);
-        // console.log(color);
+        const color = new Vector3(0.5, 0.5, 0.5);
         colorsArray.push(...color.toArray());
       }
-      // console.log(colorsArray);
-
       tubeGeometry.setAttribute(
         "color",
-        new BufferAttribute(new Float32Array(colorsArray), 3)
+        new BufferAttribute(new Float32Array(colorsArray), 3),
       );
 
       tubeGeometries.push(tubeGeometry);
 
-      matrix.makeTranslation(
-        pathsPositions[i][0].x,
-        pathsPositions[i][0].y,
-        pathsPositions[i][0].z
-      );
-
-      matrix.lookAt(
-        pathsPositions[i][0], // Start
-        pathsPositions[i][numberSegments], // End
-        new Vector3(0, 1, 0) // Up
-      );
-
+      // instance matrix (use clean points, not original)
+      matrix.makeTranslation(clean[0].x, clean[0].y, clean[0].z);
+      matrix.lookAt(clean[0], clean[clean.length - 1], new Vector3(0, 1, 0));
       matrix.toArray(instanceMatrix.array, i * 16);
     }
 
@@ -152,13 +195,38 @@ export const GeneTubeView: React.FC<GeneTubeViewProps> = ({
     // console.log("number of connections", edges.length);
     // console.log("tube rendering started");
 
+    // if (tubesMeshRef.current) {
+    //   tubes.remove(tubesMeshRef.current);
+    // }
     if (tubesMeshRef.current) {
       tubes.remove(tubesMeshRef.current);
+      (tubesMeshRef.current.geometry as any)?.dispose?.();
+      (tubesMeshRef.current.material as any)?.dispose?.();
+      tubesMeshRef.current = null;
     }
 
-    const combinedGeometry = BufferGeometryUtils.mergeGeometries(
-      tubeData.tubeGeometries
+    // const combinedGeometry = BufferGeometryUtils.mergeGeometries(
+    //   tubeData.tubeGeometries,
+    // );
+    const safeGeoms = tubeData.tubeGeometries.filter(
+      (g) =>
+        g &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (g as any).isBufferGeometry &&
+        g.attributes?.position &&
+        g.attributes.position.count > 0,
     );
+
+    if (safeGeoms.length === 0) {
+      tubesMeshRef.current = null;
+      return;
+    }
+
+    const combinedGeometry = BufferGeometryUtils.mergeGeometries(safeGeoms);
+    if (!combinedGeometry) {
+      tubesMeshRef.current = null;
+      return;
+    }
 
     const material = new MeshPhongMaterial({
       vertexColors: true,
