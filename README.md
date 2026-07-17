@@ -2,8 +2,8 @@
 
 This repository contains the complete codebase used for the analyses and visualizations presented in the paper. It includes:
 
-1. A Python-based data processing pipeline, including the MPASE framework, used to align and abstract reconstructed 3D genome structures.  
-   ([MPASE Github repository and documentation](https://github.com/nafiul-nipu/MPASE.git))
+1. A Python-based data processing pipeline, including the MultiPASE framework, used to align and abstract reconstructed 3D genome structures.  
+   ([MultiPASE Github repository and documentation](https://github.com/nafiul-nipu/MultiPASE.git))
 2. A web-based visual analytics frontend for interactive exploration of spatial genome organization, gene relocation, and temporal functional changes.  
    ([Live demo](https://nafiul-nipu.github.io/GenomeVisProject/))
 
@@ -351,7 +351,7 @@ This repository supports reproducibility of the results presented in the paper.
 
 Users can:
 
-- Inspect the MPASE implementation in the data processing pipeline
+- Inspect the MultiPASE implementation in the data processing pipeline
 - Run provided notebooks to reproduce representative outputs
 - Launch the frontend to explore generated data interactively
 
