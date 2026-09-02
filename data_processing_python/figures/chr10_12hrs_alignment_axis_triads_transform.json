@@ -1,0 +1,51 @@
+{
+  "chromosome": "chr10",
+  "time": "12hrs",
+  "axis_colors": {
+    "X": "#D62728",
+    "Y": "#2CA02C",
+    "Z": "#3366CC"
+  },
+  "orientation_rows_in_aligned_xyz": {
+    "untr": [
+      [
+        0.9999999999999999,
+        -5.106214458157469e-09,
+        -2.7128127530040734e-09
+      ],
+      [
+        5.106214475306467e-09,
+        1.0000000000000004,
+        4.77234720701541e-09
+      ],
+      [
+        2.712812714036854e-09,
+        -4.772347193843076e-09,
+        0.9999999999999999
+      ]
+    ],
+    "vacv": [
+      [
+        -0.22738541104106558,
+        0.6519435693789495,
+        0.7233708987726285
+      ],
+      [
+        -0.6947268790506685,
+        -0.6291349518049084,
+        0.34863128939031485
+      ],
+      [
+        0.6823858427386984,
+        -0.423271537860592,
+        0.5959788308882507
+      ]
+    ]
+  },
+  "sources": [
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr10/12hrs/untr/structure_12hrs_untr_with_id0.csv",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr10/chr10_12hrs_untr_aligned.json",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr10/12hrs/vacv/structure_12hrs_vacv_with_id0.csv",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr10/chr10_12hrs_vacv_aligned.json"
+  ]
+}

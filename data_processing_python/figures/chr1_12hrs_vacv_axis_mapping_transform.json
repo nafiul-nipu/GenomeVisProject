@@ -1,0 +1,40 @@
+{
+  "chromosome": "chr1",
+  "time": "12hrs",
+  "condition": "vacv",
+  "row_vector_convention": "original_xyz @ orientation = aligned_xyz_direction",
+  "axis_order": [
+    "X_before",
+    "Y_before",
+    "Z_before"
+  ],
+  "orientation_rows_in_aligned_xyz": [
+    [
+      0.3345295582663501,
+      -0.9266884387299431,
+      0.17128488599517605
+    ],
+    [
+      0.9149741410308845,
+      0.2758706531944466,
+      -0.29447869863686893
+    ],
+    [
+      -0.22563753209719986,
+      -0.25523307040885035,
+      -0.9401828459819696
+    ]
+  ],
+  "uniform_scale": 0.08715875185740868,
+  "determinant": -0.9999999999999991,
+  "fit_rmse": 2.1998032495473594e-07,
+  "dominant_mapping": {
+    "X_before": "-Y_after",
+    "Y_before": "+X_after",
+    "Z_before": "-Z_after"
+  },
+  "sources": [
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr1/12hrs/vacv/structure_12hrs_vacv_with_id0.csv",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr1/chr1_12hrs_vacv_aligned.json"
+  ]
+}

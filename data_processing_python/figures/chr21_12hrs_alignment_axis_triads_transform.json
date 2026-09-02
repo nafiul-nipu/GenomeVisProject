@@ -1,0 +1,51 @@
+{
+  "chromosome": "chr21",
+  "time": "12hrs",
+  "axis_colors": {
+    "X": "#D62728",
+    "Y": "#2CA02C",
+    "Z": "#3366CC"
+  },
+  "orientation_rows_in_aligned_xyz": {
+    "untr": [
+      [
+        0.9999999999999992,
+        -3.5383955698974893e-08,
+        -7.782872895510173e-09
+      ],
+      [
+        3.538395584401786e-08,
+        0.9999999999999994,
+        7.910391590795902e-09
+      ],
+      [
+        7.78287264135197e-09,
+        -7.910391801269979e-09,
+        1.0
+      ]
+    ],
+    "vacv": [
+      [
+        0.5736683496164076,
+        0.2660788932057096,
+        0.7746655066793744
+      ],
+      [
+        -0.6135484440975439,
+        -0.4869771427305517,
+        0.62162011647265
+      ],
+      [
+        -0.5426443876000838,
+        0.8318986026243897,
+        0.1161110828375896
+      ]
+    ]
+  },
+  "sources": [
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr21/12hrs/untr/structure_12hrs_untr_with_id0.csv",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr21/chr21_12hrs_untr_aligned.json",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr21/12hrs/vacv/structure_12hrs_vacv_with_id0.csv",
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr21/chr21_12hrs_vacv_aligned.json"
+  ]
+}
