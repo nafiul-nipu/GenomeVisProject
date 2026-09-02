@@ -1,51 +1,37 @@
 {
   "chromosome": "chr12",
   "time": "12hrs",
-  "axis_colors": {
-    "X": "#D62728",
-    "Y": "#2CA02C",
-    "Z": "#3366CC"
-  },
-  "orientation_rows_in_aligned_xyz": {
-    "untr": [
-      [
-        0.9999999999999998,
-        -2.3254470766357078e-08,
-        7.72295675035014e-09
-      ],
-      [
-        2.325447066910176e-08,
-        0.9999999999999998,
-        -1.4095604757246898e-08
-      ],
-      [
-        -7.722956561515687e-09,
-        1.409560493554826e-08,
-        0.9999999999999998
-      ]
+  "point_count_per_condition": 1087,
+  "point_transform_row_vector_convention": "after = before @ rotation.T + translation",
+  "rotation_or_orthogonal_matrix": [
+    [
+      -0.822966582924999,
+      0.542952648124738,
+      -0.167117998082455
     ],
-    "vacv": [
-      [
-        -0.8229665782724516,
-        -0.4293061810861544,
-        -0.3720513592607264
-      ],
-      [
-        0.5429526639517662,
-        -0.401737767306921,
-        -0.73743418081001
-      ],
-      [
-        -0.1671179695730325,
-        0.8088899611198495,
-        -0.5637096903950781
-      ]
+    [
+      -0.4293061857679596,
+      -0.4017377446152973,
+      0.8088899699049189
+    ],
+    [
+      -0.37205134356714614,
+      -0.7374342048249132,
+      -0.5637096693370922
     ]
-  },
+  ],
+  "translation": [
+    -0.04354912691445304,
+    -0.14914576550086733,
+    -0.022369566025078887
+  ],
+  "determinant": -1.0000000000000036,
+  "orthogonality_error": 5.073056023807532e-15,
+  "maximum_consecutive_distance_error": 3.3306690738754696e-15,
+  "mismatch_before": 1.7302008882780502,
+  "mismatch_after": 0.46300911706365355,
   "sources": [
     "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr12/12hrs/untr/structure_12hrs_untr_with_id0.csv",
-    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr12/chr12_12hrs_untr_aligned.json",
-    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr12/12hrs/vacv/structure_12hrs_vacv_with_id0.csv",
-    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/structure_beads_aligned/chr12/chr12_12hrs_vacv_aligned.json"
+    "/Users/nafiulnipu/Desktop/RA_Projects/Genomic_Vis/GenomeVisProject/data_processing_python/data/green_monkey/all_structure_files/chr12/12hrs/vacv/structure_12hrs_vacv_with_id0.csv"
   ]
 }
